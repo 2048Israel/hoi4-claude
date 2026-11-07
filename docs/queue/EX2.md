@@ -16,6 +16,9 @@ needs it:
     province (one near Poznań gave Hinterpommern); press the line's deploy arrow at x 572; repeat while a line
     shows a location. `hoi4.py state`'s division count confirms it.
   - Also check after each `advance`: a hint in `look` when trained lines are waiting.
+  - A set location can be lost again: on 1938-03-26 four lines queued with Hinterpommern read "No location set"
+    (probably when the province filled up). Re-check every line's location before each `advance`; OCR may read it
+    as "No [öcation set", so match on "cation".
 - **Construction:** `act build --building civilian_factory --state Sachsen [--count N]`. Try the map's find window
   (`ctrl+f`, type the state, jump the camera) and click the state at the screen's centre. Confirm with the
   construction queue's OCR.
