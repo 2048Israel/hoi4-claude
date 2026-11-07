@@ -1,0 +1,69 @@
+# Claude Bridge: state snapshots written to game.log.
+# Every line starts with "@CB;<kind>;" followed by key=value pairs separated by ";".
+# hoi4.py parses these lines. Keep values free of ";" and "|" (the log effect treats "|" as a category marker).
+
+# Short daily line. Also used by hoi4.py to track the in-game date.
+claude_bridge_heartbeat = {
+	log = "@CB;day;tag=[ROOT.GetTag];pp=[?ROOT.political_power];ppd=[?ROOT.political_power_daily];stab=[?ROOT.stability];ws=[?ROOT.has_war_support];mpk=[?ROOT.manpower_k];divs=[?ROOT.num_divisions];cp=[?ROOT.command_power]"
+}
+
+# Full report. Runs weekly and on demand (console: event claude_bridge.1).
+claude_bridge_report = {
+	log = "@CB;rep_begin;tag=[ROOT.GetTag]"
+
+	log = "@CB;country;tag=[ROOT.GetTag];name=[ROOT.GetName];ideology=[ROOT.GetRulingIdeology];party=[ROOT.GetRulingParty];leader=[ROOT.GetLeader];faction=[ROOT.GetFactionName]"
+	log = "@CB;politics;pp=[?ROOT.political_power];ppd=[?ROOT.political_power_daily];stab=[?ROOT.stability];ws=[?ROOT.has_war_support];cp=[?ROOT.command_power];cpd=[?ROOT.command_power_daily];election_days=[?ROOT.days_until_next_election]"
+	log = "@CB;industry;civ=[?ROOT.num_of_civilian_factories];mil=[?ROOT.num_of_military_factories];nav=[?ROOT.num_of_naval_factories];civ_free=[?ROOT.num_of_available_civilian_factories];mil_free=[?ROOT.num_of_available_military_factories];nav_free=[?ROOT.num_of_available_naval_factories];research_slots=[?ROOT.amount_research_slots];techs=[?ROOT.num_researched_technologies];fuel_k=[?ROOT.fuel_k];max_fuel_k=[?ROOT.max_fuel_k]"
+	log = "@CB;territory;owned=[?ROOT.num_owned_states];controlled=[?ROOT.num_controlled_states];occupied=[?ROOT.num_occupied_states];cores=[?ROOT.num_core_states];subjects=[?ROOT.num_subjects]"
+	log = "@CB;resources;steel=[?ROOT.resource@steel];oil=[?ROOT.resource@oil];aluminium=[?ROOT.resource@aluminium];rubber=[?ROOT.resource@rubber];tungsten=[?ROOT.resource@tungsten];chromium=[?ROOT.resource@chromium]"
+	log = "@CB;army;mpk=[?ROOT.manpower_k];max_mpk=[?ROOT.max_manpower_k];deployed_k=[?ROOT.deployed_army_manpower_k];divs=[?ROOT.num_divisions];armies=[?ROOT.num_armies];casualties_k=[?ROOT.casualties_k];garrison_need=[?ROOT.garrison_manpower_need];deploy_queue_mp=[?ROOT.amount_manpower_in_deployment_queue]"
+
+	# Equipment: stock = in stockpile, fielded = in divisions, target = what divisions want.
+	log = "@CB;equip;type=infantry_equipment;stock=[?ROOT.num_equipment@infantry_equipment];fielded=[?ROOT.num_equipment_in_armies@infantry_equipment];target=[?ROOT.num_target_equipment_in_armies@infantry_equipment]"
+	log = "@CB;equip;type=support_equipment;stock=[?ROOT.num_equipment@support_equipment];fielded=[?ROOT.num_equipment_in_armies@support_equipment];target=[?ROOT.num_target_equipment_in_armies@support_equipment]"
+	log = "@CB;equip;type=artillery_equipment;stock=[?ROOT.num_equipment@artillery_equipment];fielded=[?ROOT.num_equipment_in_armies@artillery_equipment];target=[?ROOT.num_target_equipment_in_armies@artillery_equipment]"
+	log = "@CB;equip;type=anti_tank_equipment;stock=[?ROOT.num_equipment@anti_tank_equipment];fielded=[?ROOT.num_equipment_in_armies@anti_tank_equipment];target=[?ROOT.num_target_equipment_in_armies@anti_tank_equipment]"
+	log = "@CB;equip;type=anti_air_equipment;stock=[?ROOT.num_equipment@anti_air_equipment];fielded=[?ROOT.num_equipment_in_armies@anti_air_equipment];target=[?ROOT.num_target_equipment_in_armies@anti_air_equipment]"
+	log = "@CB;equip;type=motorized_equipment;stock=[?ROOT.num_equipment@motorized_equipment];fielded=[?ROOT.num_equipment_in_armies@motorized_equipment];target=[?ROOT.num_target_equipment_in_armies@motorized_equipment]"
+	log = "@CB;equip;type=mechanized_equipment;stock=[?ROOT.num_equipment@mechanized_equipment];fielded=[?ROOT.num_equipment_in_armies@mechanized_equipment];target=[?ROOT.num_target_equipment_in_armies@mechanized_equipment]"
+	log = "@CB;equip;type=light_tank_chassis;stock=[?ROOT.num_equipment@light_tank_chassis];fielded=[?ROOT.num_equipment_in_armies@light_tank_chassis];target=[?ROOT.num_target_equipment_in_armies@light_tank_chassis]"
+	log = "@CB;equip;type=medium_tank_chassis;stock=[?ROOT.num_equipment@medium_tank_chassis];fielded=[?ROOT.num_equipment_in_armies@medium_tank_chassis];target=[?ROOT.num_target_equipment_in_armies@medium_tank_chassis]"
+	log = "@CB;equip;type=train_equipment;stock=[?ROOT.num_equipment@train_equipment];fielded=0;target=0"
+	log = "@CB;equip;type=convoy;stock=[?ROOT.num_equipment@convoy];fielded=0;target=0"
+
+	# War picture.
+	log = "@CB;war;surrender=[?ROOT.surrender_progress];enemy_strength_ratio=[?ROOT.enemies_strength_ratio];alliance_strength_ratio=[?ROOT.alliance_strength_ratio];longest_war_months=[?ROOT.longest_war_length]"
+	every_enemy_country = {
+		log = "@CB;enemy;tag=[THIS.GetTag];name=[THIS.GetName];surrender=[?THIS.surrender_progress];divs=[?THIS.num_divisions];mil=[?THIS.num_of_military_factories];civ=[?THIS.num_of_civilian_factories]"
+	}
+	every_allied_country = {
+		log = "@CB;ally;tag=[THIS.GetTag];name=[THIS.GetName];surrender=[?THIS.surrender_progress];divs=[?THIS.num_divisions];mil=[?THIS.num_of_military_factories]"
+	}
+
+	# Field armies (generals currently leading an army).
+	every_army_leader = {
+		limit = { is_leading_army = yes }
+		log = "@CB;general;name=[THIS.GetName];units=[?THIS.num_units];in_combat=[?THIS.num_units_in_combat];combat_progress=[?THIS.avg_combat_status];entrench=[?THIS.avg_unit_entrenchment_ratio];planning=[?THIS.avg_unit_planning_ratio];skill=[?THIS.skill];plans=[?THIS.num_battle_plans]"
+	}
+
+	# Our states that touch territory held by an enemy.
+	every_controlled_state = {
+		limit = {
+			any_neighbor_state = {
+				controller = { has_war_with = ROOT }
+			}
+		}
+		log = "@CB;front;id=[THIS.GetID];state=[THIS.GetName]"
+	}
+
+	# World overview.
+	every_country = {
+		limit = { is_major = yes }
+		log = "@CB;major;tag=[THIS.GetTag];name=[THIS.GetName];ideology=[THIS.GetRulingIdeology];faction=[THIS.GetFactionName];divs=[?THIS.num_divisions];mil=[?THIS.num_of_military_factories];civ=[?THIS.num_of_civilian_factories];surrender=[?THIS.surrender_progress]"
+	}
+	every_neighbor_country = {
+		log = "@CB;neighbor;tag=[THIS.GetTag];name=[THIS.GetName];ideology=[THIS.GetRulingIdeology];faction=[THIS.GetFactionName];divs=[?THIS.num_divisions];mil=[?THIS.num_of_military_factories]"
+	}
+
+	log = "@CB;rep_end;tag=[ROOT.GetTag]"
+}

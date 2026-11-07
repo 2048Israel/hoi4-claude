@@ -1,0 +1,6 @@
+# Local only: Python environment, screenshots of the player's screen, and runtime state
+.venv/
+__pycache__/
+*.pyc
+shots/
+state/

@@ -1,0 +1,13 @@
+# Claude Bridge on-demand report.
+# Fire it from the console with:  event claude_bridge.1
+add_namespace = claude_bridge
+
+country_event = {
+	id = claude_bridge.1
+	hidden = yes
+	is_triggered_only = yes
+
+	immediate = {
+		claude_bridge_report = yes
+	}
+}

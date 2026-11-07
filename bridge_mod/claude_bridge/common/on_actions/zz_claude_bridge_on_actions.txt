@@ -1,0 +1,46 @@
+# Claude Bridge: writes state snapshots and world news into game.log.
+# on_daily / on_weekly fire once per country, so the snapshots filter down to the player.
+on_actions = {
+	on_daily = {
+		effect = {
+			if = {
+				limit = { is_ai = no }
+				claude_bridge_heartbeat = yes
+			}
+		}
+	}
+	on_weekly = {
+		effect = {
+			if = {
+				limit = { is_ai = no }
+				claude_bridge_report = yes
+			}
+		}
+	}
+
+	# World news. One line per event, read by "hoi4.py news".
+	on_declare_war = {	# ROOT declares war, FROM is the target
+		effect = { log = "@CB;news;what=war_declared;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName]" }
+	}
+	on_capitulation = {	# ROOT capitulated, FROM is the winner
+		effect = { log = "@CB;news;what=capitulated;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName]" }
+	}
+	on_annex = {	# ROOT annexes FROM
+		effect = { log = "@CB;news;what=annexed;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName]" }
+	}
+	on_puppet = {	# ROOT becomes a puppet of FROM
+		effect = { log = "@CB;news;what=puppeted;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName]" }
+	}
+	on_peaceconference_ended = {	# ROOT won, FROM lost (fires per winner/loser pair)
+		effect = { log = "@CB;news;what=peace;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName]" }
+	}
+	on_create_faction = {	# ROOT created a faction, FROM joined it
+		effect = { log = "@CB;news;what=faction_created;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName];faction=[ROOT.GetFactionName]" }
+	}
+	on_join_faction = {	# ROOT joined, FROM is the faction leader
+		effect = { log = "@CB;news;what=joined_faction;a=[ROOT.GetTag];a_name=[ROOT.GetName];b=[FROM.GetTag];b_name=[FROM.GetName];faction=[FROM.GetFactionName]" }
+	}
+	on_government_change = {
+		effect = { log = "@CB;news;what=government_change;a=[ROOT.GetTag];a_name=[ROOT.GetName];ideology=[ROOT.GetRulingIdeology];leader=[ROOT.GetLeader]" }
+	}
+}
