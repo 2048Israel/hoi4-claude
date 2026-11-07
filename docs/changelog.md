@@ -3,7 +3,7 @@
 What shipped to `main`, newest first, under the version that shipped it. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
 
-# Next (on main, not released yet)
+# 0.1.2 (2026-11-07)
 
 - **Notices:** "Research Finished!" and "National Focus Completed" notices sit on top of everything and catch
   clicks. Every `act` now closes them first, by their own Ok button; `act dismiss` does it alone.
