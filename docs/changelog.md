@@ -15,6 +15,10 @@ saying what changed and how it was checked.
   works whether the tooltip opens above or below the cursor. `read pp` reads political power from the top bar.
 - **act research-fill:** fills empty research slots from `plans/research_germany.txt`, skipping techs the game
   refuses. Checked live: five empty slots filled.
+- **City orders say where they went:** `act army target` / `act order` print the target province's state, owner
+  and controller from its tooltip. "Brest" found Brest in France, not Poland: two exact matches are now refused.
+- **The console check waits for the screen to settle:** the focus tree fading out once read as an open console,
+  and the report's text landed as hotkeys (it opened Construction and unpaused for an hour).
 - **Screen titles** match word by word, since OCR can return them out of order ("EVENTS DECISIONS AND").
 
 - **act army target --army N --city NAME:** orders an army at a city through the map's Find window, with

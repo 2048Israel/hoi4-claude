@@ -1129,14 +1129,37 @@ def find_city(hwnd, city):
     if not results:
         hoi4.click(hwnd, *AR["find_close"])
         raise ActionError(f"Find has no result for {city!r}; read: {[l.text for l in lines][:8]}")
-    name = re.sub(r"^\W*[A-Z]\s+(?=[A-Z])", "", results[0].text).strip()  # "C Warsaw" -> "Warsaw"
-    hoi4.click(hwnd, *results[0].center)
+    def strip_icon(text):  # "C Warsaw" -> "Warsaw"
+        return re.sub(r"^\W*[A-Z]\s+(?=[A-Z])", "", text).strip()
+
+    # an exact name wins over a near one; two exact ones (Brest in France and in Poland) are refused, since the
+    # Find list does not say which country each is in
+    exact = [r for r in results if norm(strip_icon(r.text)) == norm(city)]
+    if len(exact) > 1:
+        hoi4.click(hwnd, *AR["find_close"])
+        raise ActionError(f"{len(exact)} places are named {city!r}; pick a nearby city with a unique name")
+    pick = exact[0] if exact else results[0]
+    name = strip_icon(pick.text)
+    hoi4.click(hwnd, *pick.center)
     time.sleep(1.3)
     cx0, cy0, cx1, cy1 = AR["city_label_box"]
     labels = [l for l in read_box(hwnd, [cx0, cy0, cx1, cy1]) if like(name, l.text) and len(l.text) >= 3]
     if labels:
         return min(labels, key=lambda l: abs(l.center[0] - 960) + abs(l.center[1] - 600)).center
     return (960, 600)
+
+
+def place_info(hwnd, pt):
+    """The province tooltip at a map point, shortened: 'Forest province in Polesie | Owner: Poland | Controller: ...'.
+    Printed with every city order, so an order sent to the wrong Brest shows at once."""
+    # a battle plan's overlay or a unit can sit under the label and show its own tooltip: try points around it
+    for dx, dy in ((0, 0), (35, 35), (-35, 35), (35, -35), (-35, -35)):
+        x, y = pt[0] + dx, pt[1] + dy
+        lines = [l.text for l in hover_tooltip(hwnd, x, y, x_min=max(0, x - 40))]
+        keep = [t for t in lines if re.search(r"province in|owner|controller", t, re.I)]
+        if keep:
+            return " | ".join(keep)
+    return "(no province tooltip read)"
 
 
 def order_selection(hwnd, city, log=print):
@@ -1146,11 +1169,12 @@ def order_selection(hwnd, city, log=print):
     pt = find_city(hwnd, city)
     if not units_selected(hwnd):
         raise ActionError("the selection was lost while searching; nothing ordered")
+    where = place_info(hwnd, pt)
     hoi4.click(hwnd, *pt, button="right")
     time.sleep(0.8)
     deselect(hwnd)
     camera_home(hwnd, log=lambda m: None)
-    log(f"selection ordered to {city} (clicked {pt})")
+    log(f"selection ordered to {city} (clicked {pt}): {where}")
 
 
 def target_city(hwnd, index, city, log=print):
@@ -1160,11 +1184,12 @@ def target_city(hwnd, index, city, log=print):
     pt = find_city(hwnd, city)
     if not units_selected(hwnd):
         raise ActionError("the army selection was lost while searching; nothing ordered")
+    where = place_info(hwnd, pt)
     hoi4.click(hwnd, *pt, button="right")
     time.sleep(0.8)
     deselect(hwnd)
     camera_home(hwnd, log=lambda m: None)
-    log(f"{p['name'] or 'army ' + str(index)} ({p['general']}): ordered to {city} (clicked {pt})")
+    log(f"{p['name'] or 'army ' + str(index)} ({p['general']}): ordered to {city} (clicked {pt}): {where}")
     return p
 
 

@@ -1098,6 +1098,10 @@ def close_console(hwnd):
 
 def run_console(hwnd, command):
     focus(hwnd)
+    # A full-screen view fading out (the focus tree just closed) is dark and flat like the console for a moment,
+    # and typing then lands as hotkeys. Trust "already open" only if it still reads open after the screen settles.
+    if console_open(hwnd):
+        time.sleep(0.8)
     if not console_open(hwnd):
         press_combo("console")
         if not wait_console(hwnd, True):
