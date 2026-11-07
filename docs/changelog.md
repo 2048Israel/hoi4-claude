@@ -3,6 +3,12 @@
 What shipped to `main`, newest first, under the version that shipped it. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
 
+# Next (on main, not released yet)
+
+- **act army target --army N --city NAME:** orders an army at a city through the map's Find window, with
+  no guessed pixels. Checked live: six armies sent at Warsaw, Lwów, Lublin, Białystok and Siedlce; all left
+  their trenches (entrenchment 85% → under 15%) and joined combat.
+
 # 0.1.2 (2026-11-07)
 
 - **Notices:** "Research Finished!" and "National Focus Completed" notices sit on top of everything and catch

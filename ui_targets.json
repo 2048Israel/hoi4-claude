@@ -57,6 +57,8 @@
     "offensive_key": "x",
     "find_box": [1560, 520, 1919, 900],
     "find_close": [1888, 560],
+    "find_results_top": 590,
+    "city_label_box": [640, 380, 1300, 820],
     "home_zoom_out": 12,
     "home_zoom_point": [960, 600],
     "execute_dx": 20,

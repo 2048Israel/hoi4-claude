@@ -1033,6 +1033,52 @@ def move_army(hwnd, index, target, log=print):
     return p
 
 
+def find_city(hwnd, city):
+    """Centre the camera on a city with the Find window (ctrl+f, type, click the result). Returns the screen
+    point of the city's label once there."""
+    hoi4.press_combo("ctrl+f")
+    time.sleep(0.8)
+    box = AR["find_box"]
+    if not any("home" in l.text.lower() for l in read_box(hwnd, box)):
+        raise ActionError("the Find window did not open; nothing typed")
+    hoi4.press_combo("ctrl+a")
+    hoi4.type_text(city)
+    time.sleep(0.9)
+    lines = read_box(hwnd, box)
+    def like(q, text):  # OCR reads l as t ("Siedtce"), so allow near matches
+        t = norm(re.sub(r"^[^A-Za-z]+", "", text))  # results start with a map icon OCR reads as "C"
+        return norm(q) in t or similar(q, t) >= 0.7 or similar(q, t[1:]) >= 0.7
+
+    results = [l for l in lines if l.center[1] > AR["find_results_top"] and like(city, l.text)
+               and "home" not in l.text.lower() and norm(l.text) != "find"]
+    if not results:
+        hoi4.click(hwnd, *AR["find_close"])
+        raise ActionError(f"Find has no result for {city!r}; read: {[l.text for l in lines][:8]}")
+    name = re.sub(r"^\W*[A-Z]\s+(?=[A-Z])", "", results[0].text).strip()  # "C Warsaw" -> "Warsaw"
+    hoi4.click(hwnd, *results[0].center)
+    time.sleep(1.3)
+    cx0, cy0, cx1, cy1 = AR["city_label_box"]
+    labels = [l for l in read_box(hwnd, [cx0, cy0, cx1, cy1]) if like(name, l.text) and len(l.text) >= 3]
+    if labels:
+        return min(labels, key=lambda l: abs(l.center[0] - 960) + abs(l.center[1] - 600)).center
+    return (960, 600)
+
+
+def target_city(hwnd, index, city, log=print):
+    """Order army `index` to attack/move to `city`: select it, centre the camera on the city with Find,
+    right-click the city's label, then put the camera back home."""
+    p = select_army(hwnd, index)
+    pt = find_city(hwnd, city)
+    if not units_selected(hwnd):
+        raise ActionError("the army selection was lost while searching; nothing ordered")
+    hoi4.click(hwnd, *pt, button="right")
+    time.sleep(0.8)
+    deselect(hwnd)
+    camera_home(hwnd, log=lambda m: None)
+    log(f"{p['name'] or 'army ' + str(index)} ({p['general']}): ordered to {city} (clicked {pt})")
+    return p
+
+
 def camera_home(hwnd, zoom_out=None, log=print):
     """Put the camera in the standard view: the Find window's Go Home (capital, fully zoomed in), then zoom out a
     fixed number of notches. Map coordinates used by plans are measured in this view."""
@@ -1333,7 +1379,8 @@ def main(argv):
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
-    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute", "move"])
+    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute", "move", "target"])
+    s.add_argument("--city", help="target: a city name the map's Find window knows, e.g. Warsaw")
     s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="attack: where the arrow points")
     s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="front: a point on the highlighted border")
     s.add_argument("--army", type=int)
@@ -1391,6 +1438,10 @@ def main(argv):
                 raise ActionError("--army N is needed")
             assign_general(hwnd, args.army, args.name)
             deselect(hwnd)
+        elif args.op == "target":
+            if not args.army or not args.city:
+                raise ActionError("target needs --army N --city NAME")
+            target_city(hwnd, args.army, args.city)
         elif args.op == "move":
             if not args.army or not args.to:
                 raise ActionError("move needs --army N --to X Y")

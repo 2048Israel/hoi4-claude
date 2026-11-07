@@ -66,6 +66,11 @@ def main():
     assert A.line_matches("Karabiner", "1 Karabiner 98k") and not A.line_matches("Ju 87", "11 BF109A")
     assert not A.line_matches("Bf 109", "Basic Small Airframe")  # a line header always starts with its number
 
+    # Find-window results as OCR read them: a map icon read as "C", and l read as t
+    import re as _re
+    assert _re.sub(r"^\W*[A-Z]\s+(?=[A-Z])", "", "C Warsaw").strip() == "Warsaw"
+    assert A.similar("Siedlce", "Siedtce") >= 0.7
+
     from PIL import Image, ImageDraw
     img = Image.new("RGB", (1920, 1200), (25, 25, 25))
     d = ImageDraw.Draw(img)
