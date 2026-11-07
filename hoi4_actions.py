@@ -84,7 +84,27 @@ def dismiss_notices(hwnd, log=print, tries=4):
         time.sleep(0.5)
         closed += 1
         log(f"closed a notice: {' '.join(l.text for l in lines[:4])}")
+    closed += dismiss_treaties(hwnd, log)
     closed += dismiss_news(hwnd, log)
+    return closed
+
+
+def dismiss_treaties(hwnd, log=print, tries=3):
+    """Peace results ("TREATY OF ...": who took which states) are a box with one Ok in the middle."""
+    closed = 0
+    for _ in range(tries):
+        lines = read_box(hwnd, T["treaty_box"])
+        title = " ".join(l.text for l in lines if l.box[1] < 440)
+        if "treaty" not in norm(title):
+            break
+        ok = [l for l in lines if norm(l.text) in ("ok", "0k")]
+        if not ok:
+            log("a treaty popup is open but its Ok could not be read")
+            break
+        hoi4.click(hwnd, *ok[0].center)
+        time.sleep(0.6)
+        closed += 1
+        log(f"closed {title}: " + "; ".join(l.text for l in lines if 450 < l.box[1] < 700))
     return closed
 
 
