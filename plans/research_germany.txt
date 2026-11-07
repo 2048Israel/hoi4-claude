@@ -1,0 +1,30 @@
+# Research priorities for act research-fill, best first. One tech per line, as the tech map names it
+# (`hoi4.py read techs --grep ...`). Techs that are done, running, or not yet available are skipped.
+Advanced Machine Tools
+Concentrated Industry V
+Construction IV
+Construction V
+Computing Machine
+Improved Infantry Equipment II
+Improved Medium Tank Chassis
+Medium Cannon
+Basic Armor Protection
+Improved Artillery Upgrade I
+Improved Anti-Tank Upgrade I
+Excavation II
+Fuel Refining II
+Improved Oil Processing
+Improved Rubber Processing
+Engineer Company II
+Maintenance Company I
+Military Police I
+Improved Fire Control System
+Basic Fortification
+Improved Radio
+Cavity Magnetron
+Intake Filters
+Widened Tracks
+Light Truck
+Improved Light Truck
+MP 43
+Panzerfaust 30

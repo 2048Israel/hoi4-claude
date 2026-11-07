@@ -693,6 +693,35 @@ def research(hwnd, slot, tech, mio="first", dry_run=False, log=print):
     return now
 
 
+def research_fill(hwnd, plan_path, log=print):
+    """Fill every empty research slot with the first tech in the plan file that the game accepts."""
+    plan = [l.strip() for l in Path(plan_path).read_text(encoding="utf-8").splitlines()
+            if l.strip() and not l.lstrip().startswith("#")]
+    slots = read_research(hwnd)
+    running = [s["tech"] for s in slots if s["tech"]]
+    tried = set()
+    filled = []
+    for s in slots:
+        if s["tech"]:
+            continue
+        for tech in plan:
+            if tech in tried or any(similar(tech, r) >= 0.8 or norm(r) == norm(tech) for r in running):
+                continue
+            tried.add(tech)
+            try:
+                research(hwnd, s["slot"], tech, log=lambda m: None)
+            except ActionError as e:
+                log(f"  skip {tech}: {str(e)[:70]}")
+                continue
+            running.append(tech)
+            filled.append((s["slot"], tech))
+            log(f"slot {s['slot']}: {tech}")
+            break
+        else:
+            log(f"slot {s['slot']}: nothing in the plan could start; add techs to {plan_path}")
+    return filled
+
+
 # --------------------------------------------------------------------------
 # production
 # --------------------------------------------------------------------------
@@ -1436,6 +1465,8 @@ def main(argv):
     s = sub.add_parser("calibrate-research")
     s.add_argument("--tabs", help="comma-separated tab names (default: all)")
     s = sub.add_parser("dismiss", help="close 'Research Finished!' / 'National Focus Completed' notices")
+    s = sub.add_parser("research-fill", help="fill empty research slots from a priority list")
+    s.add_argument("--plan", default=str(ROOT / "plans" / "research_germany.txt"))
     s = sub.add_parser("event", help="choose an option of the open event: --option N (see: read event)")
     s.add_argument("--option", type=int, required=True)
     s = sub.add_parser("recruit", help="queue divisions: each trains once and has a deploy location")
@@ -1492,6 +1523,8 @@ def main(argv):
     elif args.cmd == "close":
         close_screen(hwnd, args.screen)
         print(f"{args.screen} closed")
+    elif args.cmd == "research-fill":
+        research_fill(hwnd, args.plan)
     elif args.cmd == "event":
         choose_event(hwnd, args.option)
     elif args.cmd == "recruit":
