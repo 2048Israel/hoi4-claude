@@ -37,6 +37,8 @@ class ActionError(hoi4.BridgeError):
 # small helpers
 # --------------------------------------------------------------------------
 def norm(text):
+    # OCR reads the Roman numeral III as "Ill" or "lll": treat them alike so "Construction III" finds "Construction Ill"
+    text = re.sub(r"(?<![A-Za-z])(Ill|lll|IIl|IlI)(?![A-Za-z])", "III", text)
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
@@ -506,7 +508,7 @@ def find_tech(name):
     best = (0.0, None, None, None)
     for tab, info in data["tabs"].items():
         for title, pos in info["techs"].items():
-            score = similar(name, title)
+            score = 1.01 if norm(name) == norm(title) else similar(name, title)  # an exact match always wins
             if score > best[0]:
                 best = (score, tab, title, pos)
     if best[0] < 0.75:

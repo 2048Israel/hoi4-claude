@@ -48,6 +48,13 @@ def main():
     assert (tab, title) == ("artillery", "Inter-War Artillery")
     assert A.find_tech("3,7 cm PaK 36")[1] == "cm PaK 36", "OCR drops the '3,7' prefix; fuzzy lookup still finds it"
     assert A.find_tech("12,8 cm PaK 44")[2]["y"] == 1478
+    # OCR writes the numeral III as "Ill"; III must not fall back to the similar-looking II
+    data = json.loads(A.TECH_MAP.read_text(encoding="utf-8"))
+    data["tabs"]["industry"] = {"techs": {"Concentrated Industry II": {"x": 812, "y": 754, "days": 336},
+                                          "Concentrated Industry Ill": {"x": 798, "y": 930, "days": 842}}}
+    A.TECH_MAP.write_text(json.dumps(data), encoding="utf-8")
+    assert A.find_tech("Concentrated Industry III")[1] == "Concentrated Industry Ill"
+    assert A.find_tech("Concentrated Industry II")[1] == "Concentrated Industry II"
     try:
         A.find_tech("Nuclear Reactor")
         raise AssertionError("an unknown tech must raise")
