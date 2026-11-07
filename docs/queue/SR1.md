@@ -50,6 +50,8 @@ shows; confirm each against it:
   state mapping is not in the fixture.
 - **Shape quirks:** keys repeat (keep them all); anonymous blocks `{ ... }` appear inside lists; numbers come as
   `53.62744`, `-1` and so on. Dates are quoted in the header but not always elsewhere.
+- **Line endings are mixed:** the game writes both LF and CRLF in one save. The fixture keeps them byte-for-byte
+  (`.gitattributes`), so treat `\r` as whitespace.
 
 ## Done when
 
