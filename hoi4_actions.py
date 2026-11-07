@@ -86,8 +86,34 @@ def dismiss_notices(hwnd, log=print, tries=4):
         time.sleep(0.5)
         closed += 1
         log(f"closed a notice: {' '.join(l.text for l in lines[:4])}")
+    closed += dismiss_single_events(hwnd, log)
     closed += dismiss_treaties(hwnd, log)
     closed += dismiss_news(hwnd, log)
+    return closed
+
+
+def event_options(lines, box):
+    """Option buttons of a country event: lines inside the option column, below the text."""
+    x0, y0, x1, y1 = box
+    return [l for l in lines if x0 <= l.center[0] <= x1 and y0 <= l.center[1] <= y1 and len(l.text) > 2]
+
+
+def dismiss_single_events(hwnd, log=print, tries=4):
+    """Country events with exactly one answer ("Excellent.") need no decision: take that answer. Events with
+    two or more answers are left for a decision (see `read event` / `act event --option N`)."""
+    closed = 0
+    for _ in range(tries):
+        lines = read_box(hwnd, T["event_box"])
+        title = next((l for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), None)
+        options = event_options(lines, T["event_options_box"])
+        if not title or len(options) != 1:
+            if title and len(options) > 1:
+                log(f"event '{title.text}' has {len(options)} answers; left open for a decision")
+            break
+        hoi4.click(hwnd, *options[0].center)
+        time.sleep(0.7)
+        closed += 1
+        log(f"event '{title.text}': took the only answer '{options[0].text}'")
     return closed
 
 

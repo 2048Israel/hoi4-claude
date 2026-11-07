@@ -7,6 +7,8 @@ saying what changed and how it was checked.
 
 - **Notices:** "Research Finished!" and "National Focus Completed" notices sit on top of everything and catch
   clicks. Every `act` now closes them first, by their own Ok button; `act dismiss` does it alone.
+- **Single-answer events:** an event with only one answer ("Excellent.") is taken automatically; events with
+  two or more answers are left for a decision.
 - **World News:** news popups (a headline and one answer button) also catch clicks; every `act` now closes
   them by their one answer. Events with several options are left open for a decision.
 - **Production by name:** `act production --name "Bf 109" --add 10` finds any line by its header, scrolling the list.

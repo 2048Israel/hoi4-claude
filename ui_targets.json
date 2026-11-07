@@ -79,6 +79,9 @@
   "notice_box": [660, 400, 1300, 720],
   "notice_ok": [1180, 677],
   "news_box": [600, 200, 1300, 920],
+  "event_box": [600, 220, 1340, 760],
+  "event_title_band": [290, 330],
+  "event_options_box": [870, 440, 1330, 760],
   "treaty_box": [660, 360, 1260, 820],
   "news_button_box": [700, 840, 1160, 900],
   "safe_mouse": [1910, 1190]
