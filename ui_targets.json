@@ -29,7 +29,8 @@
     "detail_days_box": [820, 195, 1100, 235],
     "detail_research": [1190, 216],
     "detail_close": [1276, 156],
-    "mio_box": [860, 130, 1560, 700]
+    "mio_box": [860, 130, 1560, 700],
+    "tooltip_box": [1400, 1040, 1919, 1170]
   },
   "production": {
     "list_box": [0, 480, 700, 1200],
@@ -43,5 +44,7 @@
   "top_bar": {
     "clock_box": [1450, 0, 1850, 45]
   },
+  "notice_box": [660, 400, 1300, 720],
+  "notice_ok": [1180, 677],
   "safe_mouse": [1910, 1190]
 }

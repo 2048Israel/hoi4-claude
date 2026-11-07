@@ -3,6 +3,14 @@
 What shipped to `main`, newest first, under the version that shipped it. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
 
+# Next (on main, not released yet)
+
+- **Notices:** "Research Finished!" and "National Focus Completed" notices sit on top of everything and catch
+  clicks. Every `act` now closes them first, by their own Ok button; `act dismiss` does it alone.
+- **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
+  says so, closes the windows, and stops.
+- **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.
+
 # 0.1.1 (2026-11-07)
 
 ## 2026-11-07: EX1, actions and readers without screenshots

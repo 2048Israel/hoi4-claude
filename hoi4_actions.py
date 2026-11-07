@@ -66,6 +66,27 @@ def wait_for(fn, timeout=2.0, step=0.15):
 
 
 # --------------------------------------------------------------------------
+# notices ("Research Finished!", "National Focus Completed") sit on top of everything and catch clicks
+# --------------------------------------------------------------------------
+NOTICE_WORDS = ("researchfinished", "nationalfocuscompleted", "focuscompleted")
+
+
+def dismiss_notices(hwnd, log=print, tries=4):
+    """Close the small centre notices by their own Ok button. Returns how many were closed."""
+    closed = 0
+    for _ in range(tries):
+        lines = read_box(hwnd, T["notice_box"])
+        if not any(any(w in norm(l.text) for w in NOTICE_WORDS) for l in lines):
+            break
+        ok = [l for l in lines if norm(l.text) in ("ok", "0k")]  # OCR often reads the O as a zero
+        hoi4.click(hwnd, *(ok[0].center if ok else T["notice_ok"]))
+        time.sleep(0.5)
+        closed += 1
+        log(f"closed a notice: {' '.join(l.text for l in lines if any(w in norm(l.text) for w in NOTICE_WORDS))}")
+    return closed
+
+
+# --------------------------------------------------------------------------
 # screens
 # --------------------------------------------------------------------------
 def screen_title(hwnd):
@@ -505,6 +526,17 @@ def research(hwnd, slot, tech, mio="first", dry_run=False, log=print):
     hoi4.click(hwnd, *R["detail_research"])
     time.sleep(0.6)
     chosen = choose_mio(hwnd, mio)
+    if not chosen and similar(raw_detail_title(hwnd), title) >= 0.75:
+        # still on the detail window: the button is greyed out. Its tooltip says why.
+        hoi4.move_mouse(*hoi4.to_screen(hwnd, *R["detail_research"]))
+        time.sleep(0.9)
+        why = " ".join(l.text for l in ocr_image(hoi4.grab(hwnd).crop(tuple(R["tooltip_box"])),
+                                                 origin=tuple(R["tooltip_box"][:2])) if "shortcut" not in l.text.lower())
+        close_detail(hwnd)
+        hoi4.click(hwnd, *R["tree_close"])
+        time.sleep(0.4)
+        close_screen(hwnd, "research")
+        raise ActionError(f"the game will not start {title}: {why or 'Research is greyed out'}")
     if tree_open(hwnd):
         hoi4.click(hwnd, *R["tree_close"])
         time.sleep(0.4)
@@ -658,6 +690,7 @@ def main(argv):
     s.add_argument("screen")
     s = sub.add_parser("calibrate-research")
     s.add_argument("--tabs", help="comma-separated tab names (default: all)")
+    s = sub.add_parser("dismiss", help="close 'Research Finished!' / 'National Focus Completed' notices")
     s = sub.add_parser("save")
     s.add_argument("name", help="saved as claude_<name>")
     s = sub.add_parser("load-save")
@@ -670,6 +703,10 @@ def main(argv):
 
     hwnd = hoi4.need_window()
     hoi4.focus(hwnd)
+    if args.cmd not in ("load-save",):
+        dismiss_notices(hwnd)
+    if args.cmd == "dismiss":
+        return
     if args.cmd == "research":
         if not args.dry_run and not args.replace:
             busy = read_research(hwnd)[args.slot - 1]
