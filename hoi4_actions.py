@@ -95,7 +95,16 @@ def dismiss_notices(hwnd, log=print, tries=4):
 def event_options(lines, box):
     """Option buttons of a country event: lines inside the option column, below the text."""
     x0, y0, x1, y1 = box
-    return [l for l in lines if x0 <= l.center[0] <= x1 and y0 <= l.center[1] <= y1 and len(l.text) > 2]
+    # option buttons sit in the right-hand column: their text starts right of x0 (body text starts further left)
+    inside = sorted((l for l in lines if l.box[0] >= x0 and l.box[2] <= x1 + 40 and y0 <= l.center[1] <= y1
+                     and len(l.text) > 2),
+                    key=lambda l: l.center[1])
+    rows = []  # OCR may split one button's text into two lines on the same row: one option per row
+    for l in inside:
+        if rows and abs(l.center[1] - rows[-1].center[1]) < 18:
+            continue
+        rows.append(l)
+    return rows
 
 
 def dismiss_single_events(hwnd, log=print, tries=4):
@@ -894,6 +903,46 @@ def offensive_line(hwnd, index, start, end, log=print):
     return p
 
 
+def execute_tooltip(hwnd, x):
+    hoi4.move_mouse(*hoi4.to_screen(hwnd, x, AR["execute_y"]))
+    time.sleep(1.1)
+    img = hoi4.grab(hwnd)
+    return " ".join(l.text for l in ocr_image(img.crop(tuple(AR["execute_tooltip_box"])),
+                                              origin=tuple(AR["execute_tooltip_box"][:2])))
+
+
+def generals_state():
+    """{general name: entrenchment 0-1} from the latest bridge report (needs a report after the last change)."""
+    recs, _ = hoi4.records(max(0, hoi4.log_size() - 3_000_000))
+    block = hoi4.last_report(recs) or []
+    return {r.get("name"): hoi4.fnum(r.get("entrench")) for r in block if r["kind"] == "general"}
+
+
+def execute_all(hwnd, indexes=None, log=print):
+    """Start battle plans: one plain click on each card's green Execute arrow (right of its red stop square).
+    The button's look and tooltip do not show whether a plan runs, and a second click stops it again. So without
+    `indexes`, only armies whose general the bridge report shows still dug in (entrenchment > 50%) are clicked.
+    Check afterwards with `hoi4.py report`: executing armies lose entrenchment and gain divisions in combat.
+    (Ctrl+Click, which the tooltip says toggles all, toggled only one card live.)"""
+    cards = army_cards(hwnd)
+    if not cards:
+        raise ActionError("no army cards found")
+    if indexes is None:
+        hoi4.run_console(hwnd, "effect claude_bridge_report")
+        time.sleep(1.0)
+        state = generals_state()
+        armies = list_armies(hwnd, log=lambda m: None)
+        indexes = [i for i, a in enumerate(armies, 1)
+                   if a["general"] and (state.get(a["general"]) or 0) > 0.5]
+        log("still dug in: " + (", ".join(f"card {i} ({armies[i - 1]['general']})" for i in indexes) or "none"))
+    for i in indexes:
+        hoi4.click(hwnd, cards[i - 1][1] + AR["execute_dx"], AR["execute_y"])
+        time.sleep(0.6)
+        log(f"  card {i}: Execute clicked")
+    park_mouse(hwnd)
+    return indexes
+
+
 def select_box(hwnd, box):
     deselect(hwnd)
     hoi4.drag(hwnd, box[0], box[1], box[2], box[3])
@@ -1175,7 +1224,7 @@ def main(argv):
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
-    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack"])
+    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute"])
     s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="attack: where the arrow points")
     s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="front: a point on the highlighted border")
     s.add_argument("--army", type=int)
@@ -1231,6 +1280,8 @@ def main(argv):
                 raise ActionError("--army N is needed")
             assign_general(hwnd, args.army, args.name)
             deselect(hwnd)
+        elif args.op == "execute":
+            execute_all(hwnd, [args.army] if args.army else None)
         elif args.op == "attack":
             if not args.army or not args.at or not args.to:
                 raise ActionError("attack needs --army N --at X Y (on its front) --to X Y")

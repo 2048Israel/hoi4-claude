@@ -54,6 +54,9 @@
     "panel_close_x": 522,
     "front_line_key": "z",
     "offensive_key": "x",
+    "execute_dx": 23,
+    "execute_y": 1034,
+    "execute_tooltip_box": [560, 740, 1500, 1030],
     "tooltip_box": [1500, 1040, 1919, 1180]
   },
   "focus": {

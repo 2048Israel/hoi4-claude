@@ -60,6 +60,7 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act recruit --count 10 [--template "Panzer-Division"]` | Queue divisions: each line set to train once (not the default infinity) and given a deploy location |
 | `act fix-queue` | Every training line: count 1 and a deploy location (locations can get lost) |
 | `act select-box x0 y0 x1 y1` / `act army new [--halves N]` | Select divisions on the map, then make an army from the unassigned ones (S halves the selection: 75 → 38 → 19) |
+| `act army execute [--army N]` | Start battle plans: clicks Execute only for armies the report shows still dug in (the button does not show its state; a second click stops a plan) |
 | `act army attack --army N --at X Y --to X Y` | Offensive arrow for army N, right-dragged from its front into enemy land |
 | `act army front --army N --at X Y` | Front line for army N along the border highlighted at X,Y (works in peacetime) |
 | `act army list` / `act army generals` / `act army general --army N --name X` | Armies with their size and commander; give every army without one the game's top-listed general |

@@ -19,7 +19,8 @@ saying what changed and how it was checked.
   War needs Reassert Eastern Claims), and Reassert Eastern Claims started.
 - **Armies:** `act army list|new|general|generals` and `act select-box`. Checked live: 75 loose divisions
   around Berlin made into Armies 1-4 (19, 14, 21, 21) under Rundstedt, Kluge, Rommel and Manstein.
-  `act army front` gave all four a front line along the Polish border. `act army attack` drew their offensive arrows (toward Warsaw, Danzig and Kraków).
+  `act army front` gave all four a front line along the Polish border. `act army attack` drew their offensive arrows (toward Warsaw, Danzig and Kraków). War with Poland on 1939-06-26 (Britain and France
+  joined); `act army execute` started all four plans, confirmed by entrenchment dropping and divisions in combat.
 - **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
   says so, closes the windows, and stops.
 - **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.
