@@ -1764,6 +1764,14 @@ def main(argv):
     s.add_argument("box", type=int, nargs=4)
     s = sub.add_parser("focus", help="start a national focus by name (via the tree's search)")
     s.add_argument("--name", required=True)
+    s = sub.add_parser("air", help="air wings: base --at X Y | assign --at X Y --mission M --region X Y | rebase --at X Y --to X Y | off")
+    s.add_argument("op", choices=["base", "assign", "rebase", "off"])
+    s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="an air base icon or wing box (air map mode)")
+    s.add_argument("--mission", help="superiority, cas, interception, strategic, naval, port, logistics, supply, recon")
+    s.add_argument("--region", type=int, nargs=2, metavar=("X", "Y"), help="assign: a point in the region")
+    s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="rebase: the target air base icon")
+    s.add_argument("--only", help="comma-separated words a wing's name must contain, e.g. Jagd,JG")
+    s.add_argument("--base", help="an air base by name, as the Air Forces Overview (read air) shows it")
     s = sub.add_parser("decision", help="take a decision by name (shift+q list); checks political power dropped")
     s.add_argument("--name", required=True)
     s.add_argument("--dry-run", action="store_true", help="find it and show its tooltip, take nothing")
@@ -1777,7 +1785,8 @@ def main(argv):
     s = sub.add_parser("load-save")
     s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
-    s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event", "decisions", "pp"])
+    s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event", "decisions", "pp",
+                                    "air"])
     s.add_argument("--tab")
     s.add_argument("--grep")
     args = p.parse_args(argv)
@@ -1806,6 +1815,22 @@ def main(argv):
     elif args.cmd == "close":
         close_screen(hwnd, args.screen)
         print(f"{args.screen} closed")
+    elif args.cmd == "air":
+        import hoi4_air
+        if args.op == "off":
+            hoi4_air.close_air_view(hwnd)
+        elif not (args.at or args.base):
+            raise ActionError("act air needs --base NAME (see: read air) or --at X Y (a base icon in the air mode)")
+        elif args.op == "base":
+            hoi4_air.read_base(hwnd, args.at, base=args.base)
+        elif args.op == "assign":
+            if not (args.mission and args.region):
+                raise ActionError("act air assign needs --mission and --region X Y")
+            hoi4_air.assign(hwnd, args.at, args.mission, args.region, args.only, base=args.base)
+        elif args.op == "rebase":
+            if not args.to:
+                raise ActionError("act air rebase needs --to X Y")
+            hoi4_air.rebase(hwnd, args.at, args.to, args.only, base=args.base)
     elif args.cmd == "decision":
         take_decision(hwnd, args.name, dry_run=args.dry_run)
     elif args.cmd == "decision-category":
@@ -1897,6 +1922,12 @@ def main(argv):
         print(read_pp(hwnd))
     elif args.what == "decisions":
         read_decisions(hwnd)
+    elif args.what == "air":
+        import hoi4_air
+        rows = hoi4_air.read_overview(hwnd)
+        print(f"{len(rows)} air wing(s)")
+        for r in rows:
+            print(f"  {r['name']:<28} base {r['base']:<18} area {r['area'] or '(none)'}")
     elif args.what == "techs":
         if not TECH_MAP.exists():
             raise ActionError("no tech map yet: run  hoi4.py act calibrate-research")

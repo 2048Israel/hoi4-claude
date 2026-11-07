@@ -7,6 +7,7 @@
     "recruit":      {"key": "u", "title": "RECRUIT & DEPLOY"},
     "politics":     {"key": "q", "title": "POLITICAL"},
     "decisions":    {"key": "shift+q", "title": "EVENTS AND DECISIONS"},
+    "air":          {"key": "l", "title": "AIR FORCES OVERVIEW"},
     "_title_box": [0, 100, 900, 165]
   },
   "research": {
@@ -89,6 +90,31 @@
     "clock_box": [1450, 0, 1850, 45],
     "pp_box": [140, 5, 215, 35],
     "cp_box": [930, 5, 990, 35]
+  },
+  "air": {
+    "_note": "Air map mode at the standard camera. Mission bar at y 128; base panel top left, wing rows 60 px apart from y 333.",
+    "land_view_key": "f1",
+    "mission_y": 128,
+    "mission_check_band": [110, 146],
+    "missions": {"exercises": 40, "superiority": 108, "cas": 160, "interception": 220, "strategic": 270,
+                 "naval": 380, "port": 500, "logistics": 560, "supply": 610, "recon": 790},
+    "mission_names": {"superiority": "Air Superiority", "cas": "Close Air Support", "interception": "Interception",
+                      "strategic": "Strategic Bombing", "naval": "Naval Strike", "port": "Port Strike",
+                      "logistics": "Logistics Strike", "supply": "Air Supply", "recon": "Air Recon"},
+    "panel_box": [0, 150, 720, 700],
+    "header_box": [60, 260, 420, 300],
+    "panel_close": [677, 283],
+    "selected_box": [0, 180, 300, 215],
+    "row_first_y": 333,
+    "row_step": 60,
+    "row_name_x": [290, 320],
+    "row_click_x": 370,
+    "status_hover_x": 345,
+    "overview_box": [170, 470, 650, 1100],
+    "overview_first_y": 496,
+    "overview_step": 44.3,
+    "overview_cols": [360, 495],
+    "overview_click_x": 260
   },
   "decisions": {
     "_note": "shift+q. Rows: name at x 88, cost near x 520, take button x 619. Category headers are centred (x 264-396) with a collapse arrow at x 620. One wheel notch scrolls one row (51 px).",

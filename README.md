@@ -74,6 +74,9 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act decision-category --name "Heavy Industry" --collapse` | Fold a decision category away (mods add big ones) |
 | `act research-fill [--plan FILE]` | Fill every empty research slot from a priority list (`plans/research_germany.txt`) |
 | `read pp` | Political power from the top bar |
+| `read air` | Every air wing with its base and area (Air Forces Overview) |
+| `act air assign --base Holstein --mission cas --region X Y [--only Kampf,KG]` | Give a base's wings a mission over the region at a screen point; each wing's order is checked |
+| `act air rebase --base Oberbayern --to X Y [--only Jagd]` / `act air base --base NAME` / `act air off` | Move wings to the base icon at X Y; list a base's wings and orders; back to the Default map |
 | `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
 | `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
 | `act calibrate-research [--tabs artillery]` | Build the tech map (`state/tech_map.json`): clicks each icon once and reads its name. About a minute per tab |

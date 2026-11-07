@@ -15,6 +15,12 @@ saying what changed and how it was checked.
   works whether the tooltip opens above or below the cursor. `read pp` reads political power from the top bar.
 - **act research-fill:** fills empty research slots from `plans/research_germany.txt`, skipping techs the game
   refuses. Checked live: five empty slots filled.
+- **Air wings (hoi4_air.py):** `read air` lists every wing with its base and area (the Air Forces Overview, `l`);
+  `act air base|assign|rebase --base NAME` reads a base's wings, gives them a mission over a region
+  (`--mission superiority|cas|interception|...  --region X Y`, a right-click with the mission armed) or moves them
+  to another base, and checks each wing's order from its tooltip; `act air off` returns to the Default map (F1).
+  Found live on 1940-07-31: all 14 wings were standing by with no mission. Now 13 fly air superiority or close
+  air support over Eastern Germany. `tests/test_AIR.py` covers the overview rows and the wing filter.
 - **City orders say where they went:** `act army target` / `act order` print the target province's state, owner
   and controller from its tooltip. "Brest" found Brest in France, not Poland: two exact matches are now refused.
 - **The console check waits for the screen to settle:** the focus tree fading out once read as an open console,
