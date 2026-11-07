@@ -61,6 +61,11 @@ def main():
     except A.ActionError:
         pass
 
+    # production lines by name: headers as OCR read them in the live game
+    assert A.line_matches("Bf 109", "11 BF109A") and A.line_matches("Ju 87", "12 Ju87")
+    assert A.line_matches("Karabiner", "1 Karabiner 98k") and not A.line_matches("Ju 87", "11 BF109A")
+    assert not A.line_matches("Bf 109", "Basic Small Airframe")  # a line header always starts with its number
+
     from PIL import Image, ImageDraw
     img = Image.new("RGB", (1920, 1200), (25, 25, 25))
     d = ImageDraw.Draw(img)

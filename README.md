@@ -56,6 +56,7 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `read techs [--tab industry] [--grep PaK]` | Techs from the tech map: name, tab, research days |
 | `act research --slot 5 --tech "Inter-War Artillery" [--mio first\|none\|NAME] [--dry-run]` | Start research with no screenshot: finds the icon from the tech map, checks the window's title, presses Research, picks the industrial organization, confirms the slot. Refuses a busy slot without `--replace` |
 | `act production --line 2 --add 1` / `--remove 1` | Factories on production lines 1-5, confirmed by the factory counter |
+| `act production --name "Bf 109" --add 4` | Any line, found by its header text (scrolls the list) |
 | `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
 | `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
 | `act calibrate-research [--tabs artillery]` | Build the tech map (`state/tech_map.json`): clicks each icon once and reads its name. About a minute per tab |

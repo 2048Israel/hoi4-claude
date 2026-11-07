@@ -653,6 +653,60 @@ def production(hwnd, line, add=0, remove=0, log=print):
     return a
 
 
+def line_matches(name, header_text):
+    """A production line header reads like '11 BF109A' or '1 Karabiner 98k': match the name after the number."""
+    m = re.match(r"\s*\d+\s*(.*)", header_text)
+    if not m:
+        return False
+    rest = norm(m.group(1))
+    want = norm(name)
+    return bool(want) and (want in rest or similar(want, rest) >= 0.8)
+
+
+def factory_header(hwnd):
+    return " ".join(l.text for l in read_box(hwnd, [0, 300, 700, 365]) if "factor" in l.text.lower() or "/" in l.text)
+
+
+def find_line(hwnd, name, max_scrolls=15):
+    """Scroll the production list from the top until a line header matches `name`. Returns (y, header text)."""
+    open_screen(hwnd, "production")
+    hoi4.scroll(hwnd, *P["scroll_point"], 40)
+    time.sleep(0.4)
+    seen = []
+    for _ in range(max_scrolls):
+        lines = read_box(hwnd, P["list_box"])
+        for l in lines:
+            if l.box[0] < 60 and 500 <= l.center[1] <= 1150 and line_matches(name, l.text):
+                return l.center[1], l.text
+        seen += [l.text for l in lines if l.box[0] < 60 and re.match(r"\s*\d+\s", l.text)]
+        before = [l.text for l in lines]
+        hoi4.scroll(hwnd, *P["scroll_point"], -5)
+        time.sleep(0.45)
+        if [l.text for l in read_box(hwnd, P["list_box"])] == before:
+            break
+    raise ActionError(f"no production line like {name!r}; lines seen: {', '.join(dict.fromkeys(seen))}")
+
+
+def production_by_name(hwnd, name, add=0, remove=0, log=print):
+    """Add or remove factories on the line whose header matches `name`, anywhere in the list."""
+    y, header_text = find_line(hwnd, name)
+    park_mouse(hwnd)
+    before = read_count(hoi4.grab(hwnd), y)
+    for _ in range(add):
+        hoi4.click(hwnd, P["plus_x"], y)
+        time.sleep(0.2)
+    for _ in range(remove):
+        hoi4.click(hwnd, P["minus_x"], y)
+        time.sleep(0.2)
+    time.sleep(0.3)
+    park_mouse(hwnd)
+    after = read_count(hoi4.grab(hwnd), y)
+    header = factory_header(hwnd)
+    close_screen(hwnd, "production")
+    log(f"{header_text}: factories {before} -> {after} | {header}")
+    return after
+
+
 # --------------------------------------------------------------------------
 # saves
 # --------------------------------------------------------------------------
@@ -726,7 +780,9 @@ def main(argv):
     s.add_argument("--dry-run", action="store_true", help="find and check the tech, start nothing")
     s.add_argument("--replace", action="store_true", help="allow replacing the research in a busy slot")
     s = sub.add_parser("production")
-    s.add_argument("--line", type=int, required=True)
+    g = s.add_mutually_exclusive_group(required=True)
+    g.add_argument("--line", type=int, help="line number 1-5 on the first screen")
+    g.add_argument("--name", help="any line, found by its header text, e.g. 'Bf 109' or 'Ju 87'")
     s.add_argument("--add", type=int, default=0)
     s.add_argument("--remove", type=int, default=0)
     s = sub.add_parser("open")
@@ -760,7 +816,10 @@ def main(argv):
                                   "add --replace to swap it out")
         research(hwnd, args.slot, args.tech, args.mio, dry_run=args.dry_run)
     elif args.cmd == "production":
-        production(hwnd, args.line, args.add, args.remove)
+        if args.name:
+            production_by_name(hwnd, args.name, args.add, args.remove)
+        else:
+            production(hwnd, args.line, args.add, args.remove)
     elif args.cmd == "open":
         open_screen(hwnd, args.screen)
         print(f"{args.screen} open")
