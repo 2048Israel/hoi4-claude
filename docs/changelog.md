@@ -17,6 +17,10 @@ saying what changed and how it was checked.
   - On the way: Extensive Conscription, War Economy, six MEFO price-control decisions, and the advisors Schacht,
     Krupp, Neurath, Beck, Guderian and Göring.
   - Save: `claude_ger_1938_08_anschluss`.
+  - Then the Sudetenland through Munich (33 states by 1938-11) and the First Vienna Award. Fate of
+    Czechoslovakia started on 1939-01-01.
+  - Status on 1939-01-01: 74 civilian and 63 military factories, 105 divisions; Schörner and Rommel in high
+    command. Save: `claude_ger_1939_01`.
 
 # 0.1.1 (2026-11-07)
 
