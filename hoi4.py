@@ -212,8 +212,19 @@ def client_rect(hwnd):
     return origin.x, origin.y, rect.right, rect.bottom
 
 
-def focus(hwnd):
-    """Bring the game to the front so it receives input."""
+def focus(hwnd, tries=8):
+    """Bring the game to the front so it receives input. Windows refuses now and then (for example while the
+    user is typing in another window), so try a few times over about 5 seconds before giving up."""
+    for attempt in range(tries):
+        try:
+            return _focus_once(hwnd)
+        except BridgeError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(0.6)
+
+
+def _focus_once(hwnd):
     if user32.GetForegroundWindow() == hwnd:
         return
     if user32.IsIconic(hwnd):

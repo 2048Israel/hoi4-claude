@@ -19,6 +19,7 @@
     "tab_y": 137,
     "tree_box": [0, 175, 1920, 1180],
     "tree_close": [1876, 130],
+    "tree_band_box": [1000, 112, 1840, 160],
     "year_label_box": [40, 180, 250, 1180],
     "scroll_point": [1650, 1000],
     "scroll_px_per_notch": 50,

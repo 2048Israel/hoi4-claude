@@ -122,12 +122,11 @@ def read_research(hwnd, keep_open=False):
 
 
 def tree_open(hwnd):
-    """The tech tree covers the slot list: it is open when year labels show along the left edge and the slot
-    list's "Research Slots" header does not. (The slot list has year labels of its own.)"""
-    lines = read_box(hwnd, [0, 160, 300, 1180])
-    if any("researchslots" in norm(l.text) for l in lines):
-        return False
-    return any(re.fullmatch(r"1[89]\d\d", l.text.strip()) for l in lines)
+    """The tech tree's frame right of the tabs is a flat dark band: mean ~36, spread ~5 in every tab. The slot
+    list, the map and other screens read 140+ there. Measured at 1920x1200, UI scale 1.0."""
+    from PIL import ImageStat
+    s = ImageStat.Stat(hoi4.grab(hwnd).convert("L").crop(tuple(R["tree_band_box"])))
+    return s.mean[0] < 60 and s.stddev[0] < 12
 
 
 def detail_open(hwnd):
@@ -136,60 +135,93 @@ def detail_open(hwnd):
     return any("day" in l.text.lower() or "research" in l.text.lower() for l in lines)
 
 
-def scroll_offset(hwnd):
-    """(dx, dy) between the tree at its home scroll and now, from the year labels' positions."""
-    labels = {l.text.strip(): l.center for l in read_box(hwnd, R["year_label_box"])
-              if re.fullmatch(r"1[89]\d\d", l.text.strip())}
-    return labels
+# Scrolling. The wheel moves a tree exactly 50 px a notch until it hits the bottom, and the bottom bar drags it
+# sideways. Each tab's limits (v_max, h_max) are measured once by matching pictures, so a view is reached by
+# counting notches: no labels needed (some tabs have their year labels along the top, some down the left).
+NOTCH = R["scroll_px_per_notch"]
 
 
-def set_scroll(hwnd, h, v):
-    """h, v in {'min', 'max'}: drag the bottom bar fully left/right; wheel fully up/down."""
+def tree_pixels(hwnd, park=True):
+    import numpy as np
+    if park:
+        park_mouse(hwnd)
+    x0, y0, x1, y1 = R["tree_box"]
+    return np.asarray(hoi4.grab(hwnd).convert("L").crop((x0, y0 + 10, x1, y1 - 10))).astype(np.int16)
+
+
+def best_shift(a, b, axis, candidates):
+    """The shift s (in candidates) for which b equals a moved back by s along axis (0 = down, 1 = right)."""
+    import numpy as np
+    best, best_err = 0, float("inf")
+    n = a.shape[axis]
+    for s in candidates:
+        if s >= n - 40:
+            continue
+        if axis == 0:
+            err = float(np.abs(a[s:, :] - b[:n - s, :]).mean())
+        else:
+            err = float(np.abs(a[:, s:] - b[:, :n - s]).mean())
+        if err < best_err:
+            best, best_err = s, err
+    return best
+
+
+def scroll_home(hwnd):
     px, py = R["scroll_point"]
-    hoi4.scroll(hwnd, px, py, 25 if v == "min" else -25)
-    time.sleep(0.3)
+    hoi4.scroll(hwnd, px, py, 40)
     y = R["hbar_y"]
-    if h == "max":
+    hoi4.drag(hwnd, 1600, y, 0, y)
+    time.sleep(0.35)
+
+
+def to_view(hwnd, h_off, v_off, v_max=None):
+    """Show the tree scrolled right by h_off (0 or the tab's h_max) and down by v_off: a multiple of 50, or
+    v_max itself (reached by scrolling past the bottom)."""
+    scroll_home(hwnd)
+    if h_off:
+        y = R["hbar_y"]
         hoi4.drag(hwnd, 300, y, 1915, y)
-    else:
-        hoi4.drag(hwnd, 1600, y, 0, y)
-    time.sleep(0.4)
+    if v_off:
+        notches = 40 if v_max is not None and v_off >= v_max else v_off // NOTCH
+        hoi4.scroll(hwnd, *R["scroll_point"], -notches)
+    time.sleep(0.35)
 
 
-def view_offset(hwnd, home):
-    """How far the current view is shifted from home (min/min scroll), in pixels: the median over every
-    year label visible in both. None if no label is shared."""
-    now = scroll_offset(hwnd)
-    shared = [k for k in now if k in home]
-    if not shared:
-        return None
-    dxs = sorted(home[k][0] - now[k][0] for k in shared)
-    dys = sorted(home[k][1] - now[k][1] for k in shared)
-    return dxs[len(dxs) // 2], dys[len(dys) // 2]
-
-
-def map_home_labels(hwnd):
-    """Every year label's position at home scroll, including rows below the screen: scroll down in exact
-    250 px steps (the wheel moves the tree 50 px a notch) and carry each new label back to home."""
+def measure_geometry(hwnd):
+    """How far this tab scrolls down (v_max) and sideways (h_max), in pixels."""
     px, py = R["scroll_point"]
-    set_scroll(hwnd, "min", "min")
-    home = dict(scroll_offset(hwnd))
-    if not home:
-        return home
-    for step in range(1, 9):
-        hoi4.scroll(hwnd, px, py, -5)
+    scroll_home(hwnd)
+    v_max, prev = 0, tree_pixels(hwnd)
+    step = 10
+    for _ in range(12):
+        hoi4.scroll(hwnd, px, py, -step)
         time.sleep(0.35)
-        now = scroll_offset(hwnd)
-        moved = step * 5 * R["scroll_px_per_notch"]
-        shared = [k for k in now if k in home]
-        actual = sorted(home[k][1] - now[k][1] for k in shared)
-        dy = actual[len(actual) // 2] if actual else moved
-        for k, (x, y) in now.items():
-            home.setdefault(k, (x, y + dy))
-        if actual and dy < moved - 10:  # clamped at the bottom
+        cur = tree_pixels(hwnd)
+        moved = best_shift(prev, cur, 0, range(0, step * NOTCH + 1, NOTCH))
+        if moved < step * NOTCH:  # hit the bottom: the last notch may move only part-way, so find it to the pixel
+            coarse = best_shift(prev[::2, ::4], cur[::2, ::4], 0, range(0, step * NOTCH // 2 + 1))
+            moved = best_shift(prev, cur, 0, range(max(0, coarse * 2 - 3), coarse * 2 + 4))
+            v_max += moved
             break
-    set_scroll(hwnd, "min", "min")
-    return home
+        v_max += moved
+        prev = cur
+    scroll_home(hwnd)
+    left = tree_pixels(hwnd)
+    y = R["hbar_y"]
+    hoi4.drag(hwnd, 300, y, 1915, y)
+    time.sleep(0.35)
+    right = tree_pixels(hwnd)
+    coarse = best_shift(left[::4, ::4], right[::4, ::4], 1, range(0, 450))
+    h_max = best_shift(left[::2], right[::2], 1, range(max(0, coarse * 4 - 6), coarse * 4 + 7))
+    scroll_home(hwnd)
+    return h_max, v_max
+
+
+def views_for(h_max, v_max):
+    """Scroll positions that together show the whole tree."""
+    vs = list(range(0, v_max, 750)) + [v_max]  # v_max itself is reached by over-scrolling to the bottom
+    hs = [0, h_max] if h_max > 20 else [0]
+    return [(h, v) for v in sorted(set(vs)) for h in hs]
 
 
 def open_tree(hwnd, slot, tab):
@@ -290,26 +322,20 @@ def calibrate_research(hwnd, tabs=None, slot=5, log=print):
     data = json.loads(TECH_MAP.read_text(encoding="utf-8")) if TECH_MAP.exists() else {"tabs": {}}
     for tab in tabs or list(R["tabs"]):
         open_tree(hwnd, slot, tab)
-        home = map_home_labels(hwnd)
-        if not home:
-            raise ActionError(f"{tab}: no year labels to anchor the scroll position")
-        log(f"  {tab} year labels at home: {home}")
+        h_max, v_max = measure_geometry(hwnd)
+        log(f"  {tab}: scrolls {v_max} px down and {h_max} px sideways")
         found = {}
-        for h, v in (("min", "min"), ("max", "min"), ("min", "max"), ("max", "max")):
-            set_scroll(hwnd, h, v)
+        for h_off, v_off in views_for(h_max, v_max):
+            to_view(hwnd, h_off, v_off, v_max)
             if not tree_open(hwnd):
                 raise ActionError(f"{tab}: the tech tree is no longer open; stopped before clicking the map")
-            off = view_offset(hwnd, home)
-            if off is None:
-                log(f"  {tab} view {h}/{v}: no year label shared with home, view skipped")
-                continue
             park_mouse(hwnd)
             cands = detect_candidates(hoi4.grab(hwnd))
-            log(f"  {tab} view {h}/{v}: offset {off}, {len(cands)} candidates")
+            log(f"  {tab} view +{h_off}/+{v_off}: {len(cands)} candidates")
             for n, (sx, sy) in enumerate(cands):
                 if n and n % 12 == 0 and not tree_open(hwnd):
                     raise ActionError(f"{tab}: the tech tree closed during probing")
-                tx, ty = sx + off[0], sy + off[1]
+                tx, ty = sx + h_off, sy + v_off
                 if any(abs(tx - e["x"]) < 30 and abs(ty - e["y"]) < 30 for e in found.values()):
                     continue
                 hoi4.click(hwnd, sx, sy)
@@ -324,7 +350,7 @@ def calibrate_research(hwnd, tabs=None, slot=5, log=print):
                 if title not in found:
                     found[title] = {"x": tx, "y": ty, "days": days}
                 close_detail(hwnd)
-        data["tabs"][tab] = {"home_labels": home, "techs": found}
+        data["tabs"][tab] = {"h_max": h_max, "v_max": v_max, "techs": found}
         log(f"{tab}: {len(found)} techs")
         TECH_MAP.parent.mkdir(parents=True, exist_ok=True)
         TECH_MAP.write_text(json.dumps(data, indent=1), encoding="utf-8")
@@ -346,7 +372,8 @@ def find_tech(name):
                 best = (score, tab, title, pos)
     if best[0] < 0.75:
         raise ActionError(f"no tech like {name!r} in the map (closest: {best[2]!r}); recalibrate that tab?")
-    return best[1], best[2], best[3], data["tabs"][best[1]]["home_labels"]
+    info = data["tabs"][best[1]]
+    return best[1], best[2], best[3], (info.get("h_max", 0), info.get("v_max", 0))
 
 
 def choose_mio(hwnd, mio):
@@ -374,16 +401,16 @@ def choose_mio(hwnd, mio):
 def research(hwnd, slot, tech, mio="first", dry_run=False, log=print):
     """Start researching `tech` in `slot`. If the slot is busy the game asks before replacing (progress is
     kept for later), so this refuses a busy slot unless the caller has checked that with read_research."""
-    tab, title, pos, home = find_tech(tech)
+    tab, title, pos, (h_max, v_max) = find_tech(tech)
     open_tree(hwnd, slot, tab)
-    # pick the scroll state that shows the target, then measure the real offset
-    h = "max" if pos["x"] > 1880 else "min"
-    v = "max" if pos["y"] > 1150 else "min"
-    set_scroll(hwnd, h, v)
-    off = view_offset(hwnd, home)
-    if off is None:
-        raise ActionError(f"could not tell how far the {tab} tree is scrolled; nothing clicked")
-    sx, sy = pos["x"] - off[0], pos["y"] - off[1]
+    # the scroll that shows the target: as little as needed, in whole notches
+    h_off = h_max if pos["x"] > 1880 else 0
+    v_off = 0 if pos["y"] <= 1140 else (pos["y"] - 680) // NOTCH * NOTCH
+    if v_off >= v_max - NOTCH:
+        v_off = v_max  # near the bottom: scroll all the way, which lands exactly on v_max
+    to_view(hwnd, h_off, v_off, v_max)
+    off = (h_off, v_off)
+    sx, sy = pos["x"] - h_off, pos["y"] - v_off
     if not (R["tree_box"][1] <= sy <= R["tree_box"][3] and 0 <= sx < 1920):
         raise ActionError(f"{title!r} is off screen at this scroll ({sx}, {sy}); nothing clicked")
     hoi4.click(hwnd, sx, sy)
