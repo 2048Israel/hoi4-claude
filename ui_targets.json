@@ -41,6 +41,15 @@
     "factories_box": [0, 330, 700, 360],
     "scroll_point": [330, 800]
   },
+  "recruit": {
+    "templates_box": [700, 280, 1400, 1100],
+    "queue_box": [0, 480, 700, 1200],
+    "scroll_point": [330, 900],
+    "count_plus_x": 522,
+    "count_minus_x": 437,
+    "count_button_dy": 140,
+    "deploy_province": [1170, 480]
+  },
   "top_bar": {
     "clock_box": [1450, 0, 1850, 45]
   },

@@ -7,7 +7,7 @@ Jerus, 2026-11-07: "isnt it better to just set up buttons where instead of claud
 that just clicks that button directly". EX1 did that for research and production. What is left, in the order a turn
 needs it:
 
-- **Recruit:** `act recruit --template "Infantrie-Division" --count N`. The training line defaults to infinity
+- **Recruit:** done 2026-11-07 (`act recruit`, `act fix-queue`). Notes kept for reference: The training line defaults to infinity
   ("train forever"): set it to N with "+" and check it. Find the new line by OCR, not by position, because lines
   stack up.
 - **Deploy:** finished divisions wait forever on "No location set" and do not count as divisions. Seen live on

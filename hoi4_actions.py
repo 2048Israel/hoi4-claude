@@ -708,6 +708,119 @@ def production_by_name(hwnd, name, add=0, remove=0, log=print):
 
 
 # --------------------------------------------------------------------------
+# recruit & deploy
+# --------------------------------------------------------------------------
+RC = T["recruit"]
+
+
+def _queue_lines(hwnd):
+    return read_box(hwnd, RC["queue_box"])
+
+
+def _count_fields(lines):
+    """Training-count fields ('1/1', '1/∞' read as '1/30', '1/4') in the queue."""
+    return [l for l in lines if l.box[0] > 480 and l.text.startswith("1/")]
+
+
+def count_value(text):
+    """'1/1' -> 1, '1/4 G' -> 4; infinity (OCR '1/30', '1/00', '1/∞') -> None."""
+    m = re.match(r"1/(\d)(\d?)", text.strip())
+    if not m or m.group(2):
+        return None
+    return int(m.group(1)) or None
+
+
+def _scroll_queue(hwnd, notches):
+    hoi4.scroll(hwnd, *RC["scroll_point"], notches)
+    time.sleep(0.45)
+
+
+def _each_queue_page(hwnd, fn, max_pages=20):
+    """Call fn(lines) on each page of the training queue, top to bottom. fn returns True when it changed
+    something on the page (the page is then read again before moving on)."""
+    _scroll_queue(hwnd, 60)
+    for _ in range(max_pages * 3):
+        lines = _queue_lines(hwnd)
+        if fn(lines):
+            continue
+        _scroll_queue(hwnd, -6)
+        if [l.text for l in _queue_lines(hwnd)] == [l.text for l in lines]:
+            return
+
+
+def fix_queue(hwnd, log=print):
+    """Every training line: count 1 (not infinity, not more) and a deploy location. Returns what it changed."""
+    changed = {"count": 0, "location": 0}
+
+    def fix(lines):
+        for l in _count_fields(lines):
+            n = count_value(l.text)
+            y = l.center[1]
+            if n == 1:
+                continue
+            if n is not None:  # more than 1: lower with "-"
+                for _ in range(n - 1):
+                    hoi4.click(hwnd, RC["count_minus_x"], y - RC["count_button_dy"])
+                    time.sleep(0.3)
+            else:  # infinity (OCR: '30', '00', '∞'): one "+" makes it 1
+                hoi4.click(hwnd, RC["count_plus_x"], y - RC["count_button_dy"])
+            time.sleep(0.5)
+            changed["count"] += 1
+            return True
+        for l in lines:
+            if "cation" in l.text.lower() and l.box[0] < 400:  # "No location set" (OCR: "No [öcation set")
+                hoi4.click(hwnd, *l.center)
+                time.sleep(0.8)
+                hoi4.click(hwnd, *RC["deploy_province"])
+                time.sleep(0.8)
+                still = any("cation" in m.text.lower() and abs(m.center[1] - l.center[1]) < 12
+                            for m in _queue_lines(hwnd))
+                if still:
+                    raise ActionError("could not set a deploy location: the map click hit no green province "
+                                      "(was the camera moved?)")
+                changed["location"] += 1
+                return True
+        return False
+
+    _each_queue_page(hwnd, fix)
+    log(f"training queue fixed: {changed['count']} counts, {changed['location']} locations")
+    return changed
+
+
+def queue_summary(hwnd):
+    names, counts = [], []
+
+    def read(lines):
+        names.extend(l.text for l in lines if re.match(r"\d+\. ", l.text))
+        counts.extend(l.text for l in _count_fields(lines))
+        return False
+
+    _each_queue_page(hwnd, read)
+    return list(dict.fromkeys(names)), counts
+
+
+def recruit(hwnd, count, template="Infanterie-Division", log=print):
+    """Queue `count` divisions of a template, each training once, with a deploy location."""
+    open_screen(hwnd, "recruit")
+    rows = read_box(hwnd, RC["templates_box"])
+    names = [l for l in rows if norm(l.text) not in ("train", "edit")]
+    tmpl = [l for l in names if norm(l.text) == norm(template)] or [l for l in names if norm(template) in norm(l.text)]
+    if not tmpl:
+        raise ActionError(f"no template like {template!r}; seen: {', '.join(l.text for l in names[:12])}")
+    # each template card: its name, then about 40 px lower its Train and Edit buttons
+    train = [l for l in rows if norm(l.text) == "train" and 0 < l.center[1] - tmpl[0].center[1] < 70]
+    if not train:
+        raise ActionError(f"no Train button on the {tmpl[0].text} row")
+    for _ in range(count):
+        hoi4.click(hwnd, *train[0].center)
+        time.sleep(0.45)
+    fix_queue(hwnd, log)
+    names, counts = queue_summary(hwnd)
+    close_screen(hwnd, "recruit")
+    log(f"queued {count} x {tmpl[0].text}; training-count fields seen: {sorted(set(counts))}")
+
+
+# --------------------------------------------------------------------------
 # saves
 # --------------------------------------------------------------------------
 SAVE_DIR = hoi4.USER_DIR / "save games"
@@ -792,6 +905,10 @@ def main(argv):
     s = sub.add_parser("calibrate-research")
     s.add_argument("--tabs", help="comma-separated tab names (default: all)")
     s = sub.add_parser("dismiss", help="close 'Research Finished!' / 'National Focus Completed' notices")
+    s = sub.add_parser("recruit", help="queue divisions: each trains once and has a deploy location")
+    s.add_argument("--count", type=int, required=True)
+    s.add_argument("--template", default="Infanterie-Division")
+    s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("save")
     s.add_argument("name", help="saved as claude_<name>")
     s = sub.add_parser("load-save")
@@ -826,6 +943,14 @@ def main(argv):
     elif args.cmd == "close":
         close_screen(hwnd, args.screen)
         print(f"{args.screen} closed")
+    elif args.cmd == "recruit":
+        recruit(hwnd, args.count, args.template)
+    elif args.cmd == "fix-queue":
+        open_screen(hwnd, "recruit")
+        fix_queue(hwnd)
+        names, counts = queue_summary(hwnd)
+        close_screen(hwnd, "recruit")
+        print(f"training-count fields seen: {sorted(set(counts))}")
     elif args.cmd == "save":
         save_game(hwnd, args.name)
     elif args.cmd == "load-save":

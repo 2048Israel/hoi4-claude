@@ -10,6 +10,8 @@ saying what changed and how it was checked.
 - **World News:** news popups (a headline and one answer button) also catch clicks; every `act` now closes
   them by their one answer. Events with several options are left open for a decision.
 - **Production by name:** `act production --name "Bf 109" --add 10` finds any line by its header, scrolling the list.
+- **Recruiting:** `act recruit --count N [--template NAME]` and `act fix-queue` replace `tools/queue_divisions.py`.
+  Checked live: 15 infantry and 4 Panzer divisions queued at 1/1 with locations.
 - **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
   says so, closes the windows, and stops.
 - **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.
