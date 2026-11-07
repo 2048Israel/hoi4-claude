@@ -15,6 +15,10 @@ saying what changed and how it was checked.
   works whether the tooltip opens above or below the cursor. `read pp` reads political power from the top bar.
 - **act research-fill:** fills empty research slots from `plans/research_germany.txt`, skipping techs the game
   refuses. Checked live: five empty slots filled.
+- **act army push (hoi4_orders.py):** standing orders in `plans/orders.txt` (`army general city`); a fresh report
+  shows each army's share of divisions in combat, and any army under `--min-share` (35%) is sent at its city
+  again. Direct orders end when a path is blocked, and the army then digs in: in the first July 1940 run three
+  armies sat idle for weeks while Berlin fell. `tests/test_ORD.py`.
 - **Air wings (hoi4_air.py):** `read air` lists every wing with its base and area (the Air Forces Overview, `l`);
   `act air base|assign|rebase --base NAME` reads a base's wings, gives them a mission over a region
   (`--mission superiority|cas|interception|...  --region X Y`, a right-click with the mission armed) or moves them

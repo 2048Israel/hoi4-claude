@@ -1749,7 +1749,10 @@ def main(argv):
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
-    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute", "move", "target"])
+    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute", "move", "target",
+                                  "push"])
+    s.add_argument("--plan", help="push: standing orders file (default plans/orders.txt)")
+    s.add_argument("--min-share", type=float, default=0.35, help="push: re-order below this share in combat")
     s.add_argument("--city", help="target: a city name the map's Find window knows, e.g. Warsaw")
     s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="attack: where the arrow points")
     s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="front: a point on the highlighted border")
@@ -1841,6 +1844,9 @@ def main(argv):
         choose_event(hwnd, args.option)
     elif args.cmd == "recruit":
         recruit(hwnd, args.count, args.template)
+    elif args.cmd == "army" and args.op == "push":
+        import hoi4_orders
+        hoi4_orders.push(hwnd, args.plan or hoi4_orders.DEFAULT_PLAN, args.min_share)
     elif args.cmd == "army":
         if args.op == "list":
             list_armies(hwnd)

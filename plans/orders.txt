@@ -1,0 +1,8 @@
+# Standing orders for act army push: army card, a word of the commander's name, target city.
+# Bock (army 6) holds the French border on its defensive line: it is left out on purpose.
+1 Rundstedt Stettin
+2 Kluge Torun
+3 Rommel Lwow
+4 Manstein Pinsk
+5 Guderian Berlin
+7 Weichs Hamburg

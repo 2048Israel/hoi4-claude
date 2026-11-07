@@ -74,6 +74,7 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act decision-category --name "Heavy Industry" --collapse` | Fold a decision category away (mods add big ones) |
 | `act research-fill [--plan FILE]` | Fill every empty research slot from a priority list (`plans/research_germany.txt`) |
 | `read pp` | Political power from the top bar |
+| `act army push [--plan plans/orders.txt] [--min-share 0.35]` | Re-send every army that has mostly stopped fighting at its standing target city |
 | `read air` | Every air wing with its base and area (Air Forces Overview) |
 | `act air assign --base Holstein --mission cas --region X Y [--only Kampf,KG]` | Give a base's wings a mission over the region at a screen point; each wing's order is checked |
 | `act air rebase --base Oberbayern --to X Y [--only Jagd]` / `act air base --base NAME` / `act air off` | Move wings to the base icon at X Y; list a base's wings and orders; back to the Default map |
