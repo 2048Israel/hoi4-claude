@@ -708,6 +708,142 @@ def production_by_name(hwnd, name, add=0, remove=0, log=print):
 
 
 # --------------------------------------------------------------------------
+# armies
+# --------------------------------------------------------------------------
+AR = T["army"]
+
+
+def deselect(hwnd):
+    """Clear the unit selection: click open sea, then close the sea-region panel that opens."""
+    hoi4.click(hwnd, *AR["empty_sea"])
+    time.sleep(0.5)
+    hoi4.click(hwnd, *AR["sea_panel_close"])
+    time.sleep(0.3)
+
+
+def army_cards(hwnd):
+    """The army cards along the bottom, left to right: [(divisions, x)]."""
+    lines = read_box(hwnd, AR["card_numbers_box"], upscale=3)
+    # a card with a commander reads like "19 4": the count, then the general's skill badge
+    return [(int(m.group(1)), l.center[0]) for l in lines for m in [re.match(r"\s*(\d+)", l.text)] if m]
+
+
+def army_panel(hwnd):
+    """The selected army's header: name, commander (or None), 'n/24'."""
+    lines = read_box(hwnd, AR["army_header_box"])
+    name = next((l.text for l in lines if re.match(r"Army \d+", l.text)), None)
+    has_cmd = not any("no commander" in l.text.lower() for l in lines)
+    general = None
+    if has_cmd:
+        gl = [l for l in lines if norm(l.text).startswith("genera")]  # OCR: "Generat"
+        if gl:
+            general = next((l.text for l in lines if 0 < l.center[1] - gl[0].center[1] < 35
+                            and abs(l.box[0] - gl[0].box[0]) < 20), None)
+    size = next((l.text for l in lines if re.match(r"\d+/\d+", l.text)), None)
+    return {"name": name, "general": general if has_cmd else None, "size": size}
+
+
+def select_army(hwnd, index):
+    cards = army_cards(hwnd)
+    if not 1 <= index <= len(cards):
+        raise ActionError(f"there are {len(cards)} army cards; no army {index}")
+    deselect(hwnd)
+    hoi4.click(hwnd, cards[index - 1][1], AR["card_click_y"])
+    time.sleep(0.8)
+    return army_panel(hwnd)
+
+
+def list_armies(hwnd, log=print):
+    out = []
+    for i, (n, _) in enumerate(army_cards(hwnd), 1):
+        p = select_army(hwnd, i)
+        out.append(p)
+        log(f"  card {i}: {p['name']} | {p['size']} | {p['general'] or 'NO COMMANDER'}")
+    deselect(hwnd)
+    return out
+
+
+def assign_general(hwnd, index, name=None, log=print):
+    """Give army `index` a commander: `name`, or the first one the game lists (it sorts by skill)."""
+    p = select_army(hwnd, index)
+    hoi4.click(hwnd, *AR["commander_slot"])
+    time.sleep(1.0)
+    lines = read_box(hwnd, AR["commander_list_box"])
+    labels = [l for l in lines if norm(l.text).startswith("genera") and len(l.text) < 10]
+    names = [l for l in lines for g in labels if 0 < l.center[1] - g.center[1] < 35 and abs(l.box[0] - g.box[0]) < 20]
+    if not names:
+        raise ActionError(f"no generals readable in the commander list; read: {[l.text for l in lines][:10]}")
+    pick = max(names, key=lambda l: similar(name, l.text)) if name else names[0]
+    hoi4.click(hwnd, *pick.center)
+    time.sleep(1.0)
+    after = army_panel(hwnd)
+    if not after["general"]:
+        raise ActionError(f"clicked {pick.text} but {p['name']} still has no commander")
+    log(f"{after['name']} ({after['size']}): commander {after['general']}")
+    return after
+
+
+def new_army_button(hwnd):
+    """The green '+' that creates a new army from the selection."""
+    import numpy as np
+    park_mouse(hwnd)
+    x0, y0, x1, y1 = AR["plus_band"]
+    a = np.asarray(hoi4.grab(hwnd).convert("RGB").crop((x0, y0, x1, y1))).astype(int)
+    g = (a[..., 1] > 150) & (a[..., 0] < 120) & (a[..., 2] < 120)
+    cols = np.nonzero(g.sum(axis=0) >= 3)[0]
+    groups = []
+    for x in cols:
+        if groups and x - groups[-1][-1] <= 6:
+            groups[-1].append(x)
+        else:
+            groups.append([x])
+    for grp in (g_ for g_ in groups if len(g_) >= 8):
+        ys = np.nonzero(g[:, grp].any(axis=1))[0]
+        pt = (int(np.mean(grp)) + x0, int(np.median(ys)) + y0)
+        hoi4.move_mouse(*hoi4.to_screen(hwnd, *pt))
+        time.sleep(1.0)
+        tip = " ".join(l.text for l in ocr_image(hoi4.grab(hwnd).crop((500, 600, 1500, 1060)), origin=(500, 600))).lower()
+        if "army" in tip and "army group" not in tip:
+            return pt
+    return None
+
+
+def new_army(hwnd, halves=0, log=print):
+    """Make an army from the selected unassigned divisions: drop armies from the selection, halve it `halves`
+    times with S, then press New Army."""
+    for _ in range(8):
+        heads = [l for l in read_box(hwnd, AR["selection_box"]) if re.match(r"Army \d+$", l.text.strip())]
+        if not heads:
+            break
+        hoi4.click(hwnd, AR["panel_close_x"], heads[-1].center[1])
+        time.sleep(0.5)
+    if "unassigned" not in " ".join(l.text for l in read_box(hwnd, AR["selection_box"])).lower():
+        raise ActionError("no unassigned divisions are selected")
+    for _ in range(halves):
+        hoi4.press_combo("s")
+        time.sleep(0.5)
+    before = sum(n for n, _ in army_cards(hwnd))
+    plus = new_army_button(hwnd)
+    if not plus:
+        raise ActionError("the New Army button was not found")
+    hoi4.click(hwnd, *plus)
+    time.sleep(1.2)
+    cards = army_cards(hwnd)
+    if sum(n for n, _ in cards) <= before:
+        raise ActionError("New Army was pressed but no new army card appeared")
+    p = army_panel(hwnd)
+    log(f"created {p['name']} with {p['size']} | armies now {[n for n, _ in cards]}")
+    return p
+
+
+def select_box(hwnd, box):
+    deselect(hwnd)
+    hoi4.drag(hwnd, box[0], box[1], box[2], box[3])
+    time.sleep(0.8)
+    return " ".join(l.text for l in read_box(hwnd, AR["selection_box"]))[:200]
+
+
+# --------------------------------------------------------------------------
 # national focus
 # --------------------------------------------------------------------------
 FC = T["focus"]
@@ -980,6 +1116,13 @@ def main(argv):
     s.add_argument("--count", type=int, required=True)
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
+    s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
+    s.add_argument("op", choices=["list", "new", "general", "generals"])
+    s.add_argument("--army", type=int)
+    s.add_argument("--name")
+    s.add_argument("--halves", type=int, default=0)
+    s = sub.add_parser("select-box", help="drag-select divisions in a screen box: x0 y0 x1 y1")
+    s.add_argument("box", type=int, nargs=4)
     s = sub.add_parser("focus", help="start a national focus by name (via the tree's search)")
     s.add_argument("--name", required=True)
     s = sub.add_parser("save")
@@ -1018,6 +1161,23 @@ def main(argv):
         print(f"{args.screen} closed")
     elif args.cmd == "recruit":
         recruit(hwnd, args.count, args.template)
+    elif args.cmd == "army":
+        if args.op == "list":
+            list_armies(hwnd)
+        elif args.op == "new":
+            new_army(hwnd, args.halves)
+        elif args.op == "general":
+            if not args.army:
+                raise ActionError("--army N is needed")
+            assign_general(hwnd, args.army, args.name)
+            deselect(hwnd)
+        else:
+            for i, p in enumerate(list_armies(hwnd, log=lambda m: None), 1):
+                if not p["general"]:
+                    assign_general(hwnd, i)
+            deselect(hwnd)
+    elif args.cmd == "select-box":
+        print(select_box(hwnd, args.box))
     elif args.cmd == "focus":
         start_focus(hwnd, args.name)
     elif args.cmd == "fix-queue":

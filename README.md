@@ -59,6 +59,8 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act production --name "Bf 109" --add 4` | Any line, found by its header text (scrolls the list) |
 | `act recruit --count 10 [--template "Panzer-Division"]` | Queue divisions: each line set to train once (not the default infinity) and given a deploy location |
 | `act fix-queue` | Every training line: count 1 and a deploy location (locations can get lost) |
+| `act select-box x0 y0 x1 y1` / `act army new [--halves N]` | Select divisions on the map, then make an army from the unassigned ones (S halves the selection: 75 → 38 → 19) |
+| `act army list` / `act army generals` / `act army general --army N --name X` | Armies with their size and commander; give every army without one the game's top-listed general |
 | `act focus --name "Danzig or War"` / `read focus` | Start a focus through the tree's search; when the game refuses, it prints the requirement lines. `read focus` shows the running one |
 | `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
 | `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
