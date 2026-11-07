@@ -1,0 +1,2 @@
+# Save fixtures are kept byte-for-byte: no line-ending conversion on any machine.
+tests/fixtures/** -text
