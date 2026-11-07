@@ -708,6 +708,77 @@ def production_by_name(hwnd, name, add=0, remove=0, log=print):
 
 
 # --------------------------------------------------------------------------
+# national focus
+# --------------------------------------------------------------------------
+FC = T["focus"]
+
+
+def current_focus(hwnd):
+    """The running focus as Politics shows it, or None ("Select a National Focus")."""
+    open_screen(hwnd, "politics")
+    text = " ".join(l.text for l in read_box(hwnd, FC["politics_focus_box"])).strip()
+    close_screen(hwnd, "politics")
+    return None if "select" in text.lower() and "focus" in text.lower() else (text or None)
+
+
+def focus_view_open(hwnd):
+    return "focustree" in norm(" ".join(l.text for l in read_box(hwnd, T["screens"]["_title_box"])))
+
+
+def start_focus(hwnd, name, log=print):
+    """Start a focus by name through the tree's search. Refuses when a focus is already running; when the game
+    refuses Start, says so with the requirement lines it can read."""
+    running = current_focus(hwnd)
+    if running:
+        raise ActionError(f"a focus is already running: {running}")
+    if not focus_view_open(hwnd):
+        hoi4.press_combo(FC["key"])
+        if not wait_for(lambda: focus_view_open(hwnd), timeout=2.0):
+            raise ActionError("the focus tree did not open")
+    hoi4.click(hwnd, *FC["search_box"])
+    time.sleep(0.3)
+    hoi4.press_combo("ctrl+a")
+    hoi4.type_text(name)
+    time.sleep(0.4)
+    hoi4.press_combo("enter")
+    time.sleep(1.2)
+    # the detail window opens in different places, so read the whole tree area and pair the title with its Start
+    lines = read_box(hwnd, FC["tree_box"])
+    titles = [l for l in lines if l.text.isupper() and len(l.text) > 3
+              and (norm(name) in norm(l.text) or similar(name, l.text) >= 0.7)]
+    if not titles:
+        hoi4.press_combo(FC["key"])
+        seen = [l.text for l in lines if l.text.isupper() and len(l.text) > 3]
+        raise ActionError(f"no detail window titled like {name!r}; uppercase text seen: {seen[:8]}")
+    title = titles[0]
+    start = sorted((l for l in lines if norm(l.text) == "start"),
+                   key=lambda l: abs(l.center[0] - title.center[0]) + abs(l.center[1] - title.center[1]))
+    if not start or abs(start[0].center[1] - title.center[1]) > 150:
+        hoi4.press_combo(FC["key"])
+        raise ActionError(f"no Start button near {title.text}")
+    title = title.text
+    hoi4.click(hwnd, *start[0].center)
+    time.sleep(1.0)
+    if focus_view_open(hwnd):  # still open: the game refused (Start closes the tree when it works)
+        hoi4.move_mouse(*hoi4.to_screen(hwnd, *start[0].center))
+        time.sleep(1.0)
+        reqs = []
+        for _ in range(6):
+            for l in read_box(hwnd, FC["requirements_box"], park=False):
+                if l.text not in reqs:
+                    reqs.append(l.text)
+            hoi4.scroll(hwnd, *FC["requirements_scroll"], -2)
+            time.sleep(0.3)
+        hoi4.press_combo(FC["key"])
+        raise ActionError(f"the game refused to start {title}. Requirements it lists: {' | '.join(reqs)}")
+    now = current_focus(hwnd)
+    if not now or similar(now, name) < 0.5 and norm(name)[:10] not in norm(now):
+        raise ActionError(f"Start was clicked but the running focus reads {now!r}")
+    log(f"started focus: {now}")
+    return now
+
+
+# --------------------------------------------------------------------------
 # recruit & deploy
 # --------------------------------------------------------------------------
 RC = T["recruit"]
@@ -909,12 +980,14 @@ def main(argv):
     s.add_argument("--count", type=int, required=True)
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
+    s = sub.add_parser("focus", help="start a national focus by name (via the tree's search)")
+    s.add_argument("--name", required=True)
     s = sub.add_parser("save")
     s.add_argument("name", help="saved as claude_<name>")
     s = sub.add_parser("load-save")
     s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
-    s.add_argument("what", choices=["research", "production", "date", "techs"])
+    s.add_argument("what", choices=["research", "production", "date", "techs", "focus"])
     s.add_argument("--tab")
     s.add_argument("--grep")
     args = p.parse_args(argv)
@@ -945,6 +1018,8 @@ def main(argv):
         print(f"{args.screen} closed")
     elif args.cmd == "recruit":
         recruit(hwnd, args.count, args.template)
+    elif args.cmd == "focus":
+        start_focus(hwnd, args.name)
     elif args.cmd == "fix-queue":
         open_screen(hwnd, "recruit")
         fix_queue(hwnd)
@@ -966,6 +1041,8 @@ def main(argv):
         print(header)
         for r in rows:
             print(f"  line {r['line']}: {r['name']} | factories {r['factories']} | {r['detail']}")
+    elif args.what == "focus":
+        print(current_focus(hwnd) or "(no focus running)")
     elif args.what == "date":
         print(read_date(hwnd))
     elif args.what == "techs":

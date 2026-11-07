@@ -59,6 +59,7 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act production --name "Bf 109" --add 4` | Any line, found by its header text (scrolls the list) |
 | `act recruit --count 10 [--template "Panzer-Division"]` | Queue divisions: each line set to train once (not the default infinity) and given a deploy location |
 | `act fix-queue` | Every training line: count 1 and a deploy location (locations can get lost) |
+| `act focus --name "Danzig or War"` / `read focus` | Start a focus through the tree's search; when the game refuses, it prints the requirement lines. `read focus` shows the running one |
 | `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
 | `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
 | `act calibrate-research [--tabs artillery]` | Build the tech map (`state/tech_map.json`): clicks each icon once and reads its name. About a minute per tab |

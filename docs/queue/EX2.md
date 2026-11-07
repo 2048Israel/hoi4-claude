@@ -22,7 +22,7 @@ needs it:
 - **Construction:** `act build --building civilian_factory --state Sachsen [--count N]`. Try the map's find window
   (`ctrl+f`, type the state, jump the camera) and click the state at the screen's centre. Confirm with the
   construction queue's OCR.
-- **Focus:** `act focus --name "Remilitarize the Rhineland"`. Open with `alt+q`, use the tree's search (`ctrl+f`
+- **Focus:** done 2026-11-07 (`act focus`, `read focus`). Notes kept for reference: Open with `alt+q`, use the tree's search (`ctrl+f`
   inside the focus view; PLAYBOOK, National Focus) and `shift+RETURN` to start. Confirm through `hoi4.py state` or
   SR1's snapshot.
   - What worked live: click the search box at (1630,135), type the name, then Enter. That opens the detail window

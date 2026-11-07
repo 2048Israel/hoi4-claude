@@ -12,6 +12,9 @@ saying what changed and how it was checked.
 - **Production by name:** `act production --name "Bf 109" --add 10` finds any line by its header, scrolling the list.
 - **Recruiting:** `act recruit --count N [--template NAME]` and `act fix-queue` replace `tools/queue_divisions.py`.
   Checked live: 15 infantry and 4 Panzer divisions queued at 1/1 with locations.
+- **Focus:** `act focus --name NAME` and `read focus`. Checked live: refused starts reported their reasons
+  (Zentrale Planung needs a war with a major power; Molotov-Ribbentrop needs Reorganize the Wehrmacht; Danzig or
+  War needs Reassert Eastern Claims), and Reassert Eastern Claims started.
 - **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
   says so, closes the windows, and stops.
 - **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.

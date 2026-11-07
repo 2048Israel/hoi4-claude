@@ -41,6 +41,15 @@
     "factories_box": [0, 330, 700, 360],
     "scroll_point": [330, 800]
   },
+  "focus": {
+    "key": "alt+q",
+    "search_box": [1630, 135],
+    "detail_box": [300, 60, 1340, 260],
+    "tree_box": [0, 60, 1919, 1180],
+    "requirements_box": [870, 240, 1270, 380],
+    "requirements_scroll": [1070, 320],
+    "politics_focus_box": [220, 120, 700, 230]
+  },
   "recruit": {
     "templates_box": [700, 280, 1400, 1100],
     "queue_box": [0, 480, 700, 1200],
