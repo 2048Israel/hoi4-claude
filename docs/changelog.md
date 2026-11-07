@@ -24,8 +24,13 @@ with Windows' built-in OCR (`hoi4_ocr.py`, about 0.1-0.3 s a read) instead of re
   - Scrolling sideways drags the bottom bar's knob, measured in (knob, offset) steps from labels that move with the
     tree. Trees open wherever they were left, so every action starts from the top-left.
 
-**Checked live:** research dry runs for a top-row tech and a scrolled one; the busy-slot refusal; line 2 at 3 → 2 → 3
-factories; loading `claude_ger_1936` from the main menu with no screenshot.
+**Checked live:**
+- The tech map covers all 9 tabs: 499 techs, 1936 to the 1950s, with your mods' trees.
+- Research dry runs pass on the furthest-right and the furthest-down tech of every tab (18 of 18): armor scrolls
+  2,465 px down, and support and air about 2,600 px sideways.
+- The busy-slot refusal; production line 2 at 3 → 2 → 3 factories; loading `claude_ger_1936` from the main menu
+  with no screenshot.
+- A research start that is not a dry run waits for the first free slot.
 
 Windows OCR misses lone digits now and then, so a factory count may read `None`. The save reader (SR1) will give
 exact numbers. EX2 has the rest of the actions.

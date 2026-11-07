@@ -193,7 +193,7 @@ def set_knob(hwnd, x):
 
 
 def scroll_home(hwnd):
-    hoi4.scroll(hwnd, *R["scroll_point"], 40)
+    hoi4.scroll(hwnd, *R["scroll_point"], 100)  # 5000 px: past the top of the tallest tree
     time.sleep(0.2)
     set_knob(hwnd, KNOB_BOX[0])
 
@@ -205,7 +205,7 @@ def to_view(hwnd, knob, v_off, v_max=None):
     if knob is not None and knob > KNOB_BOX[0] + 15:
         set_knob(hwnd, knob)
     if v_off:
-        notches = 40 if v_max is not None and v_off >= v_max else v_off // NOTCH
+        notches = v_max // NOTCH + 10 if v_max is not None and v_off >= v_max else v_off // NOTCH
         hoi4.scroll(hwnd, *R["scroll_point"], -notches)
     time.sleep(0.35)
 
@@ -222,15 +222,41 @@ def measure_h_views(hwnd, steps=12, span=1600):
         return [[None, 0]]
     right_end = KNOB_BOX[2] - 8
     views, total, prev = [[left, 0]], 0, label_xs(hwnd)
-    for i in range(1, steps + 1):
-        actual = set_knob(hwnd, round(left + (right_end - left) * i / steps))
+    pos, step = left, (right_end - left) / steps
+
+    def median_shift(a, b):
+        shifts = sorted(a[t] - b[t] for t in a if t in b)
+        return shifts[len(shifts) // 2] if shifts else None
+
+    def bright_shift(a, b):
+        """Sideways shift between two views from the tree's bright lines and icons only: the dim background
+        picture is what stays still. For tabs with no text labels."""
+        import numpy as np
+        ma, mb = (a > 95).astype(np.int16), (b > 95).astype(np.int16)
+        coarse = best_shift(ma[::4, ::4], mb[::4, ::4], 1, range(0, 400))
+        return best_shift(ma[::2], mb[::2], 1, range(max(0, coarse * 4 - 6), coarse * 4 + 7))
+
+    prev_px = tree_pixels(hwnd)
+    while pos < right_end - 2:
+        actual = set_knob(hwnd, round(min(right_end, pos + step)))
         cur = label_xs(hwnd)
-        shifts = sorted(prev[t] - cur[t] for t in prev if t in cur)
-        if not shifts:
-            raise ActionError("a sideways step left no label in common; use more steps")
-        total += shifts[len(shifts) // 2]
+        moved = median_shift(prev, cur)
+        cur_px = tree_pixels(hwnd)
+        if moved is None and step <= 160:  # no label in both views: match the bright tree instead
+            moved = bright_shift(prev_px, cur_px) or None
+        if moved is None:  # too far for any label to stay on screen: go back and take a smaller step
+            if step < 15:
+                raise ActionError("a sideways step left no label in common even at 15 px")
+            set_knob(hwnd, round(pos))
+            back = label_xs(hwnd)
+            total += median_shift(prev, back) or 0
+            prev, prev_px, step = back, tree_pixels(hwnd), step / 2
+            continue
+        if actual is None or actual <= pos:
+            break
+        total += moved
         views.append([actual, total])
-        prev = cur
+        prev, prev_px, pos = cur, cur_px, actual
     # keep only the views needed: each kept view at most `span` px right of the one before, plus the last
     kept, candidate = [views[0]], None
     for v in views[1:]:
