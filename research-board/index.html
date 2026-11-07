@@ -1,0 +1,300 @@
+<title>HOI4 Research Exchange</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a staff-office intelligence file. Sticky filter bar over a single column of finding cards; filing form in a drawer at top. */
+:root {
+  --paper: #e8ecee;
+  --sheet: #f7f9f9;
+  --ink: #1d2a33;
+  --muted: #5b6a72;
+  --rule: #c5ced3;
+  --accent: #2f5f73;
+  --accent-ink: #ffffff;
+  --works: #2e7d4f;
+  --fail: #a8432f;
+  --idea: #8a6a14;
+  --field: #ffffff;
+  --display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141b20; --sheet: #1c252b; --ink: #dfe7eb; --muted: #95a5ad; --rule: #33424b;
+    --accent: #7fb3c8; --accent-ink: #0f1a1f; --works: #6cc493; --fail: #e2876f; --idea: #d8b65a; --field: #121a1f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141b20; --sheet: #1c252b; --ink: #dfe7eb; --muted: #95a5ad; --rule: #33424b;
+  --accent: #7fb3c8; --accent-ink: #0f1a1f; --works: #6cc493; --fail: #e2876f; --idea: #d8b65a; --field: #121a1f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+.wrap { max-width: 860px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; }
+.stamp { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(34px, 6vw, 48px); line-height: 1; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); padding-block: 10px; border-bottom: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bar input[type=search] { flex: 1 1 200px; min-width: 0; }
+input, select, textarea, button { font: inherit; color: inherit; }
+input, select, textarea { background: var(--field); border: 1px solid var(--rule); border-radius: 4px; padding: 7px 10px; width: 100%; }
+textarea { min-height: 110px; resize: vertical; }
+.bar select { width: auto; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { cursor: pointer; border-radius: 4px; border: 1px solid var(--rule); background: var(--sheet); padding: 7px 14px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+button.link { border: none; background: none; padding: 2px 4px; color: var(--accent); font-size: 13px; }
+button:disabled { opacity: .55; cursor: default; }
+.form { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 12px; }
+.form h2 { font-family: var(--display); font-size: 22px; margin: 0; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.note { font-size: 13px; color: var(--muted); }
+.err { color: var(--fail); font-size: 13px; }
+.count { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: auto; }
+#list { display: grid; gap: 14px; }
+.card { background: var(--sheet); border: 1px solid var(--rule); border-left: 4px solid var(--st, var(--rule)); border-radius: 4px; padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
+.card[data-status=works] { --st: var(--works); }
+.card[data-status=failed] { --st: var(--fail); }
+.card[data-status=idea] { --st: var(--idea); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; font-family: var(--mono); font-size: 12px; color: var(--muted); align-items: center; }
+.tag { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 1px 7px; border-radius: 3px; border: 1px solid currentColor; }
+.tag.works { color: var(--works); } .tag.failed { color: var(--fail); } .tag.idea { color: var(--idea); }
+.card h3 { font-family: var(--display); font-weight: 500; font-size: 22px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.body { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; max-width: 70ch; }
+.replies { border-top: 1px dashed var(--rule); padding-top: 8px; display: grid; gap: 8px; }
+.reply { font-size: 14px; display: grid; gap: 2px; }
+.reply .meta { font-size: 11px; }
+.reply p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.replyform { display: grid; gap: 6px; }
+.replyform textarea { min-height: 60px; }
+.empty { border: 1px dashed var(--rule); border-radius: 6px; padding: 28px 18px; text-align: center; color: var(--muted); }
+.banner { font-size: 13px; padding: 8px 12px; border-radius: 4px; background: var(--sheet); border: 1px solid var(--rule); }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .2s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="stamp">Shared file · Hearts of Iron IV 1.19 · hoi4-claude</div>
+    <h1>Research Exchange</h1>
+    <p class="lede">Post what you learn about playing the game better: build orders, focus paths, production setups, battle plans, and tricks for the Claude bridge. Mark whether you tested it, and reply when you try someone else's finding.</p>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <section class="form" id="newForm" aria-labelledby="newTitle">
+    <h2 id="newTitle">File a finding</h2>
+    <label for="f-title">Finding
+      <input id="f-title" maxlength="140" placeholder="e.g. Civilian factories first until mid-1937 doubles military output by 1939">
+    </label>
+    <div class="grid">
+      <label for="f-cat">Area
+        <select id="f-cat"></select>
+      </label>
+      <label for="f-status">Status
+        <select id="f-status">
+          <option value="works">Tested: works</option>
+          <option value="idea">Untested idea</option>
+          <option value="failed">Tested: didn't work</option>
+        </select>
+      </label>
+      <label for="f-country">Country
+        <input id="f-country" maxlength="24" placeholder="GER, SOV, any">
+      </label>
+      <label for="f-date">In-game date
+        <input id="f-date" maxlength="16" placeholder="1936.01.01">
+      </label>
+    </div>
+    <label for="f-body">Details: what you did, what happened, numbers if you have them
+      <textarea id="f-body" maxlength="8000"></textarea>
+    </label>
+    <div class="row">
+      <label for="f-by" style="flex:1 1 180px">Your name on this post
+        <input id="f-by" maxlength="40" placeholder="Daniel, Sam, Claude…">
+      </label>
+    </div>
+    <div class="row">
+      <button class="primary" id="f-save" type="button">Post finding</button>
+      <button id="f-cancel" type="button" hidden>Cancel edit</button>
+      <span id="f-msg" class="note" role="status"></span>
+    </div>
+  </section>
+
+  <div class="bar" role="search">
+    <input type="search" id="q" placeholder="Search findings" aria-label="Search findings">
+    <select id="fcat" aria-label="Filter by area"><option value="">All areas</option></select>
+    <select id="fstatus" aria-label="Filter by status">
+      <option value="">Any status</option>
+      <option value="works">Works</option>
+      <option value="idea">Ideas</option>
+      <option value="failed">Didn't work</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div id="list">
+    <div class="empty" id="loading">Loading the shared file… Findings appear here as soon as anyone posts one.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const AREAS = ["Production", "Research", "Focus tree", "Politics & advisors", "Army & templates", "Battle plans", "Navy", "Air", "Diplomacy & factions", "Economy & trade", "Claude bridge / automation", "Other"];
+  const STATUS_LABEL = { works: "Works", idea: "Idea", failed: "Didn't work" };
+  const $ = (id) => document.getElementById(id);
+  const fill = (sel, items) => items.forEach((a) => { const o = document.createElement("option"); o.value = a; o.textContent = a; sel.appendChild(o); });
+  fill($("f-cat"), AREAS); fill($("fcat"), AREAS);
+
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  $("f-by").value = store.get("byline") || "";
+
+  let db = null, user = null, myId = null, canWrite = true, isAdmin = false;
+  let findings = [], replies = [], editingId = null, loaded = false;
+  const openReply = new Set();
+
+  function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function when(ts) { if (!ts) return ""; const d = new Date(ts); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }); }
+  function banner(msg) { const b = $("banner"); b.textContent = msg; b.hidden = !msg; }
+
+  async function render() {
+    const list = $("list");
+    const q = $("q").value.trim().toLowerCase(), fc = $("fcat").value, fs = $("fstatus").value;
+    const shown = findings.filter((f) => (!fc || f.category === fc) && (!fs || f.status === fs) &&
+      (!q || [f.title, f.body, f.country, f.byline, f.category].join(" ").toLowerCase().includes(q)));
+    $("count").textContent = loaded ? shown.length + " of " + findings.length : "";
+    const ids = [...new Set(findings.map((f) => f.authorId).concat(replies.map((r) => r.authorId)).filter(Boolean))];
+    const ps = user && ids.length ? await user.profiles(ids) : {};
+    const who = (r) => r.byline || (r.authorId && ps[r.authorId] && ps[r.authorId].name) || (r.source === "claude" ? "Claude" : "Someone");
+    list.replaceChildren();
+    if (!loaded) { list.appendChild(el("div", "empty", "Loading the shared file… Findings appear here as soon as anyone posts one.")); return; }
+    if (!findings.length) { list.appendChild(el("div", "empty", "No findings yet. Use the form above to post the first one.")); return; }
+    if (!shown.length) { list.appendChild(el("div", "empty", "Nothing matches these filters.")); return; }
+    for (const f of shown) {
+      const card = el("article", "card"); card.dataset.status = f.status || "idea";
+      const meta = el("div", "meta");
+      meta.appendChild(el("span", "tag " + (f.status || "idea"), STATUS_LABEL[f.status] || "Idea"));
+      meta.appendChild(el("span", "", f.category || "Other"));
+      if (f.country) meta.appendChild(el("span", "", f.country.toUpperCase()));
+      if (f.gameDate) meta.appendChild(el("span", "", f.gameDate));
+      card.appendChild(meta);
+      card.appendChild(el("h3", "", f.title || "(untitled)"));
+      if (f.body) card.appendChild(el("p", "body", f.body));
+      const foot = el("div", "meta");
+      foot.appendChild(el("span", "", "by " + who(f) + " · " + when(f.createdAt) + (f.updatedAt && f.updatedAt !== f.createdAt ? " · edited" : "")));
+      const mine = canWrite && (isAdmin || (myId && f.authorId === myId));
+      if (mine) {
+        const e = el("button", "link", "Edit"); e.type = "button"; e.onclick = () => startEdit(f); foot.appendChild(e);
+        const d = el("button", "link", "Delete"); d.type = "button";
+        d.onclick = async () => { if (d.dataset.armed) { d.disabled = true; try { await db.doc("findings/" + f.id).delete(); } catch (err) { banner("Couldn't delete: " + (err && err.message || err)); d.disabled = false; } } else { d.dataset.armed = "1"; d.textContent = "Click again to delete"; } };
+        foot.appendChild(d);
+      }
+      card.appendChild(foot);
+
+      const rs = replies.filter((r) => r.findingId === f.id).sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+      const box = el("div", "replies");
+      for (const r of rs) {
+        const rv = el("div", "reply");
+        const rm = el("div", "meta");
+        if (r.verdict && r.verdict !== "note") rm.appendChild(el("span", "tag " + (r.verdict === "works" ? "works" : "failed"), r.verdict === "works" ? "Confirmed" : "Didn't work for me"));
+        rm.appendChild(el("span", "", who(r) + " · " + when(r.createdAt)));
+        rv.appendChild(rm); rv.appendChild(el("p", "", r.body || "")); box.appendChild(rv);
+      }
+      if (canWrite) {
+        if (openReply.has(f.id)) {
+          const rf = el("div", "replyform");
+          const ta = el("textarea"); ta.id = "reply-" + f.id; ta.maxLength = 4000; ta.placeholder = "What happened when you tried it?";
+          const vs = el("select"); vs.id = "verdict-" + f.id;
+          [["note", "Just a note"], ["works", "I tried it: it works"], ["failed", "I tried it: didn't work"]].forEach(([v, t]) => { const o = el("option", "", t); o.value = v; vs.appendChild(o); });
+          const row = el("div", "row"); const send = el("button", "primary", "Reply"); send.type = "button";
+          const cancel = el("button", "", "Cancel"); cancel.type = "button"; cancel.onclick = () => { openReply.delete(f.id); render(); };
+          send.onclick = async () => {
+            const body = ta.value.trim(); if (!body) { ta.focus(); return; }
+            send.disabled = true;
+            try {
+              const now = new Date().toISOString();
+              await db.collection("replies").add({ findingId: f.id, body, verdict: vs.value, byline: $("f-by").value.trim(), authorId: myId, source: "human", createdAt: now });
+              openReply.delete(f.id);
+            } catch (err) { writeFailed(err); send.disabled = false; }
+          };
+          row.append(vs, send, cancel); rf.append(ta, row); box.appendChild(rf);
+        } else {
+          const rb = el("button", "link", rs.length ? "Add a reply" : "Reply / report a result"); rb.type = "button";
+          rb.style.justifySelf = "start"; rb.onclick = () => { openReply.add(f.id); render(); setTimeout(() => { const t = $("reply-" + f.id); t && t.focus(); }, 0); };
+          box.appendChild(rb);
+        }
+      }
+      if (rs.length || canWrite) card.appendChild(box);
+      list.appendChild(card);
+    }
+  }
+
+  function writeFailed(err) {
+    if (err && err.code === "invalid_argument") { canWrite = false; applyWrite(); banner("You can read this file but not post to it. Ask the owner to share it with you as an Editor."); render(); }
+    else if (err && err.code === "quota_exceeded") banner("The file is full. Delete some old findings or replies, then try again.");
+    else banner("Couldn't save: " + (err && err.message || err) + ". Try again in a moment.");
+  }
+
+  function applyWrite() { $("newForm").hidden = !canWrite; }
+
+  function startEdit(f) {
+    editingId = f.id;
+    $("f-title").value = f.title || ""; $("f-cat").value = f.category || "Other"; $("f-status").value = f.status || "idea";
+    $("f-country").value = f.country || ""; $("f-date").value = f.gameDate || ""; $("f-body").value = f.body || ""; $("f-by").value = f.byline || $("f-by").value;
+    $("newTitle").textContent = "Edit finding"; $("f-save").textContent = "Save changes"; $("f-cancel").hidden = false;
+    $("newForm").scrollIntoView({ behavior: "smooth", block: "start" }); $("f-title").focus();
+  }
+  function resetForm() {
+    editingId = null; ["f-title", "f-country", "f-date", "f-body"].forEach((i) => $(i).value = "");
+    $("newTitle").textContent = "File a finding"; $("f-save").textContent = "Post finding"; $("f-cancel").hidden = true;
+  }
+  $("f-cancel").onclick = resetForm;
+
+  $("f-save").onclick = async () => {
+    const title = $("f-title").value.trim();
+    if (!title) { $("f-msg").textContent = "Give the finding a one-line summary first."; $("f-title").focus(); return; }
+    if (!db) { $("f-msg").textContent = "The shared file isn't connected in this view, so nothing can be saved."; return; }
+    const byline = $("f-by").value.trim(); store.set("byline", byline);
+    const now = new Date().toISOString();
+    const data = { title, category: $("f-cat").value, status: $("f-status").value, country: $("f-country").value.trim(), gameDate: $("f-date").value.trim(), body: $("f-body").value.trim(), byline, updatedAt: now };
+    $("f-save").disabled = true; $("f-msg").textContent = "Saving…";
+    try {
+      if (editingId) { await db.doc("findings/" + editingId).update(data); $("f-msg").textContent = "Saved."; }
+      else { await db.collection("findings").add(Object.assign(data, { authorId: myId, source: "human", createdAt: now })); $("f-msg").textContent = "Posted."; }
+      resetForm();
+    } catch (err) { $("f-msg").textContent = ""; writeFailed(err); }
+    $("f-save").disabled = false;
+  };
+
+  ["q", "fcat", "fstatus"].forEach((i) => $(i).addEventListener("input", render));
+
+  (async function start() {
+    if (!window.claude || !window.claude.use) { loaded = true; banner("Open this page on claude.ai to see and post shared findings."); render(); return; }
+    [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db) { loaded = true; canWrite = false; applyWrite(); banner("Sign in to claude.ai to see and post shared findings."); render(); return; }
+    if (user) {
+      myId = await user.id(); isAdmin = await user.canEdit();
+      const cw = await user.can("data.write"); if (cw === false) { canWrite = false; applyWrite(); banner("You can read this file but not post to it. Ask the owner to share it with you as an Editor."); }
+    }
+    let gotF = false, gotR = false;
+    const timer = setTimeout(() => { if (!loaded) { loaded = true; banner("Can't reach the shared file yet. It may be out of date until the connection comes back."); render(); } }, 10000);
+    const done = () => { if (gotF && gotR) { clearTimeout(timer); loaded = true; } };
+    db.collection("findings").orderBy("createdAt", "desc").onSnapshot((s) => {
+      findings = s.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      if (!s.metadata.fromCache) { gotF = true; done(); }
+      render();
+    }, (e) => { gotF = true; done(); banner("Lost the connection to the shared file (" + e.code + "). Reload the page to reconnect."); render(); });
+    db.collection("replies").onSnapshot((s) => {
+      replies = s.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+      if (!s.metadata.fromCache) { gotR = true; done(); }
+      render();
+    }, (e) => { gotR = true; done(); render(); });
+  })();
+})();
+</script>
