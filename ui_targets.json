@@ -1,0 +1,45 @@
+{
+  "_about": "Fixed screen positions in game-window pixels, measured at 1920x1200 with UI scale 1.0 (HOI4 1.19.4 with Jerus's mods). Boxes are [x0, y0, x1, y1].",
+  "screens": {
+    "research":     {"key": "w", "title": "RESEARCH"},
+    "production":   {"key": "y", "title": "PRODUCTION"},
+    "construction": {"key": "t", "title": "CONSTRUCTION"},
+    "recruit":      {"key": "u", "title": "RECRUIT & DEPLOY"},
+    "politics":     {"key": "q", "title": "POLITICAL"},
+    "_title_box": [0, 100, 900, 165]
+  },
+  "research": {
+    "slot_click_x": 325,
+    "slot_click_y": [430, 555, 680, 805, 930],
+    "slots_box": [0, 380, 700, 990],
+    "tabs": {
+      "infantry": 80, "support": 194, "armor": 304, "artillery": 414, "naval": 526,
+      "naval_support": 636, "air": 744, "engineering": 856, "industry": 966
+    },
+    "tab_y": 137,
+    "tree_box": [0, 175, 1920, 1180],
+    "tree_close": [1876, 130],
+    "year_label_box": [40, 180, 250, 1180],
+    "scroll_point": [1650, 1000],
+    "scroll_px_per_notch": 50,
+    "hbar_y": 1186,
+    "detail_title_box": [630, 140, 1310, 180],
+    "detail_days_box": [820, 195, 1100, 235],
+    "detail_research": [1190, 216],
+    "detail_close": [1276, 156],
+    "mio_box": [860, 130, 1560, 700]
+  },
+  "production": {
+    "list_box": [0, 480, 700, 1200],
+    "row_y": [520, 657, 795, 932, 1069],
+    "plus_x": 587,
+    "minus_x": 500,
+    "count_box_x": [530, 575],
+    "factories_box": [0, 330, 700, 360],
+    "scroll_point": [330, 800]
+  },
+  "top_bar": {
+    "clock_box": [1450, 0, 1850, 45]
+  },
+  "safe_mouse": [1910, 1190]
+}

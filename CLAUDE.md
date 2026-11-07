@@ -6,7 +6,11 @@ introduction and the command list; read it too. `PLAYBOOK.md` is the game's hotk
 | path | what it is |
 |---|---|
 | `hoi4.py` | the controller CLI: screenshots with a grid, mouse/keyboard input, pause/advance, console, reports, news |
+| `hoi4_actions.py` | checked actions and text readers (`hoi4.py act ...`, `hoi4.py read ...`): no screenshots |
+| `hoi4_ocr.py` | Windows' built-in OCR, used to read the screen as text |
+| `ui_targets.json` | fixed screen positions, measured at 1920x1200, UI scale 1.0 |
 | `bridge_mod/claude_bridge/` | HOI4 mod that logs the player's state and world news into `game.log` (it only logs) |
+| `tools/` | one-off tools, e.g. `cut_save_fixture.py` |
 | `tests/` | offline checks: no game needed. `test_offline.py`; each batch adds `test_<id>.py` |
 | `QUEUE.md` | the batches waiting, in order, one line each, by lane |
 | `docs/queue/<id>.md` | one batch's brief |
@@ -98,5 +102,8 @@ lane's next row can start.
 
 - `game.log` grows all game long: never read it whole. Use `hoi4.py tail 30 --grep '<pattern>'`, `hoi4.py state`,
   `hoi4.py news`.
-- Screenshots cost the most. Use `look` at scale 0.5-0.6, and `zoom x0 y0 x1 y1` or `look --region` for detail.
+- Screenshots cost the most. Prefer `read ...` (text through OCR) and `act ...` (checked actions) where one exists.
+  When a picture is needed, use `look` at scale 0.5-0.6, and `zoom x0 y0 x1 y1` or `look --region` for detail.
+- Never press a bare Esc to close something. With nothing open it brings up the game menu. Close a screen with
+  `act close <screen>` or its own hotkey.
 - A report from one session to the other (PR comment, Pending row) is at most 15 lines.

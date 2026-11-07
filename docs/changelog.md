@@ -3,6 +3,26 @@
 What shipped to `main`, newest first. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
 
+## 2026-11-07: EX1, actions and readers without screenshots
+
+`hoi4.py act ...` and `hoi4.py read ...` (`hoi4_actions.py`, positions in `ui_targets.json`) read the screen as text
+with Windows' built-in OCR (`hoi4_ocr.py`, about 0.1-0.3 s a read) instead of returning a picture.
+
+- **Readers:** research slots (tech and days), production lines (name, output, factories), the date, and the tech
+  map.
+- **Screens:** open and close by hotkey, confirmed by the screen's title.
+- **Research:** found from the tech map and confirmed by the detail window's title. It handles the industrial
+  organization picker, refuses a busy slot without `--replace`, and has a `--dry-run`.
+- **Production:** factories +/- on lines 1-5, confirmed by the "Military Factories x/28" counter.
+- **Tech map:** `act calibrate-research` clicks every icon once and reads its name. Positions are kept in tree space
+  and anchored on the year labels, so they hold at any scroll.
+
+**Checked live:** research dry runs for a top-row tech and a scrolled one; the busy-slot refusal; line 2 at 3 → 2 → 3
+factories. A real `act research` waits for the first free slot.
+
+Windows OCR misses lone digits now and then, so a factory count may read `None`. The save reader (SR1) will give
+exact numbers. EX2 has the rest of the actions.
+
 ## 2026-11-07: SR0, a real text-save fixture
 
 Jerus allowed text saves, so `save_as_binary=no` is set. Only that line changed; the old file is backed up in
