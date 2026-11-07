@@ -10,6 +10,12 @@ needs it:
 - **Recruit:** `act recruit --template "Infantrie-Division" --count N`. The training line defaults to infinity
   ("train forever"): set it to N with "+" and check it. Find the new line by OCR, not by position, because lines
   stack up.
+- **Deploy:** finished divisions wait forever on "No location set" and do not count as divisions. Seen live on
+  1936-07-06: 7 trained divisions were waiting.
+  - `act deploy` should do what was done by hand then: click the line's location field; click a green-striped
+    province (one near Poznań gave Hinterpommern); press the line's deploy arrow at x 572; repeat while a line
+    shows a location. `hoi4.py state`'s division count confirms it.
+  - Also check after each `advance`: a hint in `look` when trained lines are waiting.
 - **Construction:** `act build --building civilian_factory --state Sachsen [--count N]`. Try the map's find window
   (`ctrl+f`, type the state, jump the camera) and click the state at the screen's centre. Confirm with the
   construction queue's OCR.
