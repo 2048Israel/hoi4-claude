@@ -14,7 +14,7 @@ A bridge that lets Claude play Hearts of Iron IV on this PC.
 
 ```
 python -m venv .venv
-.venv\Scripts\python.exe -m pip install pillow
+.venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe hoi4.py launch
 ```
 
@@ -52,6 +52,13 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `pause` / `resume` / `speed n` | Time control |
 | `advance n [--speed 4]` | Let n days pass, then pause and summarize what changed |
 | `do "key y ; wait 0.5 ; look"` | Several commands in one call |
+| `read research` / `read production` / `read date` | The screen read back as **text** (Windows OCR), no screenshot |
+| `read techs [--tab industry] [--grep PaK]` | Techs from the tech map: name, tab, research days |
+| `act research --slot 5 --tech "Inter-War Artillery" [--mio first\|none\|NAME] [--dry-run]` | Start research with no screenshot: finds the icon from the tech map, checks the window's title, presses Research, picks the industrial organization, confirms the slot. Refuses a busy slot without `--replace` |
+| `act production --line 2 --add 1` / `--remove 1` | Factories on production lines 1-5, confirmed by the factory counter |
+| `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
+| `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
+| `act calibrate-research [--tabs artillery]` | Build the tech map (`state/tech_map.json`): clicks each icon once and reads its name. About a minute per tab |
 | `status`, `tail`, `install-mod`, `restore-mods` | Housekeeping |
 
 Coordinates are always full-resolution game-window pixels. The grid labels show those numbers even on scaled-down screenshots.

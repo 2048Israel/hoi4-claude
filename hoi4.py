@@ -15,7 +15,7 @@ Run with the project venv:
 Chain several commands in one call:
   hoi4.py do "key y ; wait 0.5 ; look"
 """
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import argparse
 import ctypes
@@ -46,6 +46,9 @@ MAX_SHOTS = 200
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if __name__ == "__main__":
+    # Helper modules (hoi4_actions) do `import hoi4`: give them this same module, not a second copy.
+    sys.modules.setdefault("hoi4", sys.modules["__main__"])
 
 
 class BridgeError(Exception):
@@ -211,8 +214,19 @@ def client_rect(hwnd):
     return origin.x, origin.y, rect.right, rect.bottom
 
 
-def focus(hwnd):
-    """Bring the game to the front so it receives input."""
+def focus(hwnd, tries=8):
+    """Bring the game to the front so it receives input. Windows refuses now and then (for example while the
+    user is typing in another window), so try a few times over about 5 seconds before giving up."""
+    for attempt in range(tries):
+        try:
+            return _focus_once(hwnd)
+        except BridgeError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(0.6)
+
+
+def _focus_once(hwnd):
     if user32.GetForegroundWindow() == hwnd:
         return
     if user32.IsIconic(hwnd):
@@ -1355,7 +1369,33 @@ def build_parser():
     s = sub.add_parser("do", help='run several commands: do "key y ; wait 0.5 ; look"')
     s.add_argument("script")
     s.set_defaults(fn=cmd_do)
+
+    # EX1: checked actions and text readers live in hoi4_actions.py.
+    s = sub.add_parser("act", help="checked actions, no screenshots: research, production, open, close, "
+                                   "calibrate-research (see hoi4_actions.py)")
+    s.add_argument("rest", nargs=argparse.REMAINDER)
+    s.set_defaults(fn=cmd_act)
+    s = sub.add_parser("read", help="read the screen as text: research, production, date, techs")
+    s.add_argument("rest", nargs=argparse.REMAINDER)
+    s.set_defaults(fn=cmd_read)
     return p
+
+
+def _actions(argv):
+    import hoi4_actions
+    try:
+        hoi4_actions.main(argv)
+    except SystemExit as exc:
+        if exc.code not in (0, None):
+            raise BridgeError(f"bad action: {' '.join(argv)}")
+
+
+def cmd_act(args):
+    _actions(args.rest)
+
+
+def cmd_read(args):
+    _actions(["read"] + args.rest)
 
 
 def run(argv):
