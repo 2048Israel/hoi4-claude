@@ -77,6 +77,13 @@ be up to date"):
 A batch that cannot be finished, or waits on Jerus, moves to **Pending** in `QUEUE.md` with why, the same turn, so the
 lane's next row can start.
 
+## Versions
+
+`__version__` in `hoi4.py` is the version; `hoi4.py --version` prints it. **Each batch merged into `main` adds
+0.0.1** (Jerus, 2026-11-07: "basically each batch is 0.1.1 aka 0.0.1 more"). 0.1.0 was the first release, and the
+next batch makes it 0.1.1. The PC session sets the number in the merge, puts the batch's changelog block under it,
+tags `vX.Y.Z`, and publishes a GitHub release.
+
 ## Standing rules
 
 - **Never commit** screenshots (`shots/`), runtime state (`state/`), the venv, game saves, or game files. Saves are
