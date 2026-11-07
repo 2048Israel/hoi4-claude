@@ -107,11 +107,23 @@ def event_options(lines, box):
     return rows
 
 
+def event_parchment(hwnd):
+    """Country events are drawn on light parchment: the band under the title is bright and warm-toned."""
+    import numpy as np
+    park_mouse(hwnd)
+    x0, y0, x1, y1 = T["event_parchment_box"]
+    a = np.asarray(hoi4.grab(hwnd).convert("RGB").crop((x0, y0, x1, y1))).astype(int)
+    r, g, b = a[..., 0].mean(), a[..., 1].mean(), a[..., 2].mean()
+    return r > 165 and g > 145 and r - b > 25
+
+
 def dismiss_single_events(hwnd, log=print, tries=4):
     """Country events with exactly one answer ("Excellent.") need no decision: take that answer. Events with
     two or more answers are left for a decision (see `read event` / `act event --option N`)."""
     closed = 0
     for _ in range(tries):
+        if not event_parchment(hwnd):  # the map or a screen, not an event window
+            break
         lines = read_box(hwnd, T["event_box"])
         title = next((l for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), None)
         options = event_options(lines, T["event_options_box"])
@@ -876,14 +888,24 @@ def new_army_button(hwnd):
             groups[-1].append(x)
         else:
             groups.append([x])
+    def is_new_army(pt):
+        hoi4.move_mouse(*hoi4.to_screen(hwnd, *pt))
+        time.sleep(1.0)
+        tip = " ".join(l.text for l in ocr_image(hoi4.grab(hwnd).crop((400, 600, 1600, 1060)), origin=(400, 600)))
+        return "create a new army and" in tip.lower()
+
     for grp in (g_ for g_ in groups if len(g_) >= 8):
         ys = np.nonzero(g[:, grp].any(axis=1))[0]
         pt = (int(np.mean(grp)) + x0, int(np.median(ys)) + y0)
-        hoi4.move_mouse(*hoi4.to_screen(hwnd, *pt))
-        time.sleep(1.0)
-        tip = " ".join(l.text for l in ocr_image(hoi4.grab(hwnd).crop((500, 600, 1500, 1060)), origin=(500, 600))).lower()
-        if "army" in tip and "army group" not in tip:
+        if is_new_army(pt):
             return pt
+    # the New Army '+' sits right of the last card and can be too dull for the colour test: walk right of it
+    cards = army_cards(hwnd)
+    if cards:
+        for dx in range(60, 200, 25):
+            pt = (cards[-1][1] + dx, AR["card_click_y"])
+            if is_new_army(pt):
+                return pt
     return None
 
 
