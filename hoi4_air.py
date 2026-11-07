@@ -96,8 +96,11 @@ def open_target(hwnd, base_pt=None, base=None):
 def base_header(hwnd):
     """(name, 'used/capacity') of the open base panel, or None."""
     lines = A.read_box(hwnd, AIR["header_box"])
-    cap = next((l.text for l in lines if re.fullmatch(r"\d+/\d+", l.text.replace(" ", ""))), None)
-    name = next((l.text for l in lines if A.HAS_WORD.search(l.text)), None)
+    # OCR reads "340/1000" as "340/1 ooo": drop spaces and fix letters read for digits
+    caps = [l.text.replace(" ", "").translate(A.DIGIT_FIX) for l in lines]
+    cap = next((c for c in caps if re.fullmatch(r"\d+/\d+", c)), None)
+    name = next((l.text for l, c in zip(lines, caps) if A.HAS_WORD.search(l.text) and "selected" not in l.text.lower()
+                 and not re.fullmatch(r"[\d/]+", c)), None)
     return (name, cap) if name and cap else None
 
 
