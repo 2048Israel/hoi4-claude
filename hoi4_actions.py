@@ -1009,6 +1009,25 @@ def execute_all(hwnd, indexes=None, log=print):
     return indexes
 
 
+def camera_home(hwnd, zoom_out=None, log=print):
+    """Put the camera in the standard view: the Find window's Go Home (capital, fully zoomed in), then zoom out a
+    fixed number of notches. Map coordinates used by plans are measured in this view."""
+    zoom_out = AR["home_zoom_out"] if zoom_out is None else zoom_out
+    deselect(hwnd)
+    hoi4.press_combo("ctrl+f")
+    time.sleep(0.8)
+    home = [l for l in read_box(hwnd, AR["find_box"]) if "home" in l.text.lower()]
+    if not home:
+        raise ActionError("the Find window did not open (no Go Home button read)")
+    hoi4.click(hwnd, *home[0].center)
+    time.sleep(1.0)
+    hoi4.click(hwnd, *AR["find_close"])
+    time.sleep(0.3)
+    hoi4.scroll(hwnd, *AR["home_zoom_point"], -zoom_out)
+    time.sleep(1.0)
+    log(f"camera home: capital, zoomed out {zoom_out} notches")
+
+
 def select_box(hwnd, box):
     deselect(hwnd)
     hoi4.drag(hwnd, box[0], box[1], box[2], box[3])
@@ -1296,6 +1315,8 @@ def main(argv):
     s.add_argument("--army", type=int)
     s.add_argument("--name")
     s.add_argument("--halves", type=int, default=0)
+    s = sub.add_parser("camera", help="camera home: capital, then the standard zoom")
+    s.add_argument("op", choices=["home"])
     s = sub.add_parser("select-box", help="drag-select divisions in a screen box: x0 y0 x1 y1")
     s.add_argument("box", type=int, nargs=4)
     s = sub.add_parser("focus", help="start a national focus by name (via the tree's search)")
@@ -1363,6 +1384,8 @@ def main(argv):
                 if not p["general"]:
                     assign_general(hwnd, i)
             deselect(hwnd)
+    elif args.cmd == "camera":
+        camera_home(hwnd)
     elif args.cmd == "select-box":
         print(select_box(hwnd, args.box))
     elif args.cmd == "focus":
