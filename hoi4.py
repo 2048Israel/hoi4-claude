@@ -1214,6 +1214,8 @@ def cmd_advance(args):
     recs, _ = records(0)
     after = last_kind(recs, "day")
     passed = days_between(before, after) if before and after else seen
+    if not isinstance(passed, int) or passed < 0:  # e.g. an earlier save was loaded: the log holds a later date
+        passed = seen
     print(f"Advanced {passed} day(s) in {time.time() - started:.0f}s"
           + (" | time STOPPED on its own (popup or event?), use 'look'" if stopped else "")
           + (" | hit the --timeout" if timed_out else "")

@@ -21,6 +21,10 @@ saying what changed and how it was checked.
   around Berlin made into Armies 1-4 (19, 14, 21, 21) under Rundstedt, Kluge, Rommel and Manstein.
   `act army front` gave all four a front line along the Polish border. `act army attack` drew their offensive arrows (toward Warsaw, Danzig and Kraków). War with Poland on 1939-06-26 (Britain and France
   joined); `act army execute` started all four plans, confirmed by entrenchment dropping and divisions in combat.
+  - A mistake, recorded: on 1939-11-24 Bock's army was pulled off the French border too. By 1939-12-24 France had
+    overrun western Germany (39 → 25 states controlled; kept as `claude_ger_1939_12_collapse`). The campaign
+    went back to `claude_ger_1939_11` and Bock was put back on the western line. Lesson: never strip the
+    front facing a great power.
 - **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
   says so, closes the windows, and stops.
 - **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.
