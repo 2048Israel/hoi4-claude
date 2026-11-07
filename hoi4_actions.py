@@ -757,7 +757,37 @@ def deselect(hwnd):
 
 
 def army_cards(hwnd):
-    """The army cards along the bottom, left to right: [(divisions, x)]."""
+    """The army cards along the bottom, left to right: [(divisions or None, x)]. Cards are found by the red stop
+    square above each one (an over-full card shows its count in red, which OCR misses); counts come from OCR."""
+    import numpy as np
+    park_mouse(hwnd)
+    img = hoi4.grab(hwnd)
+    a = np.asarray(img.convert("RGB")).astype(int)
+    y0, y1 = AR["stop_band"]
+    band = a[y0:y1, 500:1500]
+    red = (band[..., 0] > 95) & (band[..., 1] < 60) & (band[..., 2] < 60) & (band[..., 0] - band[..., 1] > 50)
+    cols = np.nonzero(red.sum(axis=0) >= 4)[0]
+    squares = []
+    for x in cols:
+        if squares and x - squares[-1][-1] <= 3:
+            squares[-1].append(x)
+        else:
+            squares.append([x])
+    stops = [int(np.mean(s)) + 500 for s in squares if len(s) >= 8]
+    counts = {}
+    box = tuple(AR["card_numbers_box"])
+    crop = img.crop(box)
+    red_only = crop.convert("RGB").split()[0].convert("RGB")  # red text (an over-full army) turns bright
+    for source in (crop, red_only):
+        for l in ocr_image(source, origin=box[:2], upscale=3):
+            m = re.match(r"\s*(\d+)\s*/?\s*\d*", l.text)
+            if m and all(abs(l.center[0] - x) > 40 for x in counts):
+                counts[l.center[0]] = int(m.group(1))
+    xs = sorted(set([sx + AR["stop_to_card_dx"] for sx in stops] +
+                    [x for x in counts if not any(abs(x - (sx + AR["stop_to_card_dx"])) < 40 for sx in stops)]))
+    out = [(next((v for x, v in counts.items() if abs(x - cx) < 40), None), cx) for cx in xs]
+    if out:
+        return out
     lines = read_box(hwnd, AR["card_numbers_box"], upscale=3)
     # a card with a commander reads like "19 4": the count, then the general's skill badge
     return [(int(m.group(1)), l.center[0]) for l in lines for m in [re.match(r"\s*(\d+)", l.text)] if m]
@@ -857,14 +887,14 @@ def new_army(hwnd, halves=0, log=print):
     for _ in range(halves):
         hoi4.press_combo("s")
         time.sleep(0.5)
-    before = sum(n for n, _ in army_cards(hwnd))
+    n_before = len(army_cards(hwnd))
     plus = new_army_button(hwnd)
     if not plus:
         raise ActionError("the New Army button was not found")
     hoi4.click(hwnd, *plus)
     time.sleep(1.2)
     cards = army_cards(hwnd)
-    if sum(n for n, _ in cards) <= before:
+    if len(cards) <= n_before:
         raise ActionError("New Army was pressed but no new army card appeared")
     p = army_panel(hwnd)
     log(f"created {p['name']} with {p['size']} | armies now {[n for n, _ in cards]}")
