@@ -3,6 +3,18 @@
 What shipped to `main`, newest first. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
 
+## 2026-11-07: SR0, a real text-save fixture
+
+Jerus allowed text saves, so `save_as_binary=no` is set. Only that line changed; the old file is backed up in
+`state/`. The game was restarted, which also loaded the mod's renamed `longest_war_months` field.
+
+- **The fixture:** `tests/fixtures/ger_1936_02_25.txt`, 514 KB. It holds Germany on 1936-02-25 with the player name
+  redacted, Germany's equipment designs, templates and states. It was cut by `tools/cut_save_fixture.py` in about
+  12 s from a 66 MB text save (the binary save was 42.5 MB).
+- **Guard:** `tests/test_SR0.py`.
+- **For SR1:** its brief now says where research slots, the focus, production lines, divisions and states live in
+  the file.
+
 ## 2026-11-07: working together
 
 `AGENTS.md`, `CLAUDE.md`, `QUEUE.md` and `docs/queue/` set out how two Claude accounts work in parallel:

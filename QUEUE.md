@@ -29,4 +29,3 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 
 | batch | lane | waits on | brief |
 |---|---|---|---|
-| SR0 | PC | Jerus: may `save_as_binary` in `settings.txt` be set to `no`? Text saves are larger and slower to write, and his saves are binary now. SR1 needs a real text save to check against. | [SR0](docs/queue/SR0.md) |
