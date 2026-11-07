@@ -1,7 +1,9 @@
 # Changelog
 
-What shipped to `main`, newest first. A batch adds its block at the top in the merge that ships it: a few lines
+What shipped to `main`, newest first, under the version that shipped it. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
+
+# 0.1.1 (2026-11-07)
 
 ## 2026-11-07: EX1, actions and readers without screenshots
 
@@ -14,14 +16,21 @@ with Windows' built-in OCR (`hoi4_ocr.py`, about 0.1-0.3 s a read) instead of re
 - **Research:** found from the tech map and confirmed by the detail window's title. It handles the industrial
   organization picker, refuses a busy slot without `--replace`, and has a `--dry-run`.
 - **Production:** factories +/- on lines 1-5, confirmed by the "Military Factories x/28" counter.
-- **Tech map:** `act calibrate-research` clicks every icon once and reads its name. Positions are kept in tree space
-  and anchored on the year labels, so they hold at any scroll.
+- **Saves:** `act save NAME` saves through the console, always as `claude_...`. `act load-save NAME` loads a save
+  from the main menu, every step checked by OCR.
+- **Tech map:** `act calibrate-research` clicks every icon once and reads its name, for all 9 tabs. Positions are
+  kept in tree space, so they hold at any scroll:
+  - Scrolling down is counted in exact 50 px wheel notches, with each tab's limit measured by matching pictures.
+  - Scrolling sideways drags the bottom bar's knob, measured in (knob, offset) steps from labels that move with the
+    tree. Trees open wherever they were left, so every action starts from the top-left.
 
 **Checked live:** research dry runs for a top-row tech and a scrolled one; the busy-slot refusal; line 2 at 3 → 2 → 3
-factories. A real `act research` waits for the first free slot.
+factories; loading `claude_ger_1936` from the main menu with no screenshot.
 
 Windows OCR misses lone digits now and then, so a factory count may read `None`. The save reader (SR1) will give
 exact numbers. EX2 has the rest of the actions.
+
+# 0.1.0 (2026-11-07)
 
 ## 2026-11-07: SR0, a real text-save fixture
 

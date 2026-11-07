@@ -15,6 +15,8 @@ Run with the project venv:
 Chain several commands in one call:
   hoi4.py do "key y ; wait 0.5 ; look"
 """
+__version__ = "0.1.0"
+
 import argparse
 import ctypes
 import json
@@ -1262,6 +1264,7 @@ def split_batch(script):
 
 def build_parser():
     p = argparse.ArgumentParser(prog="hoi4.py", description="Let Claude watch and play Hearts of Iron IV.")
+    p.add_argument("--version", action="version", version=f"hoi4-claude {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("launch", help="install the bridge mod, enable it, and start the game")
