@@ -49,6 +49,24 @@ for _ in range(N * 3):
         time.sleep(0.5)
 print("set to 1:", fixed)
 
+# A slow redraw can still let a "+" land twice: lower any line above 1 back to 1 with its "-".
+hoi4.scroll(h, 330, 900, 40)
+time.sleep(0.4)
+for _ in range(N * 2):
+    big = [l for l in counts() if len(l.text) >= 3 and l.text[2].isdigit() and l.text[2] not in "01"]
+    if big:
+        for _ in range(int(big[0].text[2]) - 1):
+            hoi4.click(h, 437, big[0].center[1] - 140)
+            time.sleep(0.3)
+        time.sleep(0.4)
+        print("lowered a line from", big[0].text)
+        continue
+    before = [l.text for l in A.read_box(h, [0, 480, 700, 1200])]
+    hoi4.scroll(h, 330, 900, -6)
+    time.sleep(0.45)
+    if [l.text for l in A.read_box(h, [0, 480, 700, 1200])] == before:
+        break
+
 placed = 0
 hoi4.scroll(h, 330, 900, 40)
 time.sleep(0.4)
