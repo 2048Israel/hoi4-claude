@@ -53,6 +53,7 @@
     "selection_box": [0, 60, 540, 1180],
     "panel_close_x": 522,
     "front_line_key": "z",
+    "offensive_key": "x",
     "tooltip_box": [1500, 1040, 1919, 1180]
   },
   "focus": {

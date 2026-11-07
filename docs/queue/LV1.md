@@ -4,8 +4,7 @@
 
 The mod writes these lines, and the report formats them, but none has appeared in a real game yet:
 
-- `general`: `every_army_leader` with `is_leading_army`, and `[?THIS.num_units]` in a character scope. Needs an army
-  with a general.
+- ~~`general`~~: seen live on 1939-05-15 (four generals, divisions, entrenchment, battle plans).
 - `front`, `enemy`, `ally`: need a war.
 - `news`: `on_declare_war`, `on_capitulation`, `on_annex`, `on_puppet`, `on_peaceconference_ended`,
   `on_create_faction`, `on_join_faction`, `on_government_change`. The first will fire with the first war or new

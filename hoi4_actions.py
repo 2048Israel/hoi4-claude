@@ -878,6 +878,22 @@ def front_line(hwnd, index, border_point, log=print):
     return p
 
 
+def offensive_line(hwnd, index, start, end, log=print):
+    """Army `index` (which must already hold a front line) gets an offensive arrow, right-dragged from `start`
+    (on its front) to `end` (inside enemy land). The game only accepts arrows that start on an existing front."""
+    p = select_army(hwnd, index)
+    hoi4.press_combo(AR["offensive_key"])
+    time.sleep(0.6)
+    hoi4.drag(hwnd, start[0], start[1], end[0], end[1], button="right")
+    time.sleep(1.2)
+    tip = " ".join(l.text for l in read_box(hwnd, AR["tooltip_box"], park=False)).lower()
+    if "cannot" in tip and "offensive" in tip:
+        hoi4.press_combo("esc")
+        raise ActionError(f"the game refused the offensive line: {tip[:160]}")
+    log(f"{p['name']} ({p['general']}): offensive line {start} -> {end}")
+    return p
+
+
 def select_box(hwnd, box):
     deselect(hwnd)
     hoi4.drag(hwnd, box[0], box[1], box[2], box[3])
@@ -1159,7 +1175,8 @@ def main(argv):
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
-    s.add_argument("op", choices=["list", "new", "general", "generals", "front"])
+    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack"])
+    s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="attack: where the arrow points")
     s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="front: a point on the highlighted border")
     s.add_argument("--army", type=int)
     s.add_argument("--name")
@@ -1213,6 +1230,11 @@ def main(argv):
             if not args.army:
                 raise ActionError("--army N is needed")
             assign_general(hwnd, args.army, args.name)
+            deselect(hwnd)
+        elif args.op == "attack":
+            if not args.army or not args.at or not args.to:
+                raise ActionError("attack needs --army N --at X Y (on its front) --to X Y")
+            offensive_line(hwnd, args.army, args.at, args.to)
             deselect(hwnd)
         elif args.op == "front":
             if not args.army or not args.at:
