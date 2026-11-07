@@ -12,6 +12,11 @@ saying what changed and how it was checked.
 - **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
   says so, closes the windows, and stops.
 - **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.
+- **The campaign so far (Germany, played with these commands):** Anschluss completed on 1938-08-17.
+  - From 1936 to now: 35 → 70 civilian factories, 28 → 55 military factories, 30 → 85 divisions.
+  - On the way: Extensive Conscription, War Economy, six MEFO price-control decisions, and the advisors Schacht,
+    Krupp, Neurath, Beck, Guderian and Göring.
+  - Save: `claude_ger_1938_08_anschluss`.
 
 # 0.1.1 (2026-11-07)
 
