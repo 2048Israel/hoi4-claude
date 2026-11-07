@@ -70,6 +70,10 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act army front --army N --at X Y` | Front line for army N along the border highlighted at X,Y (works in peacetime) |
 | `act army list` / `act army generals` / `act army general --army N --name X` | Armies with their size and commander; give every army without one the game's top-listed general |
 | `act focus --name "Danzig or War"` / `read focus` | Start a focus through the tree's search; when the game refuses, it prints the requirement lines. `read focus` shows the running one |
+| `read decisions` / `act decision --name "War Propaganda" [--dry-run]` | List every decision by category; take one by name after printing its tooltip. Checked by the row's look and the power spent |
+| `act decision-category --name "Heavy Industry" --collapse` | Fold a decision category away (mods add big ones) |
+| `act research-fill [--plan FILE]` | Fill every empty research slot from a priority list (`plans/research_germany.txt`) |
+| `read pp` | Political power from the top bar |
 | `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
 | `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
 | `act calibrate-research [--tabs artillery]` | Build the tech map (`state/tech_map.json`): clicks each icon once and reads its name. About a minute per tab |

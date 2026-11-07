@@ -5,6 +5,18 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+- **Decisions:** `read decisions` lists every category and decision (scrolling the list, lining pages up by
+  their shared rows); `act decision --name X [--dry-run]` finds a row, prints its tooltip and takes it, checked by
+  the row's look and the political or command power spent; `act decision-category --name C --collapse|--expand`.
+  Checked live on 1940-06-27: Utilize Domestic Film Industry, War Propaganda, Exhort Heroism, Collect Scrap Metal,
+  Develop Ersatz Material (PP 1,235 -> 825) and Campaign Instructions against Poland (command power 160 -> 135).
+  Radio Propaganda was refused (Radio not researched) and reported.
+- **Tooltips anywhere:** `hover_tooltip` finds a tooltip by comparing the screen before and after the hover, so it
+  works whether the tooltip opens above or below the cursor. `read pp` reads political power from the top bar.
+- **act research-fill:** fills empty research slots from `plans/research_germany.txt`, skipping techs the game
+  refuses. Checked live: five empty slots filled.
+- **Screen titles** match word by word, since OCR can return them out of order ("EVENTS DECISIONS AND").
+
 - **act army target --army N --city NAME:** orders an army at a city through the map's Find window, with
   no guessed pixels. Checked live: six armies sent at Warsaw, Lwów, Lublin, Białystok and Siedlce; all left
   their trenches (entrenchment 85% → under 15%) and joined combat.

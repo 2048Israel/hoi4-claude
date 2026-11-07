@@ -6,6 +6,7 @@
     "construction": {"key": "t", "title": "CONSTRUCTION"},
     "recruit":      {"key": "u", "title": "RECRUIT & DEPLOY"},
     "politics":     {"key": "q", "title": "POLITICAL"},
+    "decisions":    {"key": "shift+q", "title": "EVENTS AND DECISIONS"},
     "_title_box": [0, 100, 900, 165]
   },
   "research": {
@@ -85,7 +86,20 @@
     "deploy_province": [1170, 480]
   },
   "top_bar": {
-    "clock_box": [1450, 0, 1850, 45]
+    "clock_box": [1450, 0, 1850, 45],
+    "pp_box": [140, 5, 215, 35],
+    "cp_box": [930, 5, 990, 35]
+  },
+  "decisions": {
+    "_note": "shift+q. Rows: name at x 88, cost near x 520, take button x 619. Category headers are centred (x 264-396) with a collapse arrow at x 620. One wheel notch scrolls one row (51 px).",
+    "list_box": [0, 260, 680, 1190],
+    "scroll_point": [330, 900],
+    "row_name_x": [70, 150],
+    "header_x": [200, 470],
+    "arrow_x": 620,
+    "take_x": 619,
+    "tooltip_dx": [180, 760],
+    "tooltip_dy": [30, 260]
   },
   "notice_box": [660, 400, 1300, 720],
   "game_menu_box": [760, 300, 1160, 780],

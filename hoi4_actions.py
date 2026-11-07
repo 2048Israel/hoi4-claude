@@ -238,8 +238,9 @@ def screen_title(hwnd):
 
 
 def is_open(hwnd, name):
-    want = norm(T["screens"][name]["title"])
-    return want in norm(screen_title(hwnd))
+    # OCR can return a title's words out of order ("EVENTS DECISIONS AND"): every word must be there
+    seen = norm(screen_title(hwnd))
+    return all(norm(w) in seen for w in T["screens"][name]["title"].split() if norm(w))
 
 
 def open_screen(hwnd, name):
@@ -1381,6 +1382,255 @@ def recruit(hwnd, count, template="Infanterie-Division", log=print):
 
 
 # --------------------------------------------------------------------------
+# decisions (shift+q)
+# --------------------------------------------------------------------------
+DC = T["decisions"]
+HAS_WORD = re.compile(r"[A-Za-z]{3}")
+
+
+DIGIT_FIX = str.maketrans({"s": "5", "S": "5", "o": "0", "O": "0", "l": "1", "I": "1", "i": "1", "B": "8", "z": "2"})
+
+
+def read_pp(hwnd):
+    """Political power as the top bar shows it (whole number), or None. OCR reads 825 as "82s": fix letters."""
+    for l in read_box(hwnd, T["top_bar"]["pp_box"], upscale=3):
+        text = l.text.strip().translate(DIGIT_FIX).replace(",", "").replace(" ", "")
+        if re.fullmatch(r"-?\d+(\.\d+)?", text):
+            return float(text)
+    return None
+
+
+def read_cp(hwnd):
+    """Command power as the top bar shows it, or None."""
+    for l in read_box(hwnd, T["top_bar"]["cp_box"], upscale=3):
+        text = l.text.strip().translate(DIGIT_FIX).replace(",", "").replace(" ", "")
+        if re.fullmatch(r"-?\d+(\.\d+)?", text):
+            return float(text)
+    return None
+
+
+def row_picture(hwnd, y):
+    park_mouse(hwnd)
+    return hoi4.grab(hwnd).crop((420, y - 20, 660, y + 20)).convert("L")
+
+
+def picture_diff(a, b):
+    import numpy as np
+    return float(np.abs(np.asarray(a, dtype=np.int16) - np.asarray(b, dtype=np.int16)).mean())
+
+
+def is_header(line):
+    x0, y0, x1, y1 = line.box
+    # centred text between the row names (x 88) and the costs (x 500+); "War Measures" is only 14 px tall
+    return DC["header_x"][0] < x0 and x1 < DC["header_x"][1] and y1 - y0 >= 11 and bool(HAS_WORD.search(line.text))
+
+
+def is_row(line):
+    return DC["row_name_x"][0] < line.box[0] < DC["row_name_x"][1] and bool(HAS_WORD.search(line.text))
+
+
+def decision_page(hwnd):
+    """One screen of the list: [(kind, line, expanded)], kind 'cat' or 'row'. expanded is None for rows, and for
+    a header near the bottom whose content is out of sight."""
+    lines = sorted(read_box(hwnd, DC["list_box"]), key=lambda l: l.box[1])
+    bottom = DC["list_box"][3]
+    out = []
+    for i, l in enumerate(lines):
+        if is_header(l):
+            below = next((m for m in lines[i + 1:] if m.box[1] > l.box[3] + 4), None)
+            if below is None:
+                expanded = None if l.box[3] > bottom - 120 else False
+            else:
+                expanded = not is_header(below) or below.box[1] - l.box[1] > 90
+            out.append(("cat", l, expanded))
+        elif is_row(l):
+            out.append(("row", l, None))
+    return out
+
+
+def _scroll_list(hwnd, notches):
+    hoi4.scroll(hwnd, *DC["scroll_point"], notches)
+    time.sleep(0.4)
+
+
+def _list_top(hwnd, tries=6):
+    """Scroll up until the list stops moving (it can be well over 60 rows long)."""
+    last = None
+    for _ in range(tries):
+        _scroll_list(hwnd, 40)
+        time.sleep(0.3)
+        sig = [(l.text, l.box[1]) for l in read_box(hwnd, DC["list_box"])][:6]
+        if sig == last:
+            return
+        last = sig
+
+
+def each_decision_page(hwnd, max_pages=40, step=12):
+    """Yield the list page by page from the top; stops when a scroll changes nothing."""
+    _list_top(hwnd)
+    last = None
+    for _ in range(max_pages):
+        page = decision_page(hwnd)
+        sig = [(k, l.text, l.box[1]) for k, l, _ in page]
+        if sig == last:
+            return
+        yield page
+        last = sig
+        _scroll_list(hwnd, -step)
+
+
+def merge_pages(pages, step_px):
+    """Put scrolled pages on one axis: each page's offset comes from the rows it shares with the page before
+    (the scroll stops short at the end of the list), else from the scroll step. Returns [(abs_y, kind, text,
+    expanded)] sorted top to bottom, duplicates removed."""
+    items, offset, prev = [], 0, None
+    for page in pages:
+        if prev is not None:
+            shifts = sorted(pl.box[1] - l.box[1] for _, l, _ in page for _, pl, _ in prev
+                            if pl.text == l.text and 0 <= pl.box[1] - l.box[1] <= step_px + 60)
+            offset += shifts[len(shifts) // 2] if shifts else step_px
+        for kind, l, expanded in page:
+            y = l.box[1] + offset
+            if not any(t == l.text and abs(iy - y) < 25 for iy, _, t, _ in items):
+                items.append((y, kind, l.text, expanded))
+            elif kind == "cat" and expanded is not None:
+                items = [(iy, k, t, expanded if (t == l.text and abs(iy - y) < 25) else e) for iy, k, t, e in items]
+        prev = page
+    return sorted(items, key=lambda i: i[0])
+
+
+def read_decisions(hwnd, log=print, step=12):
+    open_screen(hwnd, "decisions")
+    items = merge_pages(list(each_decision_page(hwnd, step=step)), step_px=step * 51.4)
+    seen, cat = [], "?"
+    for _, kind, text, expanded in items:
+        if kind == "cat":
+            cat = text
+            seen.append(("cat", text, expanded))
+        else:
+            seen.append(("row", cat, text))
+    for item in seen:
+        if item[0] == "cat":
+            log(f"[{item[1]}]" + ("  (collapsed)" if item[2] is False else ""))
+        else:
+            log(f"    {item[2]}")
+    return seen
+
+
+def toggle_category(hwnd, name, expand, log=print):
+    """Collapse or expand one category by its header's arrow."""
+    open_screen(hwnd, "decisions")
+    for page in each_decision_page(hwnd):
+        for kind, l, expanded in page:
+            if kind == "cat" and similar(name, l.text) >= 0.8:
+                if expanded is None:
+                    _scroll_list(hwnd, -3)
+                    return toggle_category(hwnd, name, expand, log)
+                if expanded == expand:
+                    log(f"{l.text} is already {'expanded' if expand else 'collapsed'}")
+                    return
+                hoi4.click(hwnd, DC["arrow_x"], l.center[1])
+                time.sleep(0.5)
+                log(f"{'expanded' if expand else 'collapsed'} {l.text}")
+                return
+    raise ActionError(f"no decision category like {name!r}; see: read decisions")
+
+
+def _runs(flags, gap=0):
+    """[(start, end)] of the True runs in a 1-D boolean array (end exclusive); runs at most `gap` apart join."""
+    out, start = [], None
+    for i, f in enumerate(list(flags) + [False]):
+        if f and start is None:
+            start = i
+        elif not f and start is not None:
+            if out and start - out[-1][1] <= gap:
+                out[-1] = (out[-1][0], i)
+            else:
+                out.append((start, i))
+            start = None
+    return out
+
+
+def changed_box(before, after, x_min, cursor, min_px=25, gap=40):
+    """The block where the screen changed next to the cursor, ignoring columns left of x_min and the rows within
+    25 px of the cursor (the hovered row's highlight). Finds a tooltip, which opens above or below the cursor;
+    other changes on the map are separate blocks and are left out."""
+    import numpy as np
+    cx, cy = cursor
+    a = np.asarray(before.convert("L"), dtype=np.int16)
+    b = np.asarray(after.convert("L"), dtype=np.int16)
+    mask = np.abs(a - b) > 25
+    mask[:, :x_min] = False
+    mask[max(0, cy - 25):cy + 25, :] = False
+    # a tooltip's dark background can match what is behind it: only its text lines change, so join near rows
+    rows = [r for r in _runs(mask.sum(axis=1) >= min_px, gap) if r[1] - r[0] >= 20]
+    if not rows:
+        return None
+    r0, r1 = min(rows, key=lambda r: 0 if r[0] <= cy <= r[1] else min(abs(r[0] - cy), abs(r[1] - cy)))
+    cols = [c for c in _runs(mask[r0:r1].sum(axis=0) >= 3, gap) if c[1] - c[0] >= 40]
+    if not cols:
+        return None
+    c0, c1 = min(cols, key=lambda c: 0 if c[0] <= cx + 30 <= c[1] else min(abs(c[0] - cx), abs(c[1] - cx)))
+    return [int(c0), int(r0), int(c1), int(r1)]
+
+
+def hover_tooltip(hwnd, x, y, x_min=None):
+    """OCR lines of the tooltip that opens when the mouse rests at (x, y)."""
+    park_mouse(hwnd)
+    before = hoi4.grab(hwnd)
+    hoi4.move_mouse(*hoi4.to_screen(hwnd, x, y))
+    time.sleep(0.9)
+    after = hoi4.grab(hwnd)
+    box = changed_box(before, after, x_min if x_min is not None else x + 10, (x, y))
+    if not box:
+        return []
+    return ocr_image(after.crop(tuple(box)), origin=tuple(box[:2]), upscale=2)
+
+
+def decision_tooltip(hwnd, y):
+    return hover_tooltip(hwnd, 300, y)
+
+
+def take_decision(hwnd, name, dry_run=False, log=print):
+    """Find a decision row by name (scrolling the list), show its tooltip, click its take button, and check
+    that political power dropped."""
+    open_screen(hwnd, "decisions")
+    top, bottom = DC["list_box"][1] + 20, DC["list_box"][3] - 40
+    for page in each_decision_page(hwnd):
+        rows = [(similar(name, l.text), l) for k, l, _ in page if k == "row"]
+        rows = [r for r in rows if r[0] >= 0.8]
+        if not rows:
+            continue
+        score, row = max(rows, key=lambda r: r[0])
+        if not top < row.center[1] < bottom - 200:
+            _scroll_list(hwnd, -4 if row.center[1] > bottom - 200 else 4)
+            row = max((l for k, l, _ in decision_page(hwnd) if k == "row"), key=lambda l: similar(name, l.text))
+        y = row.center[1]
+        tip = " | ".join(l.text for l in decision_tooltip(hwnd, y))
+        log(f"{row.text}: {tip[:700]}")
+        if dry_run:
+            return row.text
+        pp, cp = read_pp(hwnd), read_cp(hwnd)
+        before = row_picture(hwnd, y)
+        hoi4.click(hwnd, DC["take_x"], y)
+        time.sleep(0.8)
+        after_pp, after_cp = read_pp(hwnd), read_cp(hwnd)
+        moved = picture_diff(before, row_picture(hwnd, y))
+        spent = [f"political power {pp:.0f} -> {after_pp:.0f}" if None not in (pp, after_pp) and after_pp < pp else "",
+                 f"command power {cp:.0f} -> {after_cp:.0f}" if None not in (cp, after_cp) and after_cp < cp else ""]
+        spent = ", ".join(x for x in spent if x)
+        # a taken decision shows a timer or a stamp on its row (or the row leaves): its cost may be PP, command
+        # power or a mod's own resource, so the row's look is the check, and spending is reported when seen
+        if spent or moved > 12:
+            log(f"took {row.text}" + (f": {spent}" if spent else " (its row changed)"))
+            return row.text
+        raise ActionError(f"clicked take on {row.text!r} but nothing changed; the decision is probably unavailable "
+                          "(see its tooltip above)")
+    raise ActionError(f"no decision like {name!r} in the list; see: read decisions "
+                      "(a collapsed category hides its rows: act decision-category --name C --expand)")
+
+
+# --------------------------------------------------------------------------
 # saves
 # --------------------------------------------------------------------------
 SAVE_DIR = hoi4.USER_DIR / "save games"
@@ -1489,12 +1739,20 @@ def main(argv):
     s.add_argument("box", type=int, nargs=4)
     s = sub.add_parser("focus", help="start a national focus by name (via the tree's search)")
     s.add_argument("--name", required=True)
+    s = sub.add_parser("decision", help="take a decision by name (shift+q list); checks political power dropped")
+    s.add_argument("--name", required=True)
+    s.add_argument("--dry-run", action="store_true", help="find it and show its tooltip, take nothing")
+    s = sub.add_parser("decision-category", help="collapse or expand a decision category")
+    s.add_argument("--name", required=True)
+    g = s.add_mutually_exclusive_group(required=True)
+    g.add_argument("--collapse", action="store_true")
+    g.add_argument("--expand", action="store_true")
     s = sub.add_parser("save")
     s.add_argument("name", help="saved as claude_<name>")
     s = sub.add_parser("load-save")
     s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
-    s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event"])
+    s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event", "decisions", "pp"])
     s.add_argument("--tab")
     s.add_argument("--grep")
     args = p.parse_args(argv)
@@ -1523,6 +1781,10 @@ def main(argv):
     elif args.cmd == "close":
         close_screen(hwnd, args.screen)
         print(f"{args.screen} closed")
+    elif args.cmd == "decision":
+        take_decision(hwnd, args.name, dry_run=args.dry_run)
+    elif args.cmd == "decision-category":
+        toggle_category(hwnd, args.name, expand=args.expand)
     elif args.cmd == "research-fill":
         research_fill(hwnd, args.plan)
     elif args.cmd == "event":
@@ -1606,6 +1868,10 @@ def main(argv):
         print(current_focus(hwnd) or "(no focus running)")
     elif args.what == "date":
         print(read_date(hwnd))
+    elif args.what == "pp":
+        print(read_pp(hwnd))
+    elif args.what == "decisions":
+        read_decisions(hwnd)
     elif args.what == "techs":
         if not TECH_MAP.exists():
             raise ActionError("no tech map yet: run  hoi4.py act calibrate-research")
