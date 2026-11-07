@@ -84,6 +84,28 @@ def dismiss_notices(hwnd, log=print, tries=4):
         time.sleep(0.5)
         closed += 1
         log(f"closed a notice: {' '.join(l.text for l in lines[:4])}")
+    closed += dismiss_news(hwnd, log)
+    return closed
+
+
+def dismiss_news(hwnd, log=print, tries=3):
+    """World News popups (a newspaper with a headline and one answer button) also catch clicks. Close them by
+    their single answer button. Real events with several options are left alone: they need a decision."""
+    closed = 0
+    for _ in range(tries):
+        lines = read_box(hwnd, T["news_box"])
+        if "news" not in norm(" ".join(l.text for l in lines if l.box[1] < 300)):
+            break
+        bx0, by0, bx1, by1 = T["news_button_box"]
+        buttons = [l for l in lines if bx0 <= l.center[0] <= bx1 and by0 <= l.center[1] <= by1]
+        if len(buttons) != 1:
+            log(f"a news popup has {len(buttons)} answers; left open for a decision")
+            break
+        headline = next((l.text for l in lines if 520 <= l.center[1] <= 570), "")
+        hoi4.click(hwnd, *buttons[0].center)
+        time.sleep(0.6)
+        closed += 1
+        log(f"closed world news: {headline} ({buttons[0].text})")
     return closed
 
 

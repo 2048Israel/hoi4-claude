@@ -7,6 +7,8 @@ saying what changed and how it was checked.
 
 - **Notices:** "Research Finished!" and "National Focus Completed" notices sit on top of everything and catch
   clicks. Every `act` now closes them first, by their own Ok button; `act dismiss` does it alone.
+- **World News:** news popups (a headline and one answer button) also catch clicks; every `act` now closes
+  them by their one answer. Events with several options are left open for a decision.
 - **Greyed-out research:** when the game will not start a tech (for example "Requires Technology"), `act research`
   says so, closes the windows, and stops.
 - **Checked live:** the first real start, Mechanical Computing in slot 3 (260 days), with no screenshot.
