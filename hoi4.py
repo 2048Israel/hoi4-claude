@@ -1185,6 +1185,11 @@ def cmd_advance(args):
     before = last_kind(recs, "day")
     set_speed(args.speed)
     off = log_size()
+    try:  # a leftover popup, notice or the Esc menu would stop time at once
+        import hoi4_actions
+        hoi4_actions.dismiss_notices(hwnd)
+    except Exception as exc:  # never let the helper block time control
+        print(f"(popup check skipped: {exc})")
     if not ensure_running(hwnd, args.window):
         raise BridgeError("Time will not start. A menu or popup may be open: use 'look'.")
     seen, last_change, stopped, timed_out = 0, time.time(), False, False

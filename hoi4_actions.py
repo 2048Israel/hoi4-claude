@@ -73,9 +73,22 @@ def wait_for(fn, timeout=2.0, step=0.15):
 NOTICE_WORDS = ("researchfinished", "nationalfocuscompleted", "focuscompleted")
 
 
+def close_game_menu(hwnd, log=print):
+    """The Esc menu (Load Game / Save Game / ... / Close) stops time. Close it by its own Close button."""
+    lines = read_box(hwnd, T["game_menu_box"])
+    words = norm(" ".join(l.text for l in lines))
+    if "savegame" in words and "exitgame" in words:
+        close = [l for l in lines if norm(l.text) == "close"]
+        hoi4.click(hwnd, *(close[0].center if close else T["game_menu_close"]))
+        time.sleep(0.6)
+        log("closed the game menu")
+        return True
+    return False
+
+
 def dismiss_notices(hwnd, log=print, tries=4):
     """Close the small centre notices by their own Ok button. Returns how many were closed."""
-    closed = 0
+    closed = int(close_game_menu(hwnd, log))
     for _ in range(tries):
         lines = read_box(hwnd, T["notice_box"])
         joined = norm(" ".join(l.text for l in lines))  # OCR may split "NATIONAL / Focus / COMPLETED"
