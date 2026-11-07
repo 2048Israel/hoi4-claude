@@ -1022,6 +1022,17 @@ def execute_all(hwnd, indexes=None, log=print):
     return indexes
 
 
+def move_army(hwnd, index, target, log=print):
+    """Order every division of army `index` to move to (attack) the province at `target` (window pixels in the
+    camera-home view): select the army, right-click. Unlike battle plans this reliably starts an attack."""
+    p = select_army(hwnd, index)
+    hoi4.click(hwnd, *target, button="right")
+    time.sleep(0.8)
+    deselect(hwnd)
+    log(f"{p['name'] or 'army ' + str(index)} ({p['general']}): ordered to {target}")
+    return p
+
+
 def camera_home(hwnd, zoom_out=None, log=print):
     """Put the camera in the standard view: the Find window's Go Home (capital, fully zoomed in), then zoom out a
     fixed number of notches. Map coordinates used by plans are measured in this view."""
@@ -1322,7 +1333,7 @@ def main(argv):
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
-    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute"])
+    s.add_argument("op", choices=["list", "new", "general", "generals", "front", "attack", "execute", "move"])
     s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="attack: where the arrow points")
     s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="front: a point on the highlighted border")
     s.add_argument("--army", type=int)
@@ -1380,6 +1391,10 @@ def main(argv):
                 raise ActionError("--army N is needed")
             assign_general(hwnd, args.army, args.name)
             deselect(hwnd)
+        elif args.op == "move":
+            if not args.army or not args.to:
+                raise ActionError("move needs --army N --to X Y")
+            move_army(hwnd, args.army, args.to)
         elif args.op == "execute":
             execute_all(hwnd, [args.army] if args.army else None)
         elif args.op == "attack":
