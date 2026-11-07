@@ -24,6 +24,7 @@
     "scroll_point": [1650, 1000],
     "scroll_px_per_notch": 50,
     "hbar_y": 1186,
+    "hbar_knob_box": [40, 1178, 1860, 1194],
     "detail_title_box": [630, 140, 1310, 180],
     "detail_days_box": [820, 195, 1100, 235],
     "detail_research": [1190, 216],

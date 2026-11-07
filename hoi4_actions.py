@@ -135,10 +135,16 @@ def detail_open(hwnd):
     return any("day" in l.text.lower() or "research" in l.text.lower() for l in lines)
 
 
-# Scrolling. The wheel moves a tree exactly 50 px a notch until it hits the bottom, and the bottom bar drags it
-# sideways. Each tab's limits (v_max, h_max) are measured once by matching pictures, so a view is reached by
-# counting notches: no labels needed (some tabs have their year labels along the top, some down the left).
+# Scrolling.
+# - Down: the wheel moves a tree exactly 50 px a notch until the bottom. Each tab's v_max is measured once by
+#   matching pictures; a view is then reached by counting notches.
+# - Sideways: the bottom bar has a small round knob (the brightest pixel along the bar). Dragging the knob moves the
+#   tree. The background picture does not move sideways, so sideways shifts are measured from text that moves with
+#   the tree (section and year labels), in small knob steps from the left end to the right end. Each tab keeps a list
+#   of (knob x, offset) views that together cover its width.
+# - A tab opens wherever it was last left, so home is always: wheel fully up, knob fully left.
 NOTCH = R["scroll_px_per_notch"]
+KNOB_BOX = R["hbar_knob_box"]
 
 
 def tree_pixels(hwnd, park=True):
@@ -166,29 +172,80 @@ def best_shift(a, b, axis, candidates):
     return best
 
 
-def scroll_home(hwnd):
-    px, py = R["scroll_point"]
-    hoi4.scroll(hwnd, px, py, 40)
+def knob_x(hwnd):
+    """x of the sideways scroll knob, or None when the tree is not wider than the screen."""
+    import numpy as np
+    park_mouse(hwnd)
+    x0, y0, x1, y1 = KNOB_BOX
+    col = np.asarray(hoi4.grab(hwnd).convert("L").crop((x0, y0, x1, y1))).astype(int).max(axis=0)
+    return int(np.argmax(col)) + x0 if col.max() >= 150 else None
+
+
+def set_knob(hwnd, x):
+    """Drag the knob to x; returns where it ended up (None if there is no knob)."""
+    k = knob_x(hwnd)
+    if k is None:
+        return None
     y = R["hbar_y"]
-    hoi4.drag(hwnd, 1600, y, 0, y)
+    hoi4.drag(hwnd, k, y, x, y)
     time.sleep(0.35)
+    return knob_x(hwnd)
 
 
-def to_view(hwnd, h_off, v_off, v_max=None):
-    """Show the tree scrolled right by h_off (0 or the tab's h_max) and down by v_off: a multiple of 50, or
-    v_max itself (reached by scrolling past the bottom)."""
+def scroll_home(hwnd):
+    hoi4.scroll(hwnd, *R["scroll_point"], 40)
+    time.sleep(0.2)
+    set_knob(hwnd, KNOB_BOX[0])
+
+
+def to_view(hwnd, knob, v_off, v_max=None):
+    """Show the tree with the knob at `knob` (None, or its left end, means no sideways scroll) and scrolled down
+    by v_off: a multiple of 50, or v_max itself (reached by scrolling past the bottom)."""
     scroll_home(hwnd)
-    if h_off:
-        y = R["hbar_y"]
-        hoi4.drag(hwnd, 300, y, 1915, y)
+    if knob is not None and knob > KNOB_BOX[0] + 15:
+        set_knob(hwnd, knob)
     if v_off:
         notches = 40 if v_max is not None and v_off >= v_max else v_off // NOTCH
         hoi4.scroll(hwnd, *R["scroll_point"], -notches)
     time.sleep(0.35)
 
 
+def label_xs(hwnd):
+    return {l.text: l.center[0] for l in read_box(hwnd, R["tree_box"]) if len(l.text) >= 4}
+
+
+def measure_h_views(hwnd, steps=12, span=1600):
+    """[[knob_x, offset], ...] covering the tree from its left end to its right end."""
+    scroll_home(hwnd)
+    left = knob_x(hwnd)
+    if left is None:
+        return [[None, 0]]
+    right_end = KNOB_BOX[2] - 8
+    views, total, prev = [[left, 0]], 0, label_xs(hwnd)
+    for i in range(1, steps + 1):
+        actual = set_knob(hwnd, round(left + (right_end - left) * i / steps))
+        cur = label_xs(hwnd)
+        shifts = sorted(prev[t] - cur[t] for t in prev if t in cur)
+        if not shifts:
+            raise ActionError("a sideways step left no label in common; use more steps")
+        total += shifts[len(shifts) // 2]
+        views.append([actual, total])
+        prev = cur
+    # keep only the views needed: each kept view at most `span` px right of the one before, plus the last
+    kept, candidate = [views[0]], None
+    for v in views[1:]:
+        if v[1] - kept[-1][1] <= span:
+            candidate = v
+        else:
+            kept.append(candidate)
+            candidate = v
+    if kept[-1][1] < views[-1][1] - 20:
+        kept.append(views[-1])
+    return kept
+
+
 def measure_geometry(hwnd):
-    """How far this tab scrolls down (v_max) and sideways (h_max), in pixels."""
+    """(sideways views, v_max) for the open tab."""
     px, py = R["scroll_point"]
     scroll_home(hwnd)
     v_max, prev = 0, tree_pixels(hwnd)
@@ -205,23 +262,15 @@ def measure_geometry(hwnd):
             break
         v_max += moved
         prev = cur
+    h_views = measure_h_views(hwnd)
     scroll_home(hwnd)
-    left = tree_pixels(hwnd)
-    y = R["hbar_y"]
-    hoi4.drag(hwnd, 300, y, 1915, y)
-    time.sleep(0.35)
-    right = tree_pixels(hwnd)
-    coarse = best_shift(left[::4, ::4], right[::4, ::4], 1, range(0, 450))
-    h_max = best_shift(left[::2], right[::2], 1, range(max(0, coarse * 4 - 6), coarse * 4 + 7))
-    scroll_home(hwnd)
-    return h_max, v_max
+    return h_views, v_max
 
 
-def views_for(h_max, v_max):
-    """Scroll positions that together show the whole tree."""
-    vs = list(range(0, v_max, 750)) + [v_max]  # v_max itself is reached by over-scrolling to the bottom
-    hs = [0, h_max] if h_max > 20 else [0]
-    return [(h, v) for v in sorted(set(vs)) for h in hs]
+def views_for(h_views, v_max):
+    """(knob, h_offset, v_offset) scroll positions that together show the whole tree."""
+    vs = sorted(set(list(range(0, v_max, 750)) + [v_max]))  # v_max is reached by over-scrolling to the bottom
+    return [(knob, h_off, v) for v in vs for knob, h_off in h_views]
 
 
 def open_tree(hwnd, slot, tab):
@@ -322,11 +371,11 @@ def calibrate_research(hwnd, tabs=None, slot=5, log=print):
     data = json.loads(TECH_MAP.read_text(encoding="utf-8")) if TECH_MAP.exists() else {"tabs": {}}
     for tab in tabs or list(R["tabs"]):
         open_tree(hwnd, slot, tab)
-        h_max, v_max = measure_geometry(hwnd)
-        log(f"  {tab}: scrolls {v_max} px down and {h_max} px sideways")
+        h_views, v_max = measure_geometry(hwnd)
+        log(f"  {tab}: scrolls {v_max} px down; sideways views (knob, offset) {h_views}")
         found = {}
-        for h_off, v_off in views_for(h_max, v_max):
-            to_view(hwnd, h_off, v_off, v_max)
+        for knob, h_off, v_off in views_for(h_views, v_max):
+            to_view(hwnd, knob, v_off, v_max)
             if not tree_open(hwnd):
                 raise ActionError(f"{tab}: the tech tree is no longer open; stopped before clicking the map")
             park_mouse(hwnd)
@@ -350,7 +399,7 @@ def calibrate_research(hwnd, tabs=None, slot=5, log=print):
                 if title not in found:
                     found[title] = {"x": tx, "y": ty, "days": days}
                 close_detail(hwnd)
-        data["tabs"][tab] = {"h_max": h_max, "v_max": v_max, "techs": found}
+        data["tabs"][tab] = {"h_views": h_views, "v_max": v_max, "techs": found}
         log(f"{tab}: {len(found)} techs")
         TECH_MAP.parent.mkdir(parents=True, exist_ok=True)
         TECH_MAP.write_text(json.dumps(data, indent=1), encoding="utf-8")
@@ -373,7 +422,7 @@ def find_tech(name):
     if best[0] < 0.75:
         raise ActionError(f"no tech like {name!r} in the map (closest: {best[2]!r}); recalibrate that tab?")
     info = data["tabs"][best[1]]
-    return best[1], best[2], best[3], (info.get("h_max", 0), info.get("v_max", 0))
+    return best[1], best[2], best[3], (info.get("h_views", [[None, 0]]), info.get("v_max", 0))
 
 
 def choose_mio(hwnd, mio):
@@ -401,14 +450,15 @@ def choose_mio(hwnd, mio):
 def research(hwnd, slot, tech, mio="first", dry_run=False, log=print):
     """Start researching `tech` in `slot`. If the slot is busy the game asks before replacing (progress is
     kept for later), so this refuses a busy slot unless the caller has checked that with read_research."""
-    tab, title, pos, (h_max, v_max) = find_tech(tech)
+    tab, title, pos, (h_views, v_max) = find_tech(tech)
     open_tree(hwnd, slot, tab)
-    # the scroll that shows the target: as little as needed, in whole notches
-    h_off = h_max if pos["x"] > 1880 else 0
+    # the sideways view that shows the target nearest the middle, and as little scrolling down as needed
+    fits = [v for v in h_views if 40 <= pos["x"] - v[1] <= 1860] or h_views
+    knob, h_off = min(fits, key=lambda v: abs(pos["x"] - v[1] - 960))
     v_off = 0 if pos["y"] <= 1140 else (pos["y"] - 680) // NOTCH * NOTCH
     if v_off >= v_max - NOTCH:
         v_off = v_max  # near the bottom: scroll all the way, which lands exactly on v_max
-    to_view(hwnd, h_off, v_off, v_max)
+    to_view(hwnd, knob, v_off, v_max)
     off = (h_off, v_off)
     sx, sy = pos["x"] - h_off, pos["y"] - v_off
     if not (R["tree_box"][1] <= sy <= R["tree_box"][3] and 0 <= sx < 1920):
@@ -501,6 +551,62 @@ def production(hwnd, line, add=0, remove=0, log=print):
 
 
 # --------------------------------------------------------------------------
+# saves
+# --------------------------------------------------------------------------
+SAVE_DIR = hoi4.USER_DIR / "save games"
+
+
+def find_text(hwnd, text, box, timeout=20.0):
+    deadline = time.time() + timeout
+    while True:
+        for l in read_box(hwnd, list(box)):
+            if norm(text) in norm(l.text):
+                return l
+        if time.time() >= deadline:
+            raise ActionError(f"never saw {text!r} on screen")
+        time.sleep(1.5)
+
+
+def save_game(hwnd, name, log=print):
+    """Save through the console as claude_<name> (never one of Jerus's own save names)."""
+    if not name.startswith("claude_"):
+        name = "claude_" + name
+    if not re.fullmatch(r"claude_[A-Za-z0-9_\-]+", name):
+        raise ActionError("a save name may use letters, digits, _ and - only")
+    path = SAVE_DIR / f"{name}.hoi4"
+    before = path.stat().st_mtime if path.exists() else 0
+    hoi4.run_console(hwnd, f"save {name}")
+    deadline, last = time.time() + 60, -1
+    while time.time() < deadline:
+        if path.exists() and path.stat().st_mtime > before:
+            size = path.stat().st_size
+            if size == last:
+                log(f"saved {path.name} ({size / 1e6:.0f} MB)")
+                return path
+            last = size
+        time.sleep(1)
+    raise ActionError(f"{path.name} did not appear within 60 s")
+
+
+def load_save(hwnd, name, log=print):
+    """From the main menu: Single Player, Load, pick the save, Load, Start; then wait for the map."""
+    find_text(hwnd, "Single Player", (700, 300, 1220, 800), timeout=150)
+    for label, box in (("Single Player", (700, 300, 1220, 800)), ("Load", (700, 300, 1220, 800))):
+        l = find_text(hwnd, label, box)
+        hoi4.click(hwnd, *l.center)
+        time.sleep(2)
+    entry = find_text(hwnd, name, (0, 500, 430, 1080), timeout=30)
+    hoi4.click(hwnd, *entry.center)
+    time.sleep(1.5)
+    hoi4.click(hwnd, *find_text(hwnd, "Load", (180, 1120, 460, 1180)).center)
+    start = find_text(hwnd, "START", (1500, 1100, 1920, 1190), timeout=120)
+    time.sleep(2)
+    hoi4.click(hwnd, *start.center)
+    find_text(hwnd, ", 19", T["top_bar"]["clock_box"], timeout=120)
+    log(f"loaded {entry.text}; in game at {read_date(hwnd)}")
+
+
+# --------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------
 def read_date(hwnd):
@@ -526,6 +632,10 @@ def main(argv):
     s.add_argument("screen")
     s = sub.add_parser("calibrate-research")
     s.add_argument("--tabs", help="comma-separated tab names (default: all)")
+    s = sub.add_parser("save")
+    s.add_argument("name", help="saved as claude_<name>")
+    s = sub.add_parser("load-save")
+    s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
     s.add_argument("what", choices=["research", "production", "date", "techs"])
     s.add_argument("--tab")
@@ -549,6 +659,10 @@ def main(argv):
     elif args.cmd == "close":
         close_screen(hwnd, args.screen)
         print(f"{args.screen} closed")
+    elif args.cmd == "save":
+        save_game(hwnd, args.name)
+    elif args.cmd == "load-save":
+        load_save(hwnd, args.name)
     elif args.cmd == "calibrate-research":
         calibrate_research(hwnd, args.tabs.split(",") if args.tabs else None)
         print(f"tech map saved to {TECH_MAP}")
