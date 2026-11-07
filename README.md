@@ -61,6 +61,8 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act fix-queue` | Every training line: count 1 and a deploy location (locations can get lost) |
 | `act select-box x0 y0 x1 y1` / `act army new [--halves N]` | Select divisions on the map, then make an army from the unassigned ones (S halves the selection: 75 → 38 → 19) |
 | `act camera home` | The standard map view: Go Home (the capital), then 12 notches out. Map coordinates for plans are measured in this view |
+| `act order --city NAME` | Send whatever divisions are selected at a city (no army needed) |
+| `read event` / `act event --option N` | The open event's title, options and each option's effects (read from its tooltip); choose one |
 | `act army target --army N --city Warsaw` | Order army N at a city by name: the map's Find window centres the camera on it, then a right-click on its label |
 | `act army move --army N --to X Y` | Order every division of army N to move to / attack the province at X,Y (camera-home view). More reliable than plans |
 | `act army execute [--army N]` | Start battle plans: clicks Execute only for armies the report shows still dug in (the button does not show its state; a second click stops a plan) |

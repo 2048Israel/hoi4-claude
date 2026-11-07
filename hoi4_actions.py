@@ -130,6 +130,40 @@ def event_parchment(hwnd):
     return r > 165 and g > 145 and r - b > 25
 
 
+def read_event(hwnd):
+    """The open event: {'title', 'options': [{'n', 'text', 'effects', 'at'}]}, or None. Each option's tooltip is
+    read by hovering it; the tooltip opens below and to the right of the cursor."""
+    if not event_parchment(hwnd):
+        return None
+    lines = read_box(hwnd, T["event_box_full"])
+    title = next((l.text for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), "")
+    options = event_options(lines, T["event_options_box_full"])
+    out = []
+    for i, o in enumerate(options, 1):
+        hoi4.move_mouse(*hoi4.to_screen(hwnd, *o.center))
+        time.sleep(1.2)
+        x, y = o.center
+        tip = ocr_image(hoi4.grab(hwnd).crop((x - 20, y + 25, min(1919, x + 600), min(1199, y + 330))),
+                        origin=(x - 20, y + 25))
+        effects = " | ".join(l.text for l in tip if len(l.text) > 2)
+        out.append({"n": i, "text": o.text, "effects": effects, "at": o.center})
+    park_mouse(hwnd)
+    return {"title": title, "options": out}
+
+
+def choose_event(hwnd, n, log=print):
+    ev = read_event(hwnd)
+    if not ev:
+        raise ActionError("no event is open")
+    if not 1 <= n <= len(ev["options"]):
+        raise ActionError(f"'{ev['title']}' has {len(ev['options'])} options")
+    o = ev["options"][n - 1]
+    hoi4.click(hwnd, *o["at"])
+    time.sleep(0.8)
+    log(f"event '{ev['title']}': chose {n}. {o['text']}")
+    return o
+
+
 def dismiss_single_events(hwnd, log=print, tries=4):
     """Country events with exactly one answer ("Excellent.") need no decision: take that answer. Events with
     two or more answers are left for a decision (see `read event` / `act event --option N`)."""
@@ -781,7 +815,8 @@ AR = T["army"]
 def units_selected(hwnd):
     """True when the left panel shows a unit selection (its header reads 'N Divisions' / 'N Selected' / 'Army N')."""
     text = " ".join(l.text for l in read_box(hwnd, AR["selection_header_box"]))
-    return bool(re.search(r"\d+\s*(Divisions|Selected)|Army \d+", text))
+    # OCR may read the header in either order ("19 Selected", "Divisions | 67")
+    return bool(re.search(r"\d+\s*(Divisions|Selected)|(Divisions|Selected)\s*\d+|Army \d+|unassigned", text))
 
 
 def deselect(hwnd):
@@ -904,8 +939,9 @@ def new_army_button(hwnd):
     def is_new_army(pt):
         hoi4.move_mouse(*hoi4.to_screen(hwnd, *pt))
         time.sleep(1.0)
-        tip = " ".join(l.text for l in ocr_image(hoi4.grab(hwnd).crop((400, 600, 1600, 1060)), origin=(400, 600)))
-        return "create a new army and" in tip.lower()
+        tip = " ".join(l.text for l in ocr_image(hoi4.grab(hwnd).crop((400, 600, 1800, 1095)), origin=(400, 600)))
+        t = tip.lower()  # OCR may cut the first line; the body "An Army is necessary" reads reliably
+        return ("an army is necessary" in t or "create a new army and" in t) and "army group" not in t
 
     for grp in (g_ for g_ in groups if len(g_) >= 8):
         ys = np.nonzero(g[:, grp].any(axis=1))[0]
@@ -931,12 +967,18 @@ def new_army(hwnd, halves=0, log=print):
             break
         hoi4.click(hwnd, AR["panel_close_x"], heads[-1].center[1])
         time.sleep(0.5)
-    if "unassigned" not in " ".join(l.text for l in read_box(hwnd, AR["selection_box"])).lower():
+    panel = read_box(hwnd, AR["selection_box"])
+    text = " ".join(l.text for l in panel).lower()
+    if "unassigned" not in text:
         raise ActionError("no unassigned divisions are selected")
+    if any(re.match(r"army \d+", l.text.strip().lower()) for l in panel) or "general" in text:
+        raise ActionError("divisions of existing armies are still selected; New Army would take them too. "
+                          "Select a smaller area with only unassigned divisions")
     for _ in range(halves):
         hoi4.press_combo("s")
         time.sleep(0.5)
-    n_before = len(army_cards(hwnd))
+    before = army_cards(hwnd)
+    n_before = len(before)
     plus = new_army_button(hwnd)
     if not plus:
         raise ActionError("the New Army button was not found")
@@ -945,6 +987,9 @@ def new_army(hwnd, halves=0, log=print):
     cards = army_cards(hwnd)
     if len(cards) <= n_before:
         raise ActionError("New Army was pressed but no new army card appeared")
+    shrunk = [i + 1 for i, ((nb, _), (na, _)) in enumerate(zip(before, cards)) if nb and na and na < nb]
+    if shrunk:
+        raise ActionError(f"the new army took divisions from armies {shrunk}: load the last save to undo")
     p = army_panel(hwnd)
     log(f"created {p['name']} with {p['size']} | armies now {[n for n, _ in cards]}")
     return p
@@ -1064,6 +1109,20 @@ def find_city(hwnd, city):
     return (960, 600)
 
 
+def order_selection(hwnd, city, log=print):
+    """Send whatever divisions are selected (no army needed) at `city`, via the Find window."""
+    if not units_selected(hwnd):
+        raise ActionError("nothing is selected")
+    pt = find_city(hwnd, city)
+    if not units_selected(hwnd):
+        raise ActionError("the selection was lost while searching; nothing ordered")
+    hoi4.click(hwnd, *pt, button="right")
+    time.sleep(0.8)
+    deselect(hwnd)
+    camera_home(hwnd, log=lambda m: None)
+    log(f"selection ordered to {city} (clicked {pt})")
+
+
 def target_city(hwnd, index, city, log=print):
     """Order army `index` to attack/move to `city`: select it, centre the camera on the city with Find,
     right-click the city's label, then put the camera back home."""
@@ -1093,6 +1152,9 @@ def camera_home(hwnd, zoom_out=None, log=print):
     time.sleep(1.0)
     hoi4.click(hwnd, *AR["find_close"])
     time.sleep(0.3)
+    # Go Home keeps the current zoom: zoom fully in first so the zoom-out below always lands the same
+    hoi4.scroll(hwnd, *AR["home_zoom_point"], 40)
+    time.sleep(0.8)
     hoi4.scroll(hwnd, *AR["home_zoom_point"], -zoom_out)
     time.sleep(1.0)
     log(f"camera home: capital, zoomed out {zoom_out} notches")
@@ -1374,6 +1436,8 @@ def main(argv):
     s = sub.add_parser("calibrate-research")
     s.add_argument("--tabs", help="comma-separated tab names (default: all)")
     s = sub.add_parser("dismiss", help="close 'Research Finished!' / 'National Focus Completed' notices")
+    s = sub.add_parser("event", help="choose an option of the open event: --option N (see: read event)")
+    s.add_argument("--option", type=int, required=True)
     s = sub.add_parser("recruit", help="queue divisions: each trains once and has a deploy location")
     s.add_argument("--count", type=int, required=True)
     s.add_argument("--template", default="Infanterie-Division")
@@ -1386,6 +1450,8 @@ def main(argv):
     s.add_argument("--army", type=int)
     s.add_argument("--name")
     s.add_argument("--halves", type=int, default=0)
+    s = sub.add_parser("order", help="send the selected divisions at a city: --city NAME (use after select-box or a click)")
+    s.add_argument("--city", required=True)
     s = sub.add_parser("camera", help="camera home: capital, then the standard zoom")
     s.add_argument("op", choices=["home"])
     s = sub.add_parser("select-box", help="drag-select divisions in a screen box: x0 y0 x1 y1")
@@ -1397,14 +1463,14 @@ def main(argv):
     s = sub.add_parser("load-save")
     s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
-    s.add_argument("what", choices=["research", "production", "date", "techs", "focus"])
+    s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event"])
     s.add_argument("--tab")
     s.add_argument("--grep")
     args = p.parse_args(argv)
 
     hwnd = hoi4.need_window()
     hoi4.focus(hwnd)
-    if args.cmd not in ("load-save",):
+    if args.cmd not in ("load-save", "event") and not (args.cmd == "read" and args.what == "event"):
         dismiss_notices(hwnd)
     if args.cmd == "dismiss":
         return
@@ -1426,6 +1492,8 @@ def main(argv):
     elif args.cmd == "close":
         close_screen(hwnd, args.screen)
         print(f"{args.screen} closed")
+    elif args.cmd == "event":
+        choose_event(hwnd, args.option)
     elif args.cmd == "recruit":
         recruit(hwnd, args.count, args.template)
     elif args.cmd == "army":
@@ -1463,6 +1531,8 @@ def main(argv):
                 if not p["general"]:
                     assign_general(hwnd, i)
             deselect(hwnd)
+    elif args.cmd == "order":
+        order_selection(hwnd, args.city)
     elif args.cmd == "camera":
         camera_home(hwnd)
     elif args.cmd == "select-box":
@@ -1490,6 +1560,15 @@ def main(argv):
         print(header)
         for r in rows:
             print(f"  line {r['line']}: {r['name']} | factories {r['factories']} | {r['detail']}")
+    elif args.what == "event":
+        ev = read_event(hwnd)
+        if not ev:
+            print("(no event open)")
+        else:
+            print(ev["title"])
+            for o in ev["options"]:
+                print(f"  {o['n']}. {o['text']}")
+                print(f"       {o['effects']}")
     elif args.what == "focus":
         print(current_focus(hwnd) or "(no focus running)")
     elif args.what == "date":

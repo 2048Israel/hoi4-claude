@@ -9,6 +9,13 @@ saying what changed and how it was checked.
   no guessed pixels. Checked live: six armies sent at Warsaw, Lwów, Lublin, Białystok and Siedlce; all left
   their trenches (entrenchment 85% → under 15%) and joined combat.
 
+- **read event / act event --option N:** events with choices, with each option's effects read from its tooltip.
+  Checked live on "Draft Dodging" (three options with costs and odds).
+- **act order --city NAME:** sends the selected divisions at a city; `tools/load_ingame.py` loads a save mid-game.
+- **camera home is repeatable:** it zooms fully in before Go Home (which keeps the zoom), then out.
+- **act army new is safer:** it refuses when army divisions are still selected, and reports if an existing army
+  shrank. A box around Berlin once caught divisions of Armies 1-7; the campaign was reloaded both times.
+
 # 0.1.2 (2026-11-07)
 
 - **Notices:** "Research Finished!" and "National Focus Completed" notices sit on top of everything and catch
