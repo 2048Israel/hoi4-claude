@@ -748,12 +748,21 @@ def production_by_name(hwnd, name, add=0, remove=0, log=print):
 AR = T["army"]
 
 
+def units_selected(hwnd):
+    """True when the left panel shows a unit selection (its header reads 'N Divisions' / 'N Selected' / 'Army N')."""
+    text = " ".join(l.text for l in read_box(hwnd, AR["selection_header_box"]))
+    return bool(re.search(r"\d+\s*(Divisions|Selected)|Army \d+", text))
+
+
 def deselect(hwnd):
-    """Clear the unit selection: click open sea, then close the sea-region panel that opens."""
-    hoi4.click(hwnd, *AR["empty_sea"])
-    time.sleep(0.5)
-    hoi4.click(hwnd, *AR["sea_panel_close"])
-    time.sleep(0.3)
+    """Clear the unit selection with Esc, which only clears units when units are selected; with nothing selected
+    Esc would open the game menu, so it is pressed only after checking. (A click on 'open sea' was used before,
+    but the panels shift and it hit the division list.)"""
+    for _ in range(3):
+        if not units_selected(hwnd):
+            return
+        hoi4.press_combo("esc")
+        time.sleep(0.5)
 
 
 def army_cards(hwnd):

@@ -42,8 +42,7 @@
     "scroll_point": [330, 800]
   },
   "army": {
-    "empty_sea": [600, 330],
-    "sea_panel_close": [515, 845],
+    "selection_header_box": [0, 60, 540, 330],
     "card_numbers_box": [560, 1150, 1360, 1200],
     "card_click_y": 1110,
     "stop_band": [1038, 1052],

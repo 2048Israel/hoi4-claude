@@ -1056,11 +1056,14 @@ def console_open(hwnd):
     from PIL import ImageGrab, ImageStat
     ensure_front()
     left, top, _, _ = client_rect(hwnd)
-    strip = ImageStat.Stat(ImageGrab.grab(bbox=(left + 560, top + 240, left + 590, top + 620),
-                                          all_screens=True).convert("L"))
-    bar = ImageStat.Stat(ImageGrab.grab(bbox=(left + 10, top + 640, left + 610, top + 675),
-                                        all_screens=True).convert("L"))
-    return strip.mean[0] < 45 and strip.stddev[0] < 14 and bar.mean[0] < 50
+    # Two strips of the console's dark body: either being flat and dark counts (its text and scrollbar can make
+    # one of them busy), and the input bar must be dark too.
+    def stat(x0, y0, x1, y1):
+        return ImageStat.Stat(ImageGrab.grab(bbox=(left + x0, top + y0, left + x1, top + y1),
+                                             all_screens=True).convert("L"))
+    strips = [stat(560, 215, 590, 330), stat(560, 240, 590, 620)]
+    bar = stat(10, 640, 610, 675)
+    return any(s.mean[0] < 45 and s.stddev[0] < 14 for s in strips) and bar.mean[0] < 50
 
 
 def wait_console(hwnd, want_open, timeout=1.5):
@@ -1122,7 +1125,14 @@ def cmd_report(args):
     # "effect <tag> <scripted effect>" runs the report directly. (Firing the hidden event
     # claude_bridge.1 from the console also works but opens a debug popup.)
     # Without a tag the console runs the effect for the player's country.
-    run_console(hwnd, f"effect {args.tag} claude_bridge_report" if args.tag else "effect claude_bridge_report")
+    # Without a tag the console's scope is whatever is selected (a general, a state), so always name the country:
+    # the player's tag from the latest heartbeat.
+    tag = args.tag
+    if not tag:
+        recs, _ = records(max(0, log_size() - 2_000_000))
+        hb = last_kind(recs, "day")
+        tag = hb.get("tag") if hb else None
+    run_console(hwnd, f"effect {tag} claude_bridge_report" if tag else "effect claude_bridge_report")
     deadline = time.time() + args.timeout
     while time.time() < deadline:
         recs, _ = records(start)
