@@ -23,6 +23,12 @@ needs it:
   inside the focus view; PLAYBOOK, National Focus) and `shift+RETURN` to start. Confirm through `hoi4.py state` or
   SR1's snapshot.
 - **Advisors and laws:** `act hire --name "Hjalmar Schacht"`. The list re-sorts, so find the row by OCR every time.
+  - Open an **empty** slot, never a filled one. A filled slot's list replaces that advisor: the game asks "Replace
+    Officer: do you want to replace Hjalmar Schacht with Franz Seldte?". Seen live on 1936-08-05 and cancelled.
+    Political advisor slots in this setup: x 375, 475, 575 at y 735.
+  - A red X in the list means "cannot hire". For example, Walther Funk needs Schacht and Erhard not hired. Read
+    the reason from the tooltip, and do not click.
+  - Check the hire by the drop in political power (`hoi4.py state` after one day, or OCR of the top bar).
 - **Decisions:** `act decision --name ...` by OCR of the decisions list.
 - **Production lines past the first five:** scroll the list with known steps, and find lines by name with OCR.
 
