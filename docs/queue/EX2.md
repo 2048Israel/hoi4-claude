@@ -25,6 +25,16 @@ needs it:
 - **Focus:** `act focus --name "Remilitarize the Rhineland"`. Open with `alt+q`, use the tree's search (`ctrl+f`
   inside the focus view; PLAYBOOK, National Focus) and `shift+RETURN` to start. Confirm through `hoi4.py state` or
   SR1's snapshot.
+  - What worked live: click the search box at (1630,135), type the name, then Enter. That opens the detail window
+    for the first hit; `ctrl+tab` moves to the next hit. Read the title, then click the window's "Start" (found by
+    OCR). Confirm it in Politics: the focus box at (220-700, 120-230) reads the running focus, or "Select a
+    National Focus" when none is running.
+  - When Start does nothing, its tooltip says "You don't meet the requirements!". The requirement list scrolls
+    inside its own box (870-1270, 240-380): scroll it and find the red X. Examples seen live: First Vienna Award
+    needs "Owns North Sudetenland" (Munich must happen first); Zentrale Planung needs "At war with a Major
+    Country".
+  - The tree opens at whatever zoom it was left at, so a focus's screen position is not stable. Use the search,
+    not coordinates.
 - **Advisors and laws:** `act hire --name "Hjalmar Schacht"`. The list re-sorts, so find the row by OCR every time.
   - Open an **empty** slot, never a filled one. A filled slot's list replaces that advisor: the game asks "Replace
     Officer: do you want to replace Hjalmar Schacht with Franz Seldte?". Seen live on 1936-08-05 and cancelled.
