@@ -131,15 +131,18 @@ def wing_rows(hwnd):
     return sorted(rows, key=lambda r: r["k"])
 
 
-def wing_order(hwnd, y):
-    """'Air Superiority', 'Close Air Support', 'waiting', 'moving to X', or the tooltip text as read."""
-    tip = " ".join(l.text for l in A.hover_tooltip(hwnd, AIR["status_hover_x"], y + 20,
-                                                   x_min=AIR["status_hover_x"] - 25))
-    m = re.search(r"have the order[.:]?\s*(.+?)(?:\s+Wing XP|\s+Majority|$)", tip)
-    if m:
-        return m.group(1).strip()
-    if "waiting for orders" in tip:
-        return "waiting"
+def wing_order(hwnd, y, tries=3):
+    """'Air Superiority', 'Close Air Support', 'waiting', or the tooltip text as read. The tooltip finder sometimes
+    catches the map instead (a battle icon changing at the same time), so read again until it makes sense."""
+    tip = ""
+    for _ in range(tries):
+        tip = " ".join(l.text for l in A.hover_tooltip(hwnd, AIR["status_hover_x"], y + 20,
+                                                       x_min=AIR["status_hover_x"] - 25))
+        m = re.search(r"have the order[.:]?\s*(.+?)(?:\s+Wing XP|\s+Majority|$)", tip)
+        if m:
+            return m.group(1).strip()
+        if "waiting for orders" in tip:
+            return "waiting"
     return tip[:60] or "?"
 
 
