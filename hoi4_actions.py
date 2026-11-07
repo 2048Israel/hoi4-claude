@@ -155,6 +155,11 @@ def dismiss_news(hwnd, log=print, tries=3):
             break
         bx0, by0, bx1, by1 = T["news_button_box"]
         buttons = [l for l in lines if bx0 <= l.center[0] <= bx1 and by0 <= l.center[1] <= by1]
+        rows = []  # OCR splits a long button label over two lines: one answer per ~45 px band
+        for b in sorted(buttons, key=lambda l: l.center[1]):
+            if not rows or b.center[1] - rows[-1].center[1] > 45:
+                rows.append(b)
+        buttons = rows
         if len(buttons) != 1:
             log(f"a news popup has {len(buttons)} answers; left open for a decision")
             break
