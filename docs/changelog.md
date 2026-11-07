@@ -1,7 +1,9 @@
 # Changelog
 
-What shipped to `main`, newest first. A batch adds its block at the top in the merge that ships it: a few lines
+What shipped to `main`, newest first, under the version that shipped it. A batch adds its block at the top in the merge that ships it: a few lines
 saying what changed and how it was checked.
+
+# 0.1.0 (2026-11-07)
 
 ## 2026-11-07: SR0, a real text-save fixture
 
