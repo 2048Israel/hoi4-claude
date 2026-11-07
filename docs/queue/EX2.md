@@ -35,6 +35,12 @@ needs it:
   - A world-news or event popup that opens meanwhile covers the dialog. Read the dialog's text before clicking,
     and stop if it is not the expected one (this worked live: nothing was clicked).
 - **Decisions:** `act decision --name ...` by OCR of the decisions list.
+  - The list opens on the mods' categories (Heavy Industry, academies, Navy Overhaul). Collapse them with their
+    arrow at x 619, or scroll; vanilla categories such as MEFO Bills and Price Control Measures come after.
+  - A row's tooltip opens just below the cursor (crop x 180-760, y+30 to y+240). Its "Take" button is at x 619 on
+    the row's line. A taken decision drops to the end of its category, greyed.
+  - Seen live on 1937-10-17: Import Tariffs (15 PP, -15% consumer goods), Guns before Butter and Arbeit und Brot
+    (30 PP, -5% each).
 - **Production lines past the first five:** scroll the list with known steps, and find lines by name with OCR.
 
 Each action follows EX1's pattern: open by hotkey; check by OCR; act; confirm the result; close with the hotkey
