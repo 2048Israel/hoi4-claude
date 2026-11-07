@@ -2,6 +2,9 @@
 
 A bridge that lets Claude play Hearts of Iron IV on this PC.
 
+> **AI agents:** read [`CLAUDE.md`](CLAUDE.md) first. It covers who works on what, when to branch, and how a change
+> reaches `main`. The work waiting is in [`QUEUE.md`](QUEUE.md).
+
 - **Eyes:** screenshots of the game window, with a coordinate grid drawn on top.
 - **Hands:** mouse and keyboard input sent to the game window.
 - **Memory of the game:** the *Claude Bridge* mod writes the player's state and world news into
@@ -68,7 +71,7 @@ It only logs. It changes nothing about the game.
 
 The program and mod run on one Windows PC that has the game; the first campaign there is **Germany, 1936**
 (Regular, not Ironman). Anyone can work on the code, but only that PC can test against the live game, so
-send changes as pull requests and describe how to check them in-game.
+send changes as pull requests and describe how to check them in-game (the full process is in `CLAUDE.md`).
 
 **Verified in the live game:** window focus, screenshots, clicks, hotkeys (Y production, Alt+Q focus tree),
 console reports (`report`), the daily heartbeat, `pause` / `resume` / `advance`, and console open/close detection.
@@ -79,13 +82,9 @@ console reports (`report`), the daily heartbeat, `pause` / `resume` / `advance`,
 - News hooks (`on_declare_war`, `on_capitulation`, ...): none has fired yet.
 - The screen checks at any resolution or UI scale other than 1920x1200 / 1.0.
 
-**Useful next pieces:**
-- Named click targets for common UI elements (e.g. `click-ui production.new_infantry_line`) so the player
-  needs fewer screenshots.
-- Detecting and summarizing event popups (title and options), and choosing an option by number.
-- Map helpers: center the camera on a state or province, read who controls a province under the cursor.
-- A battle-plan helper: select an army, draw a front line or offensive line, execute.
-- Cheaper observation: smaller crops of the parts of the screen that changed.
+**The work waiting** is in `QUEUE.md`, one brief per batch in `docs/queue/`. Ideas not queued yet: map helpers
+(center the camera on a state, read who controls the province under the cursor) and a battle-plan helper (select an
+army, draw a front line or offensive line, execute).
 
 `tests/test_offline.py` covers the parts that need no game: log parsing, report/news formatting, keys, grid drawing.
 Run it with `.venv\Scripts\python.exe tests\test_offline.py`. `PLAYBOOK.md` lists hotkeys and screen flows for this
