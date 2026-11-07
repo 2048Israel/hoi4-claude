@@ -101,7 +101,7 @@ def event_options(lines, box):
                     key=lambda l: l.center[1])
     rows = []  # OCR may split one button's text into two lines on the same row: one option per row
     for l in inside:
-        if rows and abs(l.center[1] - rows[-1].center[1]) < 18:
+        if rows and abs(l.center[1] - rows[-1].center[1]) < 32:  # same button: one row, or a label wrapped over two lines
             continue
         rows.append(l)
     return rows
