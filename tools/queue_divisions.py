@@ -1,11 +1,12 @@
-"""Queue N infantry divisions: Train N times, set each new line from infinity to 1, give each a location.
+r"""Queue N infantry divisions: Train N times, set each new line from infinity to 1, give each a location.
 
 Interim tool until EX2 adds `act recruit`. Usage: .venv\Scripts\python.exe tools\queue_divisions.py 10
 """
 import sys
 import time
+from pathlib import Path
 
-sys.path.insert(0, r"C:\Users\Jerus\hoi4-claude")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import hoi4
 import hoi4_actions as A
 
