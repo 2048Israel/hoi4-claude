@@ -51,7 +51,9 @@
     "commander_list_box": [690, 330, 1340, 920],
     "plus_band": [600, 1040, 1320, 1180],
     "selection_box": [0, 60, 540, 1180],
-    "panel_close_x": 522
+    "panel_close_x": 522,
+    "front_line_key": "z",
+    "tooltip_box": [1500, 1040, 1919, 1180]
   },
   "focus": {
     "key": "alt+q",

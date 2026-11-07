@@ -836,6 +836,22 @@ def new_army(hwnd, halves=0, log=print):
     return p
 
 
+def front_line(hwnd, index, border_point, log=print):
+    """Army `index` gets a front line along the border clicked at `border_point` (window pixels on the dashed
+    border the front-line tool highlights). Works in peacetime too."""
+    p = select_army(hwnd, index)
+    hoi4.press_combo(AR["front_line_key"])
+    time.sleep(0.6)
+    hoi4.click(hwnd, *border_point)
+    time.sleep(1.2)
+    tip = " ".join(l.text for l in read_box(hwnd, AR["tooltip_box"], park=False)).lower()
+    hoi4.press_combo("esc") if "cannot draw" in tip else None
+    if "cannot draw" in tip:
+        raise ActionError(f"the game would not draw a front line there: {tip[:160]}")
+    log(f"{p['name']} ({p['general']}): front line drawn at {border_point}")
+    return p
+
+
 def select_box(hwnd, box):
     deselect(hwnd)
     hoi4.drag(hwnd, box[0], box[1], box[2], box[3])
@@ -1117,7 +1133,8 @@ def main(argv):
     s.add_argument("--template", default="Infanterie-Division")
     s = sub.add_parser("fix-queue", help="every training line: count 1 and a deploy location")
     s = sub.add_parser("army", help="armies: list | new [--halves N] | general --army N [--name X] | generals")
-    s.add_argument("op", choices=["list", "new", "general", "generals"])
+    s.add_argument("op", choices=["list", "new", "general", "generals", "front"])
+    s.add_argument("--at", type=int, nargs=2, metavar=("X", "Y"), help="front: a point on the highlighted border")
     s.add_argument("--army", type=int)
     s.add_argument("--name")
     s.add_argument("--halves", type=int, default=0)
@@ -1170,6 +1187,11 @@ def main(argv):
             if not args.army:
                 raise ActionError("--army N is needed")
             assign_general(hwnd, args.army, args.name)
+            deselect(hwnd)
+        elif args.op == "front":
+            if not args.army or not args.at:
+                raise ActionError("front needs --army N --at X Y")
+            front_line(hwnd, args.army, args.at)
             deselect(hwnd)
         else:
             for i, p in enumerate(list_armies(hwnd, log=lambda m: None), 1):
