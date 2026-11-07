@@ -29,6 +29,11 @@ needs it:
   - A red X in the list means "cannot hire". For example, Walther Funk needs Schacht and Erhard not hired. Read
     the reason from the tooltip, and do not click.
   - Check the hire by the drop in political power (`hoi4.py state` after one day, or OCR of the top bar).
+  - **Laws ask for confirmation:** "REPLACE IDEA: do you want to replace Limited Conscription with Extensive
+    Conscription for a total cost of 150?". Click its OK, read by OCR (it was at 1077,771). Closing the screen
+    instead cancels silently. Seen live on 1936-12-22.
+  - A world-news or event popup that opens meanwhile covers the dialog. Read the dialog's text before clicking,
+    and stop if it is not the expected one (this worked live: nothing was clicked).
 - **Decisions:** `act decision --name ...` by OCR of the decisions list.
 - **Production lines past the first five:** scroll the list with known steps, and find lines by name with OCR.
 
