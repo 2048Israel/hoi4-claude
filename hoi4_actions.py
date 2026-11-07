@@ -76,13 +76,14 @@ def dismiss_notices(hwnd, log=print, tries=4):
     closed = 0
     for _ in range(tries):
         lines = read_box(hwnd, T["notice_box"])
-        if not any(any(w in norm(l.text) for w in NOTICE_WORDS) for l in lines):
+        joined = norm(" ".join(l.text for l in lines))  # OCR may split "NATIONAL / Focus / COMPLETED"
+        if not any(w in joined for w in NOTICE_WORDS):
             break
         ok = [l for l in lines if norm(l.text) in ("ok", "0k")]  # OCR often reads the O as a zero
         hoi4.click(hwnd, *(ok[0].center if ok else T["notice_ok"]))
         time.sleep(0.5)
         closed += 1
-        log(f"closed a notice: {' '.join(l.text for l in lines if any(w in norm(l.text) for w in NOTICE_WORDS))}")
+        log(f"closed a notice: {' '.join(l.text for l in lines[:4])}")
     return closed
 
 
