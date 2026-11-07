@@ -105,6 +105,7 @@ user32.SetForegroundWindow.argtypes = [wintypes.HWND]
 user32.BringWindowToTop.argtypes = [wintypes.HWND]
 user32.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
 user32.AttachThreadInput.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.BOOL]
+user32.SwitchToThisWindow.argtypes = [wintypes.HWND, wintypes.BOOL]
 user32.SendInput.argtypes = [wintypes.UINT, ctypes.POINTER(INPUT), ctypes.c_int]
 user32.SendInput.restype = wintypes.UINT
 user32.MapVirtualKeyW.argtypes = [wintypes.UINT, wintypes.UINT]
@@ -228,6 +229,13 @@ def focus(hwnd):
         user32.SetForegroundWindow(hwnd)
         if other:
             user32.AttachThreadInput(me, other, False)
+    if user32.GetForegroundWindow() != hwnd:
+        # A lone Alt tap also counts as "last input" and is the classic way past the foreground lock.
+        alt = (0x38, False)
+        _send(_key_input(alt[0]), _key_input(alt[0], up=True))
+        user32.SetForegroundWindow(hwnd)
+    if user32.GetForegroundWindow() != hwnd:
+        user32.SwitchToThisWindow(hwnd, True)
     time.sleep(0.3)
     if user32.GetForegroundWindow() != hwnd:
         raise BridgeError("Could not bring the HOI4 window to the front.")
