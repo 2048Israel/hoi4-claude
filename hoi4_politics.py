@@ -25,15 +25,25 @@ def slot_point(slot):
     return PO["slots"][slot]
 
 
+def list_open(hwnd):
+    x0, y0, x1, _ = PO["list_box"]
+    return "select" in " ".join(l.text for l in A.read_box(hwnd, [x0, y0, x1, PO["list_rows_top"]])).lower()
+
+
 def close_list(hwnd):
-    hoi4.click(hwnd, *PO["list_close"])
-    time.sleep(0.4)
+    """Close a slot's list, only if one is open: with none, its X spot is a top-bar alert that opens another
+    screen (seen 1939-06-26: the Politics screen went away and the next click opened a state view)."""
+    if list_open(hwnd):
+        hoi4.click(hwnd, *PO["list_close"])
+        time.sleep(0.4)
 
 
 def open_slot(hwnd, slot):
     """Open a slot's list; returns (title, [name lines])."""
     A.open_screen(hwnd, "politics")
     close_list(hwnd)
+    if not A.is_open(hwnd, "politics"):
+        raise ActionError("the Politics screen is not open; nothing clicked")
     hoi4.click(hwnd, *slot_point(slot))
     time.sleep(1.2)
     lines = A.read_box(hwnd, PO["list_box"])
