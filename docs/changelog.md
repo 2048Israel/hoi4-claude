@@ -15,6 +15,11 @@ saying what changed and how it was checked.
   works whether the tooltip opens above or below the cursor. `read pp` reads political power from the top bar.
 - **act research-fill:** fills empty research slots from `plans/research_germany.txt`, skipping techs the game
   refuses. Checked live: five empty slots filled.
+- **Laws, advisors and staff (hoi4_politics.py):** `read ideas --slot S` lists a Politics slot's choices with
+  their effects; `act idea --slot S --name NAME [--dry-run] [--replace]` takes one, confirms a law's REPLACE dialog,
+  and checks the political power spent. A filled advisor slot is never replaced without `--replace`. Slots:
+  law-conscription/trade/economy, advisor-1..3, research-1..6, staff-1..6, gov-executive/judiciary/structure.
+  Used live: Unitary State, Walther Funk, Werner von Fritsch.
 - **act army push (hoi4_orders.py):** standing orders in `plans/orders.txt` (`army general city`); a fresh report
   shows each army's share of divisions in combat, and any army under `--min-share` (35%) is sent at its city
   again. Direct orders end when a path is blocked, and the army then digs in: in the first July 1940 run three

@@ -1781,6 +1781,11 @@ def main(argv):
     s.add_argument("--only", help="comma-separated words a wing's name must contain, e.g. Jagd,JG")
     s.add_argument("--base", help="an air base by name, as the Air Forces Overview (read air) shows it")
     s.add_argument("--wing", help="assign: one wing by name, picked in the overview (a base panel shows 4 rows)")
+    s = sub.add_parser("idea", help="take a law/advisor/staff/government choice: --slot S --name NAME [--dry-run]")
+    s.add_argument("--slot", required=True, help="e.g. law-economy, advisor-3, staff-6, gov-structure (see read ideas)")
+    s.add_argument("--name", required=True)
+    s.add_argument("--dry-run", action="store_true")
+    s.add_argument("--replace", action="store_true", help="allow replacing the advisor already in a filled slot")
     s = sub.add_parser("decision", help="take a decision by name (shift+q list); checks political power dropped")
     s.add_argument("--name", required=True)
     s.add_argument("--dry-run", action="store_true", help="find it and show its tooltip, take nothing")
@@ -1795,7 +1800,8 @@ def main(argv):
     s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
     s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event", "decisions", "pp",
-                                    "air"])
+                                    "air", "ideas"])
+    s.add_argument("--slot", help="read ideas: the slot whose choices to list (law-economy, advisor-3, staff-6, ...)")
     s.add_argument("--tab")
     s.add_argument("--grep")
     args = p.parse_args(argv)
@@ -1844,6 +1850,9 @@ def main(argv):
             if not args.to:
                 raise ActionError("act air rebase needs --to X Y")
             hoi4_air.rebase(hwnd, args.at, args.to, args.only, base=args.base)
+    elif args.cmd == "idea":
+        import hoi4_politics
+        hoi4_politics.take(hwnd, args.slot, args.name, dry_run=args.dry_run, replace=args.replace)
     elif args.cmd == "decision":
         take_decision(hwnd, args.name, dry_run=args.dry_run)
     elif args.cmd == "decision-category":
@@ -1938,6 +1947,13 @@ def main(argv):
         print(read_pp(hwnd))
     elif args.what == "decisions":
         read_decisions(hwnd)
+    elif args.what == "ideas":
+        import hoi4_politics
+        if not args.slot:
+            print("slots: " + ", ".join(hoi4_politics.PO["slots"]))
+        else:
+            hoi4_politics.choices(hwnd, args.slot)
+            close_screen(hwnd, "politics")
     elif args.what == "air":
         import hoi4_air
         rows = hoi4_air.read_overview(hwnd)

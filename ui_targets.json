@@ -117,6 +117,24 @@
     "overview_cols": [360, 495],
     "overview_click_x": 260
   },
+  "politics": {
+    "_note": "Politics screen (q) idea slots, measured 1940-05/07. Lists open at x 690-1300, rows ~92 px apart.",
+    "slots": {
+      "law-conscription": [60, 740], "law-trade": [160, 740], "law-economy": [270, 740],
+      "advisor-1": [386, 740], "advisor-2": [486, 740], "advisor-3": [585, 740],
+      "research-1": [71, 869], "research-2": [171, 869], "research-3": [271, 869],
+      "research-4": [371, 869], "research-5": [471, 869], "research-6": [586, 869],
+      "staff-1": [71, 1000], "staff-2": [160, 1000], "staff-3": [271, 1000],
+      "staff-4": [371, 1000], "staff-5": [471, 1000], "staff-6": [585, 1000],
+      "gov-executive": [70, 1140], "gov-judiciary": [170, 1140], "gov-structure": [271, 1140]
+    },
+    "list_box": [690, 100, 1300, 900],
+    "list_rows_top": 180,
+    "list_close": [1258, 126],
+    "name_x": [780, 1000],
+    "hover_x": 880,
+    "confirm_box": [600, 300, 1320, 900]
+  },
   "decisions": {
     "_note": "shift+q. Rows: name at x 88, cost near x 520, take button x 619. Category headers are centred (x 264-396) with a collapse arrow at x 620. One wheel notch scrolls one row (51 px).",
     "list_box": [0, 260, 680, 1190],
