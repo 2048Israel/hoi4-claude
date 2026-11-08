@@ -61,14 +61,15 @@ def main():
     from PIL import ImageDraw
     img = Image.new("RGB", (1920, 1200), (200, 180, 140))
     d = ImageDraw.Draw(img)
-    d.rectangle((870, 500, 1330, 530), fill=(50, 45, 40))
-    d.rectangle((870, 560, 1330, 590), fill=(50, 45, 40))
+    d.rectangle((870, 500, 1330, 530), fill=(42, 40, 38))
+    d.rectangle((870, 560, 1330, 590), fill=(42, 40, 38))
     for x in range(870, 1330, 20):
         d.rectangle((x, 640, x + 10, 660), fill=(160, 170, 120))
         d.rectangle((x + 10, 640, x + 20, 660), fill=(90, 120, 160))
     opts = [OcrLine("Who dares, wins.", (1000, 508, 1200, 522)), OcrLine("Second", (1000, 568, 1200, 582)),
             OcrLine("Budapest", (1000, 643, 1100, 657))]
     assert [o.text for o in A.on_buttons(img, opts)] == ["Who dares, wins.", "Second"]
+    assert A.on_buttons(img, [OcrLine("dynia", (1000, 643, 1100, 657))]) == [], "map text alone is no option"
     print("EX2 OFFLINE CHECKS PASSED")
 
 

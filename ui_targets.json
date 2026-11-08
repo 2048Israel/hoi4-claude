@@ -157,6 +157,7 @@
   "event_options_box": [870, 440, 1330, 700],
   "event_box_full": [600, 220, 1340, 920],
   "event_options_box_full": [870, 440, 1330, 900],
+  "event_popup_x": [620, 1260],
   "treaty_box": [660, 360, 1260, 820],
   "news_button_box": [700, 840, 1160, 900],
   "safe_mouse": [1910, 1190]

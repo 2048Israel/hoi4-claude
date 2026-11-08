@@ -120,18 +120,23 @@ def event_options(lines, box):
     return rows
 
 
-def on_button(img, y, x0=875, x1=1325):
-    """An option's row lies on a dark, even button strip. Map labels below a small popup ("Ace Pilot Promoted")
-    were read as options 2 and 3; the map under them is brighter or uneven."""
+def on_button(img, line, x0=None, x1=None):
+    """An option's text sits on a dark, even button. Sampled in a thin band just under the text, where a button is
+    plain and the map is not: map labels below a small popup ("Ace Pilot Promoted") were read as options."""
     import numpy as np
-    a = np.asarray(img.convert("L").crop((x0, max(0, y - 3), x1, y + 4))).astype(int)
+    x0 = max(0, line.box[0] - 40) if x0 is None else x0
+    x1 = min(img.width, line.box[2] + 40) if x1 is None else x1
+    y0 = line.box[3] + 2
+    a = np.asarray(img.convert("L").crop((x0, y0, x1, y0 + 4))).astype(int)
     cols = np.median(a, axis=0)
-    return float(np.median(cols)) < 90 and float(np.percentile(cols, 75)) < 110
+    # measured live: under a button's text 39-44, under map labels next to a popup 73-85
+    return float(np.median(cols)) < 62 and float(np.percentile(cols, 75)) < 75
 
 
 def on_buttons(img, options):
-    """Keep the first option always (an event has at least one); drop later ones that are not on a button."""
-    return options[:1] + [o for o in options[1:] if on_button(img, o.center[1])]
+    """The options that sit on a button strip. None of them may: an event with a portrait puts its button further
+    left, and only map text is left in the usual column ("dynia" from Gdynia); other_layout() then looks again."""
+    return [o for o in options if on_button(img, o)]
 
 
 def other_layout(img, lines, title, options):
@@ -143,8 +148,9 @@ def other_layout(img, lines, title, options):
         if upper:
             title = max(upper, key=lambda l: l.box[3] - l.box[1]).text
     if not options:
-        options = [l for l in lines if len(l.text) > 3
-                   and on_button(img, l.center[1], max(0, l.box[0] - 40), min(1919, l.box[2] + 40))]
+        px0, px1 = T["event_popup_x"]
+        options = [l for l in lines if len(l.text) > 3 and l.box[0] >= px0 and l.box[2] <= px1
+                   and on_button(img, l)]
         rows = []
         for l in sorted(options, key=lambda l: l.center[1]):
             if not rows or abs(l.center[1] - rows[-1].center[1]) >= 32:
