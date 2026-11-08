@@ -1853,6 +1853,7 @@ def main(argv):
     s.add_argument("--only", help="comma-separated words a wing's name must contain, e.g. Jagd,JG")
     s.add_argument("--base", help="an air base by name, as the Air Forces Overview (read air) shows it")
     s.add_argument("--wing", help="assign: one wing by name, picked in the overview (a base panel shows 4 rows)")
+    s.add_argument("--region-name", help="assign --wing: the region the wing must end up over, e.g. 'Western Poland'")
     s = sub.add_parser("idea", help="take a law/advisor/staff/government choice: --slot S --name NAME [--dry-run]")
     s.add_argument("--slot", required=True, help="e.g. law-economy, advisor-3, staff-6, gov-structure (see read ideas)")
     s.add_argument("--name", required=True)
@@ -1917,7 +1918,8 @@ def main(argv):
         elif args.op == "assign" and args.wing:
             if not (args.mission and args.region):
                 raise ActionError("act air assign needs --mission and --region X Y")
-            hoi4_air.assign_wing(hwnd, args.wing, args.mission, args.region, base=args.base)
+            hoi4_air.assign_wing(hwnd, args.wing, args.mission, args.region, base=args.base,
+                                 region_name=args.region_name)
         elif not (args.at or args.base):
             raise ActionError("act air needs --base NAME (see: read air) or --at X Y (a base icon in the air mode)")
         elif args.op == "base":
