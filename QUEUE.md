@@ -18,7 +18,7 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 
 | batch | lane | what | brief |
 |---|---|---|---|
-| OR1 | Offline | The orders format: what thinker agents send and the executor accepts (`hoi4_orders.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
+| OR1 | Offline | The orders format: what thinker agents send and the executor accepts (`hoi4_orderspec.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
 | SR1 | Offline | Save-file reader: an HOI4 text save into compact JSON for the player (research, production, construction, divisions) | [SR1](docs/queue/SR1.md) |
 | TH1 | Offline | Thinker agents: economy, research and focus, politics and diplomacy, military; state in, orders out (after OR1) | [TH1](docs/queue/TH1.md) |
 | EX3 | PC | Construction: queue factories, forts and infrastructure by state name; the rest of EX2 | [EX2](docs/queue/EX2.md) |
