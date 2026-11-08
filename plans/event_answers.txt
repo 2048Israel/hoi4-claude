@@ -1,0 +1,5 @@
+# Standing answers for tools/war_rounds.py: `option | words of the event title`. Anything else stops the rounds.
+1 | second vienna award
+1 | wishes to join our faction
+1 | treaty of craiova
+1 | technology treaty

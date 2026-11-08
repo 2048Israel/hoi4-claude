@@ -1,8 +1,9 @@
 # Standing orders for act army push: army card, a word of the commander's name, target city.
 # Bock (army 6) holds the French border on its defensive line: it is left out on purpose.
+# 1940-08-16: Poland retook Warsaw and Krakow on both sides of our corridor; take them back first.
 1 Rundstedt Stettin
-2 Kluge Torun
-3 Rommel Lwow
-4 Manstein Pinsk
+2 Kluge Warsaw
+3 Rommel Krakow
+4 Manstein Warsaw
 5 Guderian Berlin
 7 Weichs Hamburg
