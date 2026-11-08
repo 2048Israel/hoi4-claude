@@ -134,6 +134,25 @@ def on_buttons(img, options):
     return options[:1] + [o for o in options[1:] if on_button(img, o.center[1])]
 
 
+def other_layout(img, lines, title, options):
+    """Events with a portrait ("American Operative Captured!") put the title lower and the button further left.
+    Title: the tallest text in the upper part. Options: lines that sit on a dark button strip of their own."""
+    x0, y0, x1, y1 = T["event_box_full"]
+    if not title:
+        upper = [l for l in lines if l.center[1] < y0 + (y1 - y0) * 0.6 and len(l.text) > 6]
+        if upper:
+            title = max(upper, key=lambda l: l.box[3] - l.box[1]).text
+    if not options:
+        options = [l for l in lines if len(l.text) > 3
+                   and on_button(img, l.center[1], max(0, l.box[0] - 40), min(1919, l.box[2] + 40))]
+        rows = []
+        for l in sorted(options, key=lambda l: l.center[1]):
+            if not rows or abs(l.center[1] - rows[-1].center[1]) >= 32:
+                rows.append(l)
+        options = rows
+    return title, options
+
+
 def event_parchment(hwnd):
     """Country events are drawn on light parchment: the band under the title is bright and warm-toned."""
     import numpy as np
@@ -150,8 +169,11 @@ def read_event(hwnd):
     if not event_parchment(hwnd):
         return None
     lines = read_box(hwnd, T["event_box_full"])
+    img = hoi4.grab(hwnd)
     title = next((l.text for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), "")
-    options = on_buttons(hoi4.grab(hwnd), event_options(lines, T["event_options_box_full"]))
+    options = on_buttons(img, event_options(lines, T["event_options_box_full"]))
+    if not title or not options:
+        title, options = other_layout(img, lines, title, options)
     out = []
     for i, o in enumerate(options, 1):
         hoi4.move_mouse(*hoi4.to_screen(hwnd, *o.center))
@@ -185,17 +207,20 @@ def dismiss_single_events(hwnd, log=print, tries=4):
     for _ in range(tries):
         if not event_parchment(hwnd):  # the map or a screen, not an event window
             break
-        lines = read_box(hwnd, T["event_box"])
-        title = next((l for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), None)
-        options = event_options(lines, T["event_options_box"])
+        lines = read_box(hwnd, T["event_box_full"])
+        img = hoi4.grab(hwnd)
+        title = next((l.text for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), "")
+        options = on_buttons(img, event_options(lines, T["event_options_box_full"]))
+        if not title or not options:
+            title, options = other_layout(img, lines, title, options)
         if not title or len(options) != 1:
             if title and len(options) > 1:
-                log(f"event '{title.text}' has {len(options)} answers; left open for a decision")
+                log(f"event '{title}' has {len(options)} answers; left open for a decision")
             break
         hoi4.click(hwnd, *options[0].center)
         time.sleep(0.7)
         closed += 1
-        log(f"event '{title.text}': took the only answer '{options[0].text}'")
+        log(f"event '{title}': took the only answer '{options[0].text}'")
     return closed
 
 

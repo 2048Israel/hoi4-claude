@@ -64,6 +64,7 @@ def main():
     for i in range(1, args.rounds + 1):
         adv = run("advance", str(args.days)).splitlines()
         print(f"round {i}: " + next((l for l in adv if l.startswith("Now:")), adv[-1] if adv else "?"))
+        run("act", "dismiss")  # notices (focus completed, research finished) sit on top of events: close them first
         left = answer_events(rules)
         if left:
             print(f"STOP: event with no standing answer: {left!r} (read event, then act event --option N)")
