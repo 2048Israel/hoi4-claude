@@ -46,6 +46,23 @@ def answer_events(rules, limit=6):
     return None
 
 
+FOCUS_PLAN = ROOT / "plans" / "focus_germany.txt"
+
+
+def start_next_focus():
+    """Start the first focus in plans/focus_germany.txt that the game accepts (done or locked ones are refused)."""
+    if not FOCUS_PLAN.exists():
+        return "none running, and no plans/focus_germany.txt"
+    for line in FOCUS_PLAN.read_text(encoding="utf-8").splitlines():
+        name = line.split("#", 1)[0].strip()
+        if not name:
+            continue
+        out = run("act", "focus", "--name", name)
+        if "started focus" in out:
+            return out.splitlines()[-1]
+    return "none running; nothing in plans/focus_germany.txt could start"
+
+
 def summary():
     rep = run("report")
     keep = [l for l in rep.splitlines()
@@ -80,7 +97,7 @@ def main():
             filled = [l for l in run("act", "research-fill").splitlines() if l.startswith("slot")]
             print("  research: " + ("; ".join(filled) if filled else "empty slots, nothing in the plan could start"))
         if "no focus running" in run("read", "focus"):
-            print("  FOCUS: none running (act focus --name ...)")
+            print("  focus: " + start_next_focus())
         if args.save_every and i % args.save_every == 0:
             print("  " + run("act", "save", f"{args.save_name}_r{i}").splitlines()[-1])
     return 0

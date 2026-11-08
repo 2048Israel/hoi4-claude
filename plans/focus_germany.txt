@@ -1,0 +1,11 @@
+# Focus priorities for tools/war_rounds.py, best first. Done or locked ones are refused by the game and skipped.
+Zentrale Planung
+Strengthen the Kriegsmarine
+Tactical Bombers
+Dive Bombers
+Fallschirmjager
+Reorganize Secret Services
+Support Finland
+Befriend China
+Befriend Turkey
+Legion Condor

@@ -1353,6 +1353,9 @@ def start_focus(hwnd, name, log=print):
     if not now or similar(now, name) < 0.5 and norm(name)[:10] not in norm(now):
         raise ActionError(f"Start was clicked but the running focus reads {now!r}")
     log(f"started focus: {now}")
+    if focus_view_open(hwnd):  # leave the map as we found it: refusals close the tree too
+        hoi4.press_combo(FC["key"])
+        time.sleep(0.6)
     return now
 
 
