@@ -1780,6 +1780,7 @@ def main(argv):
     s.add_argument("--to", type=int, nargs=2, metavar=("X", "Y"), help="rebase: the target air base icon")
     s.add_argument("--only", help="comma-separated words a wing's name must contain, e.g. Jagd,JG")
     s.add_argument("--base", help="an air base by name, as the Air Forces Overview (read air) shows it")
+    s.add_argument("--wing", help="assign: one wing by name, picked in the overview (a base panel shows 4 rows)")
     s = sub.add_parser("decision", help="take a decision by name (shift+q list); checks political power dropped")
     s.add_argument("--name", required=True)
     s.add_argument("--dry-run", action="store_true", help="find it and show its tooltip, take nothing")
@@ -1827,6 +1828,10 @@ def main(argv):
         import hoi4_air
         if args.op == "off":
             hoi4_air.close_air_view(hwnd)
+        elif args.op == "assign" and args.wing:
+            if not (args.mission and args.region):
+                raise ActionError("act air assign needs --mission and --region X Y")
+            hoi4_air.assign_wing(hwnd, args.wing, args.mission, args.region, base=args.base)
         elif not (args.at or args.base):
             raise ActionError("act air needs --base NAME (see: read air) or --at X Y (a base icon in the air mode)")
         elif args.op == "base":

@@ -210,6 +210,35 @@ def assign(hwnd, base_pt, mission, region_pt, only=None, log=print, base=None):
     return rows
 
 
+def assign_wing(hwnd, wing, mission, region_pt, base=None, log=print):
+    """Give one wing a mission, picked by name in the overview (a base panel shows only four rows; clicking a row
+    in the overview selects exactly that wing). With several wings of that name, one with no area goes first."""
+    rows = read_overview(hwnd, keep_open=True)
+    hits = [r for r in rows if (A.similar(wing, r["name"]) >= 0.8 or A.norm(wing) in A.norm(r["name"]))
+            and (not base or A.similar(base, r["base"]) >= 0.75 or A.norm(base) in A.norm(r["base"]))]
+    if not hits:
+        A.close_screen(hwnd, "air")
+        raise ActionError(f"no wing like {wing!r}" + (f" at {base!r}" if base else "") + " in the overview")
+    row = sorted(hits, key=lambda r: bool(r["area"]))[0]
+    hoi4.click(hwnd, AIR["overview_click_x"], row["y"])
+    if not A.wait_for(lambda: base_header(hwnd), timeout=2.0):
+        raise ActionError(f"clicking {row['name']} in the overview opened no base panel")
+    if not mission_armed(hwnd, mission):
+        hoi4.click(hwnd, AIR["missions"][mission], AIR["mission_y"])
+        time.sleep(0.5)
+    if not mission_armed(hwnd, mission):
+        raise ActionError(f"the {mission} button did not arm")
+    hoi4.click(hwnd, *region_point(hwnd, region_pt), button="right")
+    time.sleep(1.0)
+    close_base(hwnd)
+    after = read_overview(hwnd)
+    same = [r for r in after if r["name"] == row["name"] and r["base"] == row["base"]]
+    areas = sorted(set(r["area"] or "(none)" for r in same))
+    log(f"{row['name']} at {row['base']}: area now {areas}")
+    if all(not r["area"] for r in same):
+        raise ActionError(f"{row['name']} still has no area after the right-click")
+
+
 def region_point(hwnd, pt):
     """A point near pt where a right-click assigns to the region: wing boxes, base icons and battle icons sit on
     the map too, and a right-click on them does something else. The region's own tooltip says "Right-Click to
