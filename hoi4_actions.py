@@ -120,6 +120,20 @@ def event_options(lines, box):
     return rows
 
 
+def on_button(img, y, x0=875, x1=1325):
+    """An option's row lies on a dark, even button strip. Map labels below a small popup ("Ace Pilot Promoted")
+    were read as options 2 and 3; the map under them is brighter or uneven."""
+    import numpy as np
+    a = np.asarray(img.convert("L").crop((x0, max(0, y - 3), x1, y + 4))).astype(int)
+    cols = np.median(a, axis=0)
+    return float(np.median(cols)) < 90 and float(np.percentile(cols, 75)) < 110
+
+
+def on_buttons(img, options):
+    """Keep the first option always (an event has at least one); drop later ones that are not on a button."""
+    return options[:1] + [o for o in options[1:] if on_button(img, o.center[1])]
+
+
 def event_parchment(hwnd):
     """Country events are drawn on light parchment: the band under the title is bright and warm-toned."""
     import numpy as np
@@ -137,7 +151,7 @@ def read_event(hwnd):
         return None
     lines = read_box(hwnd, T["event_box_full"])
     title = next((l.text for l in lines if T["event_title_band"][0] <= l.center[1] <= T["event_title_band"][1]), "")
-    options = event_options(lines, T["event_options_box_full"])
+    options = on_buttons(hoi4.grab(hwnd), event_options(lines, T["event_options_box_full"]))
     out = []
     for i, o in enumerate(options, 1):
         hoi4.move_mouse(*hoi4.to_screen(hwnd, *o.center))

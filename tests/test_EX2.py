@@ -57,6 +57,18 @@ def main():
                                                    OcrLine("CONDOR", (895, 322, 985, 340)),
                                                    OcrLine("GERMAN REICH", (60, 120, 300, 140))])]
     assert "LEGION CONDOR" in merged and "GERMAN REICH" in merged, merged
+    # event options: map labels under a small popup are not options (seen on "Ace Pilot Promoted")
+    from PIL import ImageDraw
+    img = Image.new("RGB", (1920, 1200), (200, 180, 140))
+    d = ImageDraw.Draw(img)
+    d.rectangle((870, 500, 1330, 530), fill=(50, 45, 40))
+    d.rectangle((870, 560, 1330, 590), fill=(50, 45, 40))
+    for x in range(870, 1330, 20):
+        d.rectangle((x, 640, x + 10, 660), fill=(160, 170, 120))
+        d.rectangle((x + 10, 640, x + 20, 660), fill=(90, 120, 160))
+    opts = [OcrLine("Who dares, wins.", (1000, 508, 1200, 522)), OcrLine("Second", (1000, 568, 1200, 582)),
+            OcrLine("Budapest", (1000, 643, 1100, 657))]
+    assert [o.text for o in A.on_buttons(img, opts)] == ["Who dares, wins.", "Second"]
     print("EX2 OFFLINE CHECKS PASSED")
 
 
