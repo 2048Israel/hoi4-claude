@@ -1355,15 +1355,20 @@ def fix_queue(hwnd, log=print):
             return True
         for l in lines:
             if "cation" in l.text.lower() and l.box[0] < 400:  # "No location set" (OCR: "No [öcation set")
-                hoi4.click(hwnd, *l.center)
-                time.sleep(0.8)
-                hoi4.click(hwnd, *RC["deploy_province"])
-                time.sleep(0.8)
-                still = any("cation" in m.text.lower() and abs(m.center[1] - l.center[1]) < 12
-                            for m in _queue_lines(hwnd))
-                if still:
-                    raise ActionError("could not set a deploy location: the map click hit no green province "
-                                      "(was the camera moved?)")
+                # the camera home view follows the capital, so one fixed map point is not always ours: try a few
+                # points right of the recruit panel until the line has a location
+                for pt in [RC["deploy_province"]] + RC.get("deploy_candidates", []):
+                    hoi4.click(hwnd, *l.center)
+                    time.sleep(0.8)
+                    hoi4.click(hwnd, *pt)
+                    time.sleep(0.8)
+                    still = any("cation" in m.text.lower() and abs(m.center[1] - l.center[1]) < 12
+                                for m in _queue_lines(hwnd))
+                    if not still:
+                        break
+                else:
+                    raise ActionError("could not set a deploy location: no candidate map point is a green province "
+                                      "(was the camera moved? try act camera home)")
                 changed["location"] += 1
                 return True
         return False
