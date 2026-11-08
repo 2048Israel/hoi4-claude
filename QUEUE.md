@@ -21,11 +21,14 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 | OR1 | Offline | The orders format: what thinker agents send and the executor accepts (`hoi4_orders.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
 | SR1 | Offline | Save-file reader: an HOI4 text save into compact JSON for the player (research, production, construction, divisions) | [SR1](docs/queue/SR1.md) |
 | TH1 | Offline | Thinker agents: economy, research and focus, politics and diplomacy, military; state in, orders out (after OR1) | [TH1](docs/queue/TH1.md) |
-| LV1 | PC | Verify in the game the bridge lines never seen yet: general, front, enemy, ally, and the news hooks | [LV1](docs/queue/LV1.md) |
-| EX2 | PC | The rest of the executor: construction, recruiting, focus, advisors and laws, decisions; production lines past the first five | [EX2](docs/queue/EX2.md) |
-| PU1 | PC | Event popups: notice one, read its title and options cheaply, pick an option by number | [PU1](docs/queue/PU1.md) |
+| EX3 | PC | Construction: queue factories, forts and infrastructure by state name; the rest of EX2 | [EX2](docs/queue/EX2.md) |
 
 ## Pending
 
 | batch | lane | waits on | brief |
 |---|---|---|---|
+
+Removed 2026-11-07 (PC session), shipped in 0.1.2-0.1.3: **LV1** (general, front, enemy and ally lines are read
+live by `report` and `act army push`; news hooks feed `news`), **PU1** (`read event`, `act event`, auto-dismissed
+notices and news), and **EX2** except construction (focus, decisions, laws/advisors/staff, recruiting, production
+by name are on `main`; construction moves to EX3).

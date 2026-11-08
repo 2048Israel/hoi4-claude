@@ -1,6 +1,10 @@
 # OR1: the orders format
 
-**Lane:** Offline. **Module:** `hoi4_orders.py`, `tests/test_OR1.py`.
+**Lane:** Offline. **Module:** `hoi4_orderspec.py`, `tests/test_OR1.py`.
+
+> 2026-11-07 (PC session): `hoi4_orders.py` now exists on `main` and holds the standing army orders behind
+> `act army push` (`plans/orders.txt`). Put the orders format in `hoi4_orderspec.py` instead, and leave
+> `hoi4_orders.py` alone; `act army push` can later read the new format through it.
 
 ## Why
 
