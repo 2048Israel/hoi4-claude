@@ -5,6 +5,8 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+# 0.1.3 (2026-11-07)
+
 - **Decisions:** `read decisions` lists every category and decision (scrolling the list, lining pages up by
   their shared rows); `act decision --name X [--dry-run]` finds a row, prints its tooltip and takes it, checked by
   the row's look and the political or command power spent; `act decision-category --name C --collapse|--expand`.
@@ -31,7 +33,14 @@ saying what changed and how it was checked.
   Found live on 1940-07-31: all 14 wings were standing by with no mission. Now 13 fly air superiority or close
   air support over Eastern Germany. `tests/test_AIR.py` covers the overview rows and the wing filter.
 - **City orders say where they went:** `act army target` / `act order` print the target province's state, owner
-  and controller from its tooltip. "Brest" found Brest in France, not Poland: two exact matches are now refused.
+  and controller from its tooltip. "Brest" found Brest in France, not Poland: when Find lists a name twice, the
+  first is taken with a warning (the state Gdynia and its city share a name), and the log line shows which.
+- **tools/war_rounds.py:** plays the war in rounds: advance, answer events from `plans/event_answers.txt` (stops
+  on any other event), close news, `act army push`, refill empty research, warn when no focus runs, summary.
+- **Smaller fixes:** wrapped focus titles ("LEGION" over "CONDOR") are joined before matching; `act air assign
+  --wing NAME` reaches wings a base panel cuts off; `act air` right-clicks only where the region's own tooltip
+  shows; `fix-queue` tries several deploy points (camera home follows the capital); `tools/load_ingame.py`
+  scrolls the save list.
 - **The console check waits for the screen to settle:** the focus tree fading out once read as an open console,
   and the report's text landed as hotkeys (it opened Construction and unpaused for an hour).
 - **Screen titles** match word by word, since OCR can return them out of order ("EVENTS DECISIONS AND").

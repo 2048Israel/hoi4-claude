@@ -15,7 +15,7 @@ Run with the project venv:
 Chain several commands in one call:
   hoi4.py do "key y ; wait 0.5 ; look"
 """
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 import argparse
 import ctypes
