@@ -1,9 +1,6 @@
 # Standing orders for act army push: army card, a word of the commander's name, target city.
-# Bock (army 6) holds the French border on its defensive line: it is left out on purpose.
-# 1940-06-26 replay: Berlin retaken; cut the Polish coastal strip (Hamburg - Gdynia) into pieces.
-1 Rundstedt Gdynia
-2 Kluge Lwow
-3 Rommel Stettin
-4 Manstein Bialystok
-5 Guderian Rostock
-7 Weichs Hamburg
+# 1939-08-25 replay: the four armies open with their 100% battle plans; push re-sends only those that stall.
+1 Rundstedt Krakow
+2 Kluge Gdynia
+3 Rommel Warsaw
+4 Manstein Lodz

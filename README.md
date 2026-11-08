@@ -70,6 +70,7 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act army front --army N --at X Y` | Front line for army N along the border highlighted at X,Y (works in peacetime) |
 | `act army list` / `act army generals` / `act army general --army N --name X` | Armies with their size and commander; give every army without one the game's top-listed general |
 | `act focus --name "Danzig or War"` / `read focus` | Start a focus through the tree's search; when the game refuses, it prints the requirement lines. `read focus` shows the running one |
+| `act diplomacy --city Warsaw --action "Declare war" [--dry-run]` | A diplomatic action on the country that owns the city |
 | `act build --building military_factory --count 8 [--per-state 2]` | Queue buildings in the visible states with the most free slots (Construction screen) |
 | `read ideas --slot staff-6` / `act idea --slot advisor-3 --name "Walther Funk" [--dry-run] [--replace]` | Laws, advisors, military staff and government slots: list choices with effects; take one (PP checked) |
 | `read decisions` / `act decision --name "War Propaganda" [--dry-run]` | List every decision by category; take one by name after printing its tooltip. Checked by the row's look and the power spent |

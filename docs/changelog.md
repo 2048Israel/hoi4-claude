@@ -5,6 +5,10 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+- **Diplomacy (hoi4_diplomacy.py):** `act diplomacy --city Warsaw --action "Declare war" [--dry-run]` right-clicks
+  the country owning the city, picks the action from its list by name (tooltip printed), and sends it. Used
+  live: war on Poland declared 1939-08-25 in the replay.
+
 - **Construction (hoi4_build.py, EX3):** `act build --building military_factory --count 8 [--per-state 2]` arms
   the building and clicks the visible states with the most free slots (their "used/total" labels), checking
   that the queue grew. Found live on 1939-06-26: the queue was empty with 42 civilian factories idle; now 12

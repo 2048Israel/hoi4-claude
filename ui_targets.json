@@ -8,6 +8,7 @@
     "politics":     {"key": "q", "title": "POLITICAL"},
     "decisions":    {"key": "shift+q", "title": "EVENTS AND DECISIONS"},
     "air":          {"key": "l", "title": "AIR FORCES OVERVIEW"},
+    "diplomacy":    {"key": "e", "title": "DIPLOMACY"},
     "_title_box": [0, 100, 900, 165]
   },
   "research": {
@@ -143,6 +144,13 @@
     "queue_box": [0, 170, 520, 1180],
     "queue_name_x_max": 200,
     "map_box": [870, 60, 1900, 1150]
+  },
+  "diplomacy": {
+    "_note": "Diplomacy screen opened by right-clicking a foreign country, measured 1939-08-25.",
+    "header_box": [280, 160, 460, 220],
+    "actions_box": [340, 640, 640, 1180],
+    "action_name_x_max": 420,
+    "confirm_box": [560, 300, 1360, 900]
   },
   "decisions": {
     "_note": "shift+q. Rows: name at x 88, cost near x 520, take button x 619. Category headers are centred (x 264-396) with a collapse arrow at x 620. One wheel notch scrolls one row (51 px).",

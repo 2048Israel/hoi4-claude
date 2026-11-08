@@ -1862,6 +1862,10 @@ def main(argv):
     s.add_argument("--building", required=True, help="military_factory, civilian_factory, refinery, infrastructure, ...")
     s.add_argument("--count", type=int, default=1)
     s.add_argument("--per-state", type=int, default=2)
+    s = sub.add_parser("diplomacy", help="a diplomatic action on the country owning --city: --action 'Declare war'")
+    s.add_argument("--city", required=True, help="a city of the target country, e.g. Warsaw")
+    s.add_argument("--action", required=True)
+    s.add_argument("--dry-run", action="store_true")
     s = sub.add_parser("decision", help="take a decision by name (shift+q list); checks political power dropped")
     s.add_argument("--name", required=True)
     s.add_argument("--dry-run", action="store_true", help="find it and show its tooltip, take nothing")
@@ -1932,6 +1936,9 @@ def main(argv):
     elif args.cmd == "build":
         import hoi4_build
         hoi4_build.build(hwnd, args.building, args.count, args.per_state)
+    elif args.cmd == "diplomacy":
+        import hoi4_diplomacy
+        hoi4_diplomacy.act(hwnd, args.city, args.action, dry_run=args.dry_run)
     elif args.cmd == "decision":
         take_decision(hwnd, args.name, dry_run=args.dry_run)
     elif args.cmd == "decision-category":
