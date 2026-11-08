@@ -24,11 +24,12 @@ def main():
         raise AssertionError("a line without an army number must be refused")
     except O.ActionError:
         pass
-    gens = [{"name": "Heinz Guderian", "units": "12", "in_combat": "0"},
-            {"name": "Maximilian von Weichs", "units": "19", "in_combat": "19"}]
+    gens = [{"name": "Heinz Guderian", "units": "12", "in_combat": "0", "entrench": "0.45"},
+            {"name": "Maximilian von Weichs", "units": "19", "in_combat": "19", "entrench": "0.0"}]
     assert O.find_general(gens, "guderian")["name"] == "Heinz Guderian" and O.find_general(gens, "Bock") is None
     assert O.stalled(gens[0], 0.35) and not O.stalled(gens[1], 0.35)
     assert not O.stalled({"units": "0", "in_combat": "0"}, 0.35), "an empty army is not re-ordered"
+    assert not O.stalled({"units": "21", "in_combat": "2", "entrench": "0.05"}, 0.35), "marching is not stalled"
     print("ORD OFFLINE CHECKS PASSED")
 
 

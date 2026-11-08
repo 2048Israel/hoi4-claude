@@ -53,10 +53,15 @@ def find_general(generals, word):
     return hits[0] if hits else None
 
 
-def stalled(general, min_share):
+def stalled(general, min_share, min_entrench=0.2):
+    """Few divisions in combat AND digging in. An army marching to contact also has few in combat, but its
+    entrenchment stays low; re-ordering it would only cancel its battle plan (seen on 1939-08-29: all four armies
+    re-sent on day 4 of the war)."""
     units = float(general.get("units") or 0)
     combat = float(general.get("in_combat") or 0)
-    return units > 0 and combat / units < min_share
+    entrench = float(general.get("entrench") or 0)
+    entrench = entrench / 100 if entrench > 1 else entrench
+    return units > 0 and combat / units < min_share and entrench >= min_entrench
 
 
 def push(hwnd, plan=DEFAULT_PLAN, min_share=0.35, log=print):
