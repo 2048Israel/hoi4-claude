@@ -1,5 +1,5 @@
 r"""Play the war in rounds: advance N days, answer events that have a standing answer, close news, re-send stalled
-armies (act army push), and print a short war summary. Stops at once on an event with no standing answer, so a
+armies (act army push), refill empty research slots, warn when no focus runs, and print a short war summary. Stops at once on an event with no standing answer, so a
 real decision is never made blindly.
 
 Usage: .venv\Scripts\python.exe tools\war_rounds.py --rounds 4 --days 5 [--save-every 2 --save-name ger_1940]
@@ -73,6 +73,13 @@ def main():
         push = run("act", "army", "push").splitlines()
         print("  " + (push[-1] if push else "push: no output"))
         print(summary())
+        # idle research and an empty focus slot cost the most when nobody looks: check them every round
+        research = run("read", "research")
+        if "(empty)" in research:
+            filled = [l for l in run("act", "research-fill").splitlines() if l.startswith("slot")]
+            print("  research: " + ("; ".join(filled) if filled else "empty slots, nothing in the plan could start"))
+        if "no focus running" in run("read", "focus"):
+            print("  FOCUS: none running (act focus --name ...)")
         if args.save_every and i % args.save_every == 0:
             print("  " + run("act", "save", f"{args.save_name}_r{i}").splitlines()[-1])
     return 0

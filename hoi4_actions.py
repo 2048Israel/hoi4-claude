@@ -1240,6 +1240,30 @@ def focus_view_open(hwnd):
     return "focustree" in norm(" ".join(l.text for l in read_box(hwnd, T["screens"]["_title_box"])))
 
 
+def merge_title_lines(lines):
+    """Upper-case title lines, with a title that wraps ("LEGION" over "CONDOR", "ESTABLISH" over "THE REICHSWERKE")
+    joined into one line: OCR reads each row of the detail window's title on its own."""
+    from hoi4_ocr import OcrLine
+    ups = sorted((l for l in lines if l.text.isupper() and len(l.text) > 2), key=lambda l: (l.box[1], l.box[0]))
+    out, used = [], set()
+    for i, a in enumerate(ups):
+        if i in used:
+            continue
+        text, box = a.text, list(a.box)
+        for j in range(i + 1, len(ups)):
+            b = ups[j]
+            if j in used or b.box[1] - box[3] > 14 or b.box[1] < box[1]:
+                continue
+            if abs(b.center[0] - (box[0] + box[2]) / 2) < 120:  # centred under the line above
+                text += " " + b.text
+                box = [min(box[0], b.box[0]), box[1], max(box[2], b.box[2]), b.box[3]]
+                used.add(j)
+        out.append(OcrLine(text, tuple(box)))
+        if text != a.text:
+            out.append(a)  # keep the first row on its own too
+    return out
+
+
 def start_focus(hwnd, name, log=print):
     """Start a focus by name through the tree's search. Refuses when a focus is already running; when the game
     refuses Start, says so with the requirement lines it can read."""
@@ -1259,8 +1283,8 @@ def start_focus(hwnd, name, log=print):
     time.sleep(1.2)
     # the detail window opens in different places, so read the whole tree area and pair the title with its Start
     lines = read_box(hwnd, FC["tree_box"])
-    titles = [l for l in lines if l.text.isupper() and len(l.text) > 3
-              and (norm(name) in norm(l.text) or similar(name, l.text) >= 0.7)]
+    titles = [l for l in merge_title_lines(lines)
+              if norm(name) in norm(l.text) or similar(name, l.text) >= 0.7]
     if not titles:
         hoi4.press_combo(FC["key"])
         seen = [l.text for l in lines if l.text.isupper() and len(l.text) > 3]

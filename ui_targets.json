@@ -131,8 +131,8 @@
     "list_box": [690, 100, 1300, 900],
     "list_rows_top": 180,
     "list_close": [1258, 126],
-    "name_x": [780, 1000],
-    "hover_x": 880,
+    "name_cols": [[780, 1000], [1060, 1200]],
+    "hover_dx": 80,
     "confirm_box": [600, 300, 1320, 900]
   },
   "decisions": {

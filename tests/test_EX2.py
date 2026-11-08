@@ -52,6 +52,11 @@ def main():
     box = A.changed_box(Image.fromarray(before), Image.fromarray(after), x_min=310, cursor=(300, 813))
     assert box and 320 <= box[0] <= 340 and 430 <= box[1] <= 450 and 770 <= box[2] <= 790 and 770 <= box[3] <= 790, box
     assert A._runs([True, True, False, True, False, False, False, True], gap=1) == [(0, 4), (7, 8)]
+    # focus titles wrap onto two rows in the detail window ("LEGION" over "CONDOR"): they are joined
+    merged = [l.text for l in A.merge_title_lines([OcrLine("LEGION", (900, 300, 980, 318)),
+                                                   OcrLine("CONDOR", (895, 322, 985, 340)),
+                                                   OcrLine("GERMAN REICH", (60, 120, 300, 140))])]
+    assert "LEGION CONDOR" in merged and "GERMAN REICH" in merged, merged
     print("EX2 OFFLINE CHECKS PASSED")
 
 

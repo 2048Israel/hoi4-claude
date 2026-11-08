@@ -40,9 +40,10 @@ def open_slot(hwnd, slot):
     title = " ".join(l.text for l in lines if l.box[1] < PO["list_rows_top"])
     if not title.strip():
         raise ActionError(f"no list opened for slot {slot}")
-    x0, x1 = PO["name_x"]
-    names = [l for l in lines if x0 < l.box[0] < x1 and l.box[1] >= PO["list_rows_top"]
-             and A.HAS_WORD.search(l.text) and not re.fullmatch(r"[\d\s%+.,-]+", l.text)]
+    # most lists are one column of names at x 793; Military High Command is a grid of two (x ~790 and ~1080)
+    names = [l for l in lines if any(x0 < l.box[0] < x1 for x0, x1 in PO["name_cols"])
+             and l.box[1] >= PO["list_rows_top"] and A.HAS_WORD.search(l.text)
+             and not re.fullmatch(r"[\d\s%+.,-]+", l.text)]
     return title, names
 
 
@@ -52,7 +53,7 @@ def choices(hwnd, slot, log=print):
     log(title)
     out, seen = [], set()
     for n in names:
-        tip = " | ".join(l.text for l in A.hover_tooltip(hwnd, PO["hover_x"], n.center[1], x_min=PO["list_box"][0]))
+        tip = " | ".join(l.text for l in A.hover_tooltip(hwnd, n.box[0] + PO["hover_dx"], n.center[1], x_min=PO["list_box"][0]))
         head = tip.split(" | ")[0] if tip else n.text
         if head in seen:  # a long name wraps onto two lines: one tooltip
             continue
@@ -71,13 +72,13 @@ def take(hwnd, slot, name, dry_run=False, replace=False, log=print):
     if best is None or A.similar(name, best.text) < 0.75:
         close_list(hwnd)
         raise ActionError(f"{title}: no choice like {name!r}; read: {[l.text for l in names][:12]}")
-    tip = " | ".join(l.text for l in A.hover_tooltip(hwnd, PO["hover_x"], best.center[1], x_min=PO["list_box"][0]))
+    tip = " | ".join(l.text for l in A.hover_tooltip(hwnd, best.box[0] + PO["hover_dx"], best.center[1], x_min=PO["list_box"][0]))
     log(f"{title}: {best.text}: {tip[:300]}")
     if dry_run:
         close_list(hwnd)
         return
     pp = A.read_pp(hwnd)
-    hoi4.click(hwnd, PO["hover_x"], best.center[1])
+    hoi4.click(hwnd, best.box[0] + PO["hover_dx"], best.center[1])
     time.sleep(1.0)
     # laws (and replacing a filled slot) ask to confirm: read the dialog before pressing its OK
     dialog = A.read_box(hwnd, PO["confirm_box"])
