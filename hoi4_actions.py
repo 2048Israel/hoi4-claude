@@ -1781,9 +1781,11 @@ def load_save(hwnd, name, log=print):
     hoi4.click(hwnd, *entry.center)
     time.sleep(1.5)
     hoi4.click(hwnd, *find_text(hwnd, "Load", (180, 1120, 460, 1180)).center)
-    start = find_text(hwnd, "START", (1500, 1100, 1920, 1190), timeout=120)
+    # the Start button's text is stylised and OCR does not always read it: wait for the scenario screen (its
+    # "Back to Menu" button), then click Start by position
+    find_text(hwnd, "Back to Menu", (0, 1100, 400, 1190), timeout=120)
     time.sleep(2)
-    hoi4.click(hwnd, *start.center)
+    hoi4.click(hwnd, *T["start_button"])
     find_text(hwnd, ", 19", T["top_bar"]["clock_box"], timeout=120)
     log(f"loaded {entry.text}; in game at {read_date(hwnd)}")
 

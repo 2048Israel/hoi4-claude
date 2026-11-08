@@ -2,6 +2,7 @@ r"""Load a save from inside a running game: Esc menu > Load Game > pick the save
 
 Usage: .venv\Scripts\python.exe tools\load_ingame.py claude_ger_1940_06_breach
 """
+import re
 import sys
 import time
 from pathlib import Path
@@ -25,10 +26,19 @@ hoi4.click(h, 961, load[0].center[1])
 time.sleep(2.0)
 # the list shows about six saves, newest first: scroll down until the name shows up
 entry = None
-for _ in range(15):
-    hits = [l for l in A.read_box(h, [640, 360, 1200, 900]) if A.norm(l.text) == A.norm(name)]
-    if hits:
-        entry = hits[0]
+hoi4.scroll(h, 960, 640, 40)  # start from the top (newest)
+time.sleep(0.6)
+for _ in range(40):  # ~60 saves, newest game date first
+    # an exact name first; OCR can bend one character of a long name, so a very near match (0.97) also counts.
+    # 0.9 was too loose: claude_ger_1939_06_prewar matched claude_ger_1939_08_25_prewar and loaded the wrong save
+    lines = A.read_box(h, [640, 360, 1200, 900])
+    exact = [l for l in lines if A.norm(l.text) == A.norm(name)]
+    digits = lambda t: re.sub(r"\D", "", t)
+    near = sorted((l for l in lines if digits(l.text) == digits(name) and A.similar(name, l.text) >= 0.8),
+                  key=lambda l: -A.similar(name, l.text))
+    if exact or near:
+        entry = (exact or near)[0]
+        print(f"picked {entry.text!r}")
         break
     hoi4.scroll(h, 960, 640, -3)
     time.sleep(0.6)

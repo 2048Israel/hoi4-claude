@@ -177,5 +177,6 @@
   "event_popup_x": [620, 1260],
   "treaty_box": [660, 360, 1260, 820],
   "news_button_box": [700, 840, 1160, 900],
+  "start_button": [1740, 1147],
   "safe_mouse": [1910, 1190]
 }
