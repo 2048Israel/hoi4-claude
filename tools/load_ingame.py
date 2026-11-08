@@ -23,7 +23,17 @@ if not load:
     raise SystemExit("game menu not open: " + str([l.text for l in menu]))
 hoi4.click(h, 961, load[0].center[1])
 time.sleep(2.0)
-entry = A.find_text(h, name, (640, 360, 1200, 900), timeout=10)
+# the list shows about six saves, newest first: scroll down until the name shows up
+entry = None
+for _ in range(15):
+    hits = [l for l in A.read_box(h, [640, 360, 1200, 900]) if A.norm(l.text) == A.norm(name)]
+    if hits:
+        entry = hits[0]
+        break
+    hoi4.scroll(h, 960, 640, -3)
+    time.sleep(0.6)
+if entry is None:
+    raise SystemExit(f"{name} is not in the load list")
 hoi4.click(h, *entry.center)
 time.sleep(1.0)
 btn = [l for l in A.read_box(h, [640, 880, 1200, 940]) if A.norm(l.text) == "load"]

@@ -1132,12 +1132,12 @@ def find_city(hwnd, city):
     def strip_icon(text):  # "C Warsaw" -> "Warsaw"
         return re.sub(r"^\W*[A-Z]\s+(?=[A-Z])", "", text).strip()
 
-    # an exact name wins over a near one; two exact ones (Brest in France and in Poland) are refused, since the
-    # Find list does not say which country each is in
+    # an exact name wins over a near one. Two exact ones can be one place (the state Gdynia and its city) or two
+    # (Brest in France and in Poland): the first is taken with a warning, and the order's log line names the
+    # province's state and owner, so a wrong one shows at once
     exact = [r for r in results if norm(strip_icon(r.text)) == norm(city)]
     if len(exact) > 1:
-        hoi4.click(hwnd, *AR["find_close"])
-        raise ActionError(f"{len(exact)} places are named {city!r}; pick a nearby city with a unique name")
+        print(f"warning: {len(exact)} places are named {city!r} in Find; taking the first")
     pick = exact[0] if exact else results[0]
     name = strip_icon(pick.text)
     hoi4.click(hwnd, *pick.center)

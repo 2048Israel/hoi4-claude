@@ -191,15 +191,15 @@ def assign(hwnd, base_pt, mission, region_pt, only=None, log=print, base=None):
         time.sleep(0.5)
     if not mission_armed(hwnd, mission):
         raise ActionError(f"the {mission} button did not arm")
-    hoi4.move_mouse(*hoi4.to_screen(hwnd, *region_pt))
-    time.sleep(0.6)
-    hoi4.click(hwnd, *region_pt, button="right")
+    pt = region_point(hwnd, region_pt)
+    hoi4.click(hwnd, *pt, button="right")
     time.sleep(1.0)
     want = AIR["mission_names"][mission].lower()
     failed = []
     for r in rows:
         r["order"] = wing_order(hwnd, r["y"])
-        ok = want in r["order"].lower()
+        # OCR can drop a stray number into the line ("Close Air 72 Support"): compare letters only
+        ok = re.sub(r"[^a-z]", "", want) in re.sub(r"[^a-z]", "", r["order"].lower())
         log(f"{head[0]}: {r['name']}: {r['order']}" + ("" if ok else "  <- not given"))
         if not ok:
             failed.append(r["name"])
@@ -208,6 +208,20 @@ def assign(hwnd, base_pt, mission, region_pt, only=None, log=print, base=None):
                           "missions (fighters: superiority/interception; bombers: cas/strategic), and the region "
                           "must be in range")
     return rows
+
+
+def region_point(hwnd, pt):
+    """A point near pt where a right-click assigns to the region: wing boxes, base icons and battle icons sit on
+    the map too, and a right-click on them does something else. The region's own tooltip says "Right-Click to
+    assign selected Air Wings to this area"."""
+    for dx, dy in ((0, 0), (60, 0), (-60, 0), (0, 60), (0, -60), (90, 70), (-90, -70), (120, 0), (-120, 0)):
+        x, y = pt[0] + dx, pt[1] + dy
+        tip = " ".join(l.text for l in A.hover_tooltip(hwnd, x, y, x_min=max(0, x - 40))).lower()
+        if "assign selected" in tip:
+            if "none of the selected" in tip:
+                raise ActionError(f"the region at {(x, y)} is out of range for the selected wings")
+            return (x, y)
+    raise ActionError(f"no point near {pt} shows the region's assign tooltip (wing boxes or icons in the way?)")
 
 
 def rebase(hwnd, base_pt, to_pt, only=None, log=print, base=None):
