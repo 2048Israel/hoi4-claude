@@ -2,7 +2,7 @@
 # Bock (army 6) holds the French border on its defensive line: it is left out on purpose.
 # 1940-06-26 replay: Berlin retaken; cut the Polish coastal strip (Hamburg - Gdynia) into pieces.
 1 Rundstedt Gdynia
-2 Kluge Torun
+2 Kluge Lwow
 3 Rommel Stettin
 4 Manstein Bialystok
 5 Guderian Rostock
