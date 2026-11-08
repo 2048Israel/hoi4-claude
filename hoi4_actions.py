@@ -126,11 +126,15 @@ def on_button(img, line, x0=None, x1=None):
     import numpy as np
     x0 = max(0, line.box[0] - 40) if x0 is None else x0
     x1 = min(img.width, line.box[2] + 40) if x1 is None else x1
-    y0 = line.box[3] + 2
-    a = np.asarray(img.convert("L").crop((x0, y0, x1, y0 + 4))).astype(int)
-    cols = np.median(a, axis=0)
-    # measured live: under a button's text 39-44, under map labels next to a popup 73-85
-    return float(np.median(cols)) < 62 and float(np.percentile(cols, 75)) < 75
+    # measured live: under a button's text 39-44, under map labels next to a popup 73-85. A label wrapped over two
+    # lines has the second line right under the first, so the band above the text counts too
+    gray = img.convert("L")
+    for y0 in (line.box[3] + 2, line.box[1] - 6):
+        a = np.asarray(gray.crop((x0, max(0, y0), x1, max(0, y0) + 4))).astype(int)
+        cols = np.median(a, axis=0)
+        if float(np.median(cols)) < 62 and float(np.percentile(cols, 75)) < 75:
+            return True
+    return False
 
 
 def on_buttons(img, options):
@@ -1035,7 +1039,11 @@ def new_army_button(hwnd):
 
 def new_army(hwnd, halves=0, log=print):
     """Make an army from the selected unassigned divisions: drop armies from the selection, halve it `halves`
-    times with S, then press New Army."""
+    times with S, then press New Army.
+
+    WARNING (seen live twice on 1939-08-25): with 8 or 26 unassigned divisions selected, New Army made an army of
+    31-42 that included 12-16 divisions taken from Armies 1 and 3. The check below catches it afterwards; the
+    only undo is loading the last save (tools/reload_from_menu.py). Save before using this."""
     for _ in range(8):
         heads = [l for l in read_box(hwnd, AR["selection_box"]) if re.match(r"Army \d+$", l.text.strip())]
         if not heads:
@@ -1060,11 +1068,14 @@ def new_army(hwnd, halves=0, log=print):
     hoi4.click(hwnd, *plus)
     time.sleep(1.2)
     cards = army_cards(hwnd)
-    if len(cards) <= n_before:
-        raise ActionError("New Army was pressed but no new army card appeared")
+    # check the old armies first: on 1939-08-25 the new card was not detected, and the error about it hid that
+    # the new army had taken 16 of Army 1's divisions
     shrunk = [i + 1 for i, ((nb, _), (na, _)) in enumerate(zip(before, cards)) if nb and na and na < nb]
     if shrunk:
-        raise ActionError(f"the new army took divisions from armies {shrunk}: load the last save to undo")
+        raise ActionError(f"the new army took divisions from armies {shrunk} ({[n for n, _ in before]} -> "
+                          f"{[n for n, _ in cards]}): load the last save to undo")
+    if len(cards) <= n_before:
+        raise ActionError("New Army was pressed but no new army card appeared")
     p = army_panel(hwnd)
     log(f"created {p['name']} with {p['size']} | armies now {[n for n, _ in cards]}")
     return p
@@ -1784,9 +1795,17 @@ def load_save(hwnd, name, log=print):
     # the Start button's text is stylised and OCR does not always read it: wait for the scenario screen (its
     # "Back to Menu" button), then click Start by position
     find_text(hwnd, "Back to Menu", (0, 1100, 400, 1190), timeout=120)
-    time.sleep(2)
-    hoi4.click(hwnd, *T["start_button"])
-    find_text(hwnd, ", 19", T["top_bar"]["clock_box"], timeout=120)
+    # Start ignores clicks for a moment after the scenario screen draws: click again until the game's clock shows
+    for _ in range(8):
+        time.sleep(3)
+        hoi4.click(hwnd, *T["start_button"])
+        try:
+            find_text(hwnd, ", 19", T["top_bar"]["clock_box"], timeout=25)
+            break
+        except ActionError:
+            continue
+    else:
+        raise ActionError("the game did not start after clicking Start")
     log(f"loaded {entry.text}; in game at {read_date(hwnd)}")
 
 
