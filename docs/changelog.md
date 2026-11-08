@@ -5,6 +5,14 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+- **Construction (hoi4_build.py, EX3):** `act build --building military_factory --count 8 [--per-state 2]` arms
+  the building and clicks the visible states with the most free slots (their "used/total" labels), checking
+  that the queue grew. Found live on 1939-06-26: the queue was empty with 42 civilian factories idle; now 12
+  military factories and 2 refineries are queued and all 91 civilian factories are working. `tests/test_EX3.py`.
+- **Events:** a second layout (portrait, title lower, button further left); options must sit on a dark button
+  (sampled under the text); single-answer events use the same reader. War rounds close notices first and start
+  the next focus from `plans/focus_germany.txt`.
+
 # 0.1.3 (2026-11-07)
 
 - **Decisions:** `read decisions` lists every category and decision (scrolling the list, lining pages up by

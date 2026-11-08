@@ -21,7 +21,6 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 | OR1 | Offline | The orders format: what thinker agents send and the executor accepts (`hoi4_orderspec.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
 | SR1 | Offline | Save-file reader: an HOI4 text save into compact JSON for the player (research, production, construction, divisions) | [SR1](docs/queue/SR1.md) |
 | TH1 | Offline | Thinker agents: economy, research and focus, politics and diplomacy, military; state in, orders out (after OR1) | [TH1](docs/queue/TH1.md) |
-| EX3 | PC | Construction: queue factories, forts and infrastructure by state name; the rest of EX2 | [EX2](docs/queue/EX2.md) |
 
 ## Pending
 
@@ -31,4 +30,5 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 Removed 2026-11-07 (PC session), shipped in 0.1.2-0.1.3: **LV1** (general, front, enemy and ally lines are read
 live by `report` and `act army push`; news hooks feed `news`), **PU1** (`read event`, `act event`, auto-dismissed
 notices and news), and **EX2** except construction (focus, decisions, laws/advisors/staff, recruiting, production
-by name are on `main`; construction moves to EX3).
+by name are on `main`; construction moves to EX3). **EX3** shipped the same day as `act build` (by free slots; by
+state name is still open).

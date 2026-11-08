@@ -1858,6 +1858,10 @@ def main(argv):
     s.add_argument("--name", required=True)
     s.add_argument("--dry-run", action="store_true")
     s.add_argument("--replace", action="store_true", help="allow replacing the advisor already in a filled slot")
+    s = sub.add_parser("build", help="queue buildings in the visible states with the most free slots")
+    s.add_argument("--building", required=True, help="military_factory, civilian_factory, refinery, infrastructure, ...")
+    s.add_argument("--count", type=int, default=1)
+    s.add_argument("--per-state", type=int, default=2)
     s = sub.add_parser("decision", help="take a decision by name (shift+q list); checks political power dropped")
     s.add_argument("--name", required=True)
     s.add_argument("--dry-run", action="store_true", help="find it and show its tooltip, take nothing")
@@ -1925,6 +1929,9 @@ def main(argv):
     elif args.cmd == "idea":
         import hoi4_politics
         hoi4_politics.take(hwnd, args.slot, args.name, dry_run=args.dry_run, replace=args.replace)
+    elif args.cmd == "build":
+        import hoi4_build
+        hoi4_build.build(hwnd, args.building, args.count, args.per_state)
     elif args.cmd == "decision":
         take_decision(hwnd, args.name, dry_run=args.dry_run)
     elif args.cmd == "decision-category":
