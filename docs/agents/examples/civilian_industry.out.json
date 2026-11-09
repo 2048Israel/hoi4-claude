@@ -1,0 +1,11 @@
+{
+  "orders": [
+    {"op": "construction.queue", "building": "land_fort", "count": 2, "state": "Baden", "priority": 3, "by": "civilian_industry", "why": "the army's request: forts on the Rhine facing France"},
+    {"op": "construction.queue", "building": "military_factory", "count": 2, "state": "Brandenburg", "by": "civilian_industry", "why": "40 factories need 4+ projects and the Lower Austria refinery ends in 23 days; Brandenburg: 27 free slots, far from France"},
+    {"op": "construction.queue", "building": "military_factory", "count": 2, "state": "Thüringen", "by": "civilian_industry", "why": "a second new project: 22 free slots and infrastructure 5"},
+    {"op": "construction.queue", "building": "military_factory", "count": 2, "state": "Hessen", "by": "civilian_industry", "why": "a third: Moselland and Rhineland have more slots but face France"}
+  ],
+  "requests": [],
+  "report": "Queued: 2 forts in Baden (army), 6 military factories in Brandenburg, Thüringen and Hessen.\nNamed states wait on EX6; until then the executor reports them failed.",
+  "notes": "Keep 4+ projects for 40 factories. After these: refineries in Sachsen or Bohemia if fuel runs short.\nNo new building west of the Rhine while at war with France."
+}

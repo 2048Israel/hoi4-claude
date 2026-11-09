@@ -1,0 +1,14 @@
+{
+  "orders": [
+    {"op": "air.assign", "base": "Brandenburg", "wing": "KG 1 'Hindenburg'", "mission": "cas", "region": "Western Poland", "priority": 2, "by": "air", "why": "operation_gdynia asked for close air support; KG 1 had no mission"},
+    {"op": "air.assign", "base": "Holstein", "wing": "Küstenfliegergruppe 106", "mission": "naval", "region": "Eastern North Sea", "by": "air", "why": "an idle naval bomber wing; at war with Britain, whose ships sail the North Sea"},
+    {"op": "air.rebase", "base": "Lower Silesia", "wing": "Jagdgeschwader 134", "to": "Rhineland", "by": "air", "why": "an idle fighter wing; Western Germany faces France with no fighters"},
+    {"op": "air.rebase", "base": "Brandenburg", "wing": "Jagdgeschwader 132", "to": "Westfalen", "by": "air", "why": "15% effective over Western Poland from Brandenburg; needed over Western Germany"}
+  ],
+  "requests": [
+    {"op": "request.equipment", "to": "military_industry", "equipment": "Ju 87", "amount": 100, "by": "air", "why": "a second Stuka wing for the West in spring"},
+    {"op": "request.research", "to": "research", "tech": "Improved Small Airframe", "by": "air", "why": "the next fighter airframe, for superiority over France in 1940"}
+  ],
+  "report": "KG 1 flies CAS for operation gdynia; Küstenfliegergruppe 106 naval strike in the Eastern North Sea.\nJG 134 and JG 132 move west (Rhineland, Westfalen): superiority over Western Germany next turn.\nAsked: 100 Ju 87 (military industry), Improved Small Airframe (research).",
+  "notes": "Next turn: JG 134 (Rhineland) and JG 132 (Westfalen): superiority over Western Germany.\nCAS over Western Poland until 1939-11-25 (operation gdynia).\nWhen Poland falls: the Stukas and half the tactical bombers west; 2 fighter wings stay east."
+}

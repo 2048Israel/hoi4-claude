@@ -1,0 +1,26 @@
+{
+ "agent": "operation_gdynia",
+ "turn": 13,
+ "due": ["operation started on turn 12"],
+ "budget": {},
+ "state": {
+  "agent": "operation_gdynia",
+  "date": "1939.11.1.1",
+  "tag": "GER",
+  "charter": {"goal": "Take Gdynia and clear the Polish pocket in Hinterpommern", "forces": ["army 2"], "success": "Gdynia (province 9263) and every Hinterpommern province are controlled by GER", "abort": "deadline passed, or Army 2 falls under 50% strength", "deadline": "1939-11-25", "by": "field_marshal_german_theater_1"},
+  "templates": ["Panzer-Division", "Infanterie-Division", "Dywizja Piechoty", "Cavalry 1936 A", "Dywizja Piechoty Górskiej", null],
+  "unit_columns": ["template (index in templates)", "province", "strength", "org", "moving_to", "in_combat"],
+  "enemy_columns": ["template (index in templates)", "province", "strength", "org"],
+  "armies": [{"name": "Army 2", "group": "German Theater 1", "leader": {"name": "Gunther von Kluge", "skill": 4, "attack": 5, "defense": 3, "planning": 4, "logistics": 3, "traits": ["brilliant_strategist", "trait_cautious"]}, "divisions": 14, "in_combat": 1, "moving": 5, "avg_org": 33.5, "avg_strength": 206, "units": {"Upper Silesia": [[0, 479, 73, 30, null, 0], [1, 9511, 227, 39, null, 0]], "Łódz": [[1, 9439, 212, 25, null, 0], [1, 9546, 227, 28, null, 0]], "Hinterpommern": [[1, 11260, 227, 58, null, 0], [1, 11316, 204, 7, 11288, 0]], "Warsaw": [[1, 3544, 202, 34, null, 0], [1, 3482, 227, 36, 467, 0], [1, 11492, 206, 30, 3544, 0]], "Gdynia": [[1, 243, 227, 58, null, 0], [1, 3295, 202, 12, null, 1]], "Kraków": [[1, 9427, 226, 54, 11398, 0], [1, 11413, 218, 27, 442, 0]], "Poznań": [[1, 9532, 203, 32, null, 0]]}}],
+  "fronts": [{"against": ["POL"], "states": ["Eastern Slovakia", "Gdynia", "Hinterpommern", "Kielce", "Kraków", "Płock", "Warsaw", "Łódz"], "provinces": [9361, 6604, 548, 11532, 3410, 11430, 3295, 11260, 3544, 11515, 279, 467, 11492, 3482, 243, 11316, 9306, 11413]}],
+  "enemy_seen": {"POL": {"Gdynia": [[2, 9263, 192, 2], [3, 3324, 100, 70], [3, 334, 96, 65], [4, 6347, 182, 65], [3, 334, 100, 49], [3, 9263, 100, 34], [4, 334, 182, 65], [2, 9263, 208, 28], [2, 9263, 227, 21]], "Hinterpommern": [[2, 11372, 212, 22], [2, 11288, 227, 53], [2, 11288, 226, 24], [3, 11343, 100, 62]], "Poznań": [[2, 11558, 184, 37]]}},
+  "enemy_totals": {"columns": ["tag", "since"], "rows": [["POL", "1939.8.25.5"]]},
+  "around_columns": ["province", "state", "controller", "terrain"],
+  "around": [[17, "Poznań", "GER", "plains"], [279, "Gdynia", "GER", "plains"], [334, "Gdynia", "POL", "forest"], [388, "Poznań", "GER", "forest"], [3324, "Gdynia", "POL", "forest"], [3381, "Poznań", "GER", "plains"], [3460, "Poznań", "GER", "plains"], [6347, "Gdynia", "POL", "plains"], [9252, "Hinterpommern", "GER", "forest"], [9263, "Gdynia", "POL", "plains"], [9277, "Hinterpommern", "GER", "forest"], [9306, "Hinterpommern", "GER", "forest"], [11232, "Poznań", "GER", "forest"], [11288, "Hinterpommern", "POL", "forest"], [11343, "Hinterpommern", "POL", "plains"], [11372, "Hinterpommern", "POL", "plains"], [11558, "Poznań", "POL", "plains"]],
+  "around_note": "trimmed to Gdynia, Hinterpommern and Poznań",
+  "enemy_seen_note": "trimmed to the states near the goal"
+ },
+ "notes": "",
+ "requests": [],
+ "results": {}
+}

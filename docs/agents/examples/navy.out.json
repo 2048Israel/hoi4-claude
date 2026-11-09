@@ -1,0 +1,8 @@
+{
+  "orders": [],
+  "requests": [
+    {"op": "request.ships", "to": "naval_industry", "type": "submarine", "count": 12, "by": "navy", "why": "convoy raiding against Britain in the Western Approaches"}
+  ],
+  "report": "I. U-Boots Flottille Weddigen: convoy raiding, Western Approaches (no fleet op in OR1 yet: by hand).\nOstseeflotte: patrol, Lower Baltic Sea. Hochseeflotte: hold at Weser-Ems (fleet in being).\nAsked naval industry for 12 submarines.",
+  "notes": "Fleet orders (until OR1 has fleet ops, in report for Supreme Command):\n- U-boats of the reserve fleet: split off, convoy raiding, North Sea.\n- Reserve fleet's 13 destroyers: convoy escort, Lower Baltic Sea (Swedish iron ore).\n- Marineschule Kiel (2 minelayers): mines, Eastern North Sea.\n- II. U-Boots-Ausbildungs-Gruppe: training, stays home.\nNever engage the Home Fleet. Plan escorts for Weserübung in spring 1940."
+}

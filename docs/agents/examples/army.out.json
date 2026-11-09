@@ -1,0 +1,11 @@
+{
+  "orders": [
+    {"op": "army.front", "army": 1, "against": "France", "priority": 2, "by": "army", "why": "the French border (Baden, Moselland) has no army; Rundstedt's 19 divisions go west as Poland collapses"}
+  ],
+  "requests": [
+    {"op": "request.equipment", "to": "military_industry", "equipment": "infantry_equipment", "amount": 20000, "by": "army", "why": "32 Infanterie-Division lines in training and the losses in Poland"},
+    {"op": "request.construction", "to": "civilian_industry", "building": "land_fort", "state": "Baden", "count": 2, "by": "army", "why": "the Rhine border with France has one fort line and no army behind it"}
+  ],
+  "report": "Army 1 (Rundstedt, 19) leaves Poland for the French border; Armies 2-4 finish Poland. Not ready for any new war.\n57 divisions in no army: an army for the Low Countries needs EX5; please form one by hand.\nAsked: 20,000 infantry equipment; 2 forts in Baden.",
+  "notes": "West: Army 1 on France. Next: an army from the loose divisions on Belgium, Luxembourg, Holland.\nEast: the field marshal keeps Armies 2-4 and operation gdynia.\nTraining: 38 lines; recruit again under 10.\nPanzer-Division to medium tanks when Panzer III is produced; no template change while training."
+}

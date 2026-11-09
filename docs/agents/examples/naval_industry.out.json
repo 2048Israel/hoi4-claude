@@ -1,0 +1,10 @@
+{
+  "orders": [
+    {"op": "production.add_line", "equipment": "Typ VIIA", "factories": 5, "dockyards": true, "priority": 2, "by": "naval_industry", "why": "the navy's 12 submarines for convoy raiding; 8 of 12 dockyards idle"},
+    {"op": "production.set", "line": 1, "factories": 3, "dockyards": true, "by": "naval_industry", "why": "Scharnhorst is 68% built: 3 dockyards bring 1,011 days down to about 340"},
+    {"op": "production.set", "line": 2, "factories": 2, "dockyards": true, "by": "naval_industry", "why": "escorts for the convoys: the first Zerstörer 1934A sooner"}
+  ],
+  "requests": [],
+  "report": "All 12 dockyards working: Typ VIIA line (5), Scharnhorst (3), destroyers (2, 1, 1).\nThe navy's 12 submarines: a new ship line needs EX4's executor command, so it may come back failed.",
+  "notes": "Typ VIIA: 12 boats asked; raise to 8 dockyards when Scharnhorst is done.\nNo new capital ships: no race with the Royal Navy.\nConvoys: check the stock before Weserübung."
+}

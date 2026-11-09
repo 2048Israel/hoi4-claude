@@ -1,0 +1,11 @@
+{
+  "orders": [
+    {"op": "army.target", "army": 2, "city": "Gdynia", "priority": 2, "by": "operation_gdynia", "why": "the goal: 4 Polish units hold Gdynia (9263), 3 of them under 30% organisation"}
+  ],
+  "requests": [
+    {"op": "request.air_support", "to": "air", "region": "Western Poland", "mission": "cas", "until": "1939-11-25", "by": "operation_gdynia", "why": "Army 2 attacks the Gdynia pocket"},
+    {"op": "request.air_support", "to": "air", "region": "Eastern Germany", "mission": "cas", "until": "1939-11-25", "by": "operation_gdynia", "why": "the Polish pocket inside Hinterpommern"}
+  ],
+  "report": "Army 2 sent at Gdynia; 4 of its 14 divisions are near, the rest march from Łódz, Warsaw and Kraków.\nPocket: 9 Polish units in Gdynia, 4 in Hinterpommern. Not met yet: Gdynia and 3 Hinterpommern provinces are Polish.",
+  "notes": "Turn 1: Army 2 at Gdynia. While it marches, no new order.\nIf it stands short of Gdynia: a front line on the pocket and a battle plan instead.\nThen the Hinterpommern pocket (11288, 11343, 11372).\nAbort line: Army 2 under 50% strength, or 1939-11-25."
+}

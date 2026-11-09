@@ -1,0 +1,8 @@
+{
+  "orders": [
+    {"op": "research.start", "slot": 4, "tech": "Improved Small Airframe", "priority": 2, "by": "research", "why": "slot 4 is free; the air agent's request: the next fighter airframe for the war with Britain and France"}
+  ],
+  "requests": [],
+  "report": "Slot 4: Improved Small Airframe (the air agent's request). All 5 slots busy.\nNext free slot: Fuel Refining II.",
+  "notes": "Next free slots, best first:\n1. Fuel Refining II (fuel for a long war)\n2. Improved Oil Processing\n3. Improved Artillery Upgrade I\n4. Cavity Magnetron (radar)\nIndustry line keeps Concentrated Industry IV and Construction IV; Construction V after IV."
+}

@@ -1,0 +1,10 @@
+{
+  "orders": [
+    {"op": "operation.start", "name": "gdynia", "goal": "Take Gdynia and clear the Polish pocket in Hinterpommern", "forces": ["army 2"], "success": "Gdynia (province 9263) and every Hinterpommern province are controlled by GER", "abort": "deadline passed, or Army 2 falls under 50% strength", "deadline": "1939-11-25", "priority": 2, "by": "field_marshal_german_theater_1", "why": "13 Polish units hold Gdynia and 3 Hinterpommern provinces behind our lines"}
+  ],
+  "requests": [
+    {"op": "request.divisions", "to": "army", "count": 4, "template": "Infanterie-Division", "theater": "East Prussia", "by": "field_marshal_german_theater_1", "why": "4 Polish divisions stand in Ermland-Masuren and none of ours"}
+  ],
+  "report": "Operation gdynia started: Army 2 (Kluge), deadline 1939-11-25.\nArmies 1, 3, 4 left on their orders: most divisions still marching (13/19, 13/21, 15/21).\nPolish units seen: Kraków 11, Gdynia 9, Płock 7, Kielce 7, Warsaw 7, East Prussia 4, Hinterpommern 4.",
+  "notes": "Turn 10 targets: Army 1 Kraków (taken), Armies 3 and 4 Warsaw (city held; Poles in 4 provinces of the state).\nNext: when they stand, Army 3 at Płock, Army 4 at Kielce.\nOperation gdynia: Army 2 is the operation's until it ends.\nEast Prussia: 4 divisions asked from the army."
+}

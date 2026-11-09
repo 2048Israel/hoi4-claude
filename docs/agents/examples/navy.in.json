@@ -1,0 +1,18 @@
+{
+ "agent": "navy",
+ "turn": 12,
+ "due": ["cadence: every 2nd turn at war"],
+ "directive": "At war with Poland, Britain and France since 1939-08-25. Finish Poland in November; hold the West, no offensive against France before spring 1940. No new wars.",
+ "budget": {},
+ "state": {
+  "agent": "navy",
+  "date": "1939.11.1.1",
+  "tag": "GER",
+  "fleets": [{"name": "Kriegsmarine", "home_base": "Weser-Ems", "task_forces": [{"name": "Hochseeflotte", "at": "North-West Germany", "province": 241, "mission": 0, "ships": {"heavy_cruiser": 2, "light_cruiser": 6, "destroyer": 4}, "strength": 861, "org": 40.0}, {"name": "Ostseeflotte", "at": "Lower Baltic Sea", "province": 2256, "mission": 0, "ships": {"battleship": 2, "destroyer": 8}, "strength": 529, "org": 38.0}, {"name": "Marineschule Kiel", "at": "Jutland Peninsula", "province": 6389, "mission": 0, "ships": {"mine_layer": 2}, "strength": 40, "org": 40.0}]}, {"name": "Unterseeboots-Flotte ", "home_base": "Holstein", "task_forces": [{"name": "I. U-Boots Flottille Weddigen", "at": "Jutland Peninsula", "province": 6389, "mission": 0, "ships": {"submarine": 8}, "strength": 120, "org": 40.0}, {"name": "II. U-Boots-Ausbildungs-Gruppe", "at": "North-West Germany", "province": 241, "mission": 0, "ships": {"submarine": 6}, "strength": 90, "org": 40.0}]}, {"name": "German Reich Flotta 1", "home_base": "Weser-Ems", "task_forces": [{"name": "German Reich Reserve fleet 1", "at": "North-West Germany", "province": 241, "mission": 8, "ships": {"battleship": 1, "heavy_cruiser": 2, "destroyer": 13, "submarine": 8}, "strength": 1287, "org": 38.5}]}],
+  "convoys": {"columns": ["equipment", "stock", "in_units", "wanted", "short"]},
+  "wars": ["AST", "BRM", "CAN", "ENG", "FRA", "JOR", "KUW", "LEB", "MAL", "NZL", "OMA", "PAL", "POL", "RAJ", "SAF", "SYR"]
+ },
+ "notes": "",
+ "requests": [],
+ "results": {}
+}

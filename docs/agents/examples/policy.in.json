@@ -1,0 +1,28 @@
+{
+ "agent": "policy",
+ "turn": 12,
+ "due": ["cadence: every 3rd turn at war", "no focus running", "PP over 150"],
+ "directive": "At war with Poland, Britain and France since 1939-08-25. Finish Poland in November; hold the West, no offensive against France before spring 1940. No new wars.",
+ "budget": {"pp": 450},
+ "state": {
+  "agent": "policy",
+  "date": "1939.11.1.1",
+  "tag": "GER",
+  "political_power": 722.0,
+  "stability": 0.85,
+  "war_support": 0.685,
+  "ruling_party": "fascism",
+  "popularity": {"democratic": 34.9, "communism": 17.9, "fascism": 30.4, "neutrality": 16.8},
+  "focus": {"progress": 4, "completed": 29, "can_start": {"columns": ["id", "name", "days", "if (the game decides)", "war_with", "opens"], "rows": [["GER_trade_deal_with_sweden", "Trade Deal with Sweden", 35, "is_subject = no, AND { country_exists = SWE, SWE { is_subjec...", null, null], ["GER_develop_heraeus_facilities", "Develop Heraeus Research Facilities", 70, "industrial_complex > 49", null, null], ["GER_create_rustungsstab", "Create the Rüstungsstab", 70, null, null, null], ["GER_armament_rationalization", "Armament Rationalization", 70, null, null, null], ["GER_salvage_captured_equipment", "Salvage Captured Equipment", 35, "has_war_with_major = yes", null, null], ["GER_instill_auftragstaktik", "Instill Auftragstaktik", 35, null, null, 3], ["GER_expand_kummersdorfs_capacity", "Expand Kummersdorf's Capacity", 35, "has_war_with_major = yes", null, null], ["GER_expanding_the_luftwaffe", "Expanding the Luftwaffe", 35, null, null, 3], ["GER_plan_z", "Plan Z", 35, null, null, 1], ["GER_around_maginot", "Around Maginot", 28, "is_subject = no, OR { NOT { HOL { is_in_faction_with = GER }...", ["BEL", "HOL", "LUX", "FRA"], 2], ["GER_operation_weserubung", "Operation Weserübung", 28, "is_subject = no, hidden_trigger { OR { AND { is_ai = yes, NO...", ["DEN", "NOR"], 3], ["GER_fuhrerprinzip", "Führerprinzip", 35, null, null, 7]]}},
+  "laws": {"economy": "War Economy", "trade_laws": "Autarky", "mobilization_laws": "Extensive Conscription", "gp_national_ideas": "Planning Stage"},
+  "law_options": {"economy": [["Civilian Economy", 150], ["Early Mobilization", 150], ["Partial Mobilization", 150], ["War Economy", 150], ["Total Mobilization", 150], ["Totaler Krieg", 150], ["National Defense State", 150]], "trade_laws": [["Free Trade", 150], ["Export Focus", 150], ["Limited Exports", 150], ["Autarky", 150], ["autarkic_economy_improved", 150], ["Closed Economy", 150], ["special_economic_zones", 0]], "mobilization_laws": [["Disarmed Nation", 150], ["Volunteer Only", 150], ["Limited Conscription", 150], ["Extensive Conscription", 150], ["Service by Requirement", 150], ["All Adults Serve", 150], ["Scraping the Barrel", 150]]},
+  "advisors": [{"name": "Krupp", "slot": "industrial_concern"}],
+  "spirits": ["Bitter Loser"],
+  "ideas_unread": ["PER_persian_german_trade_idea_2"],
+  "wars": {"columns": ["tag", "since"], "rows": [["AST", "1939.8.25.6"], ["CAN", "1939.8.25.6"], ["ENG", "1939.8.25.6"], ["FRA", "1939.8.25.6"], ["NZL", "1939.8.25.6"], ["POL", "1939.8.25.5"], ["RAJ", "1939.8.25.6"], ["SAF", "1939.8.25.6"]], "note": "trimmed: 16 enemies in the save, the British dominions and mandates left out"},
+  "faction": {"template": "faction_template_axis", "members": ["GER", "SLO"]}
+ },
+ "notes": "Saving PP for Service by Requirement once at war with a major power.",
+ "requests": [],
+ "results": {}
+}
