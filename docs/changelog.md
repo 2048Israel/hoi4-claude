@@ -5,6 +5,18 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+# 0.1.7 (2026-11-09)
+
+- **State slicer (hoi4_slices.py, ST1):** `slices(snapshot, bridge_state, world)` gives each agent of
+  docs/command.md its own input: policy, research, the three industries, air, navy, army, one field marshal per
+  army group and one per running operation, keyed by OR1's agent names. Fog of war: enemy divisions only in
+  provinces we hold or stand in, or next to one; per-country counts only from the bridge. Adjacency is read at run
+  time from the game's provinces.bmp, definition.csv and adjacencies.csv (1.4 s, cached in state/). Beyond SR1 it
+  reads province control, wars, air wings and bases, air superiority and the faction from the save, laws and
+  building slots from the game's files, and FP1's startable focuses. On the 1939 save every slice is 750-6,700
+  characters; 5.3 s in all (2.1 s of it FP1, skip with --no-focus). Offline: tests/test_ST1.py with a 14x3
+  handmade map.
+
 # 0.1.6 (2026-11-09)
 
 - **Save reader (hoi4_save.py, SR1):** `python hoi4_save.py <save> [--tag GER] [--units POL]` turns a text save
