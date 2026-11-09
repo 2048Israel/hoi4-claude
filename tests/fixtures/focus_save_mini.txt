@@ -1,0 +1,34 @@
+HOI4txt
+player="GER"
+ideology=fascism
+date="1939.11.1.1"
+difficulty="normal"
+game_rules={
+	obsolete_focus_branches_visibility=SHOW
+}
+countries={
+	AUS={
+		focus={
+			completed="AUS_decoy"
+		}
+	}
+	GER={
+		instances_counter=54
+		politics={
+			focus={
+				completed="GER_decoy_deeper"
+			}
+		}
+		focus={
+			completed="GER_root_a"
+			completed="GER_or_child"
+			progress=3.5
+			current="GER_left"
+			paused=no
+		}
+		refresh=74
+	}
+	ITA={
+		instances_counter=3
+	}
+}
