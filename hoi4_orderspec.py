@@ -380,7 +380,9 @@ RESULT_STATUSES = ("done", "refused", "failed", "dropped")
 
 def result(order: dict, status: str, reason: str | None = None) -> dict:
     """One result entry for an order, to store under its id."""
-    r = {"status": status, "by": order.get("by"), "op": order.get("op")}
+    r = {"status": status}
+    if isinstance(order, dict):
+        r.update({k: order[k] for k in ("by", "op") if order.get(k) is not None})
     if reason:
         r["reason"] = reason
     return r
@@ -609,8 +611,8 @@ def merge(replies: dict, budgets: dict | None = None, available: dict | None = N
             used.add(oid)
             if item_problems:
                 op = item.get("op") if isinstance(item, dict) else None
-                dropped[oid] = {"status": "dropped", "by": agent, "op": op if op in OPS else None,
-                                "reason": "; ".join(item_problems)}
+                dropped[oid] = result({"by": agent, "op": op if op in OPS else None}, "dropped",
+                                      "; ".join(item_problems))
                 continue
             order = dict(item, id=oid, _seq=seq)
             seq += 1
