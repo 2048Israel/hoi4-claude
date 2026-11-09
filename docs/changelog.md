@@ -5,6 +5,15 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+# 0.1.5 (2026-11-09)
+
+- **Orders format (hoi4_orderspec.py, OR1):** the JSON Lines format between the agents of docs/command.md and the
+  executor: 25 ops (the first-week ops, the executor's, operation charters, six requests), each with by/why and
+  optional priority/id/cost; validate(), validate_reply() for {orders, requests, report, notes}, budgets and
+  results (done/refused/failed/dropped). merge() gives ids, routes requests, and holds conflicting or over-budget
+  orders for Supreme Command (settle()); it never guesses. docs/orders.md has every op with an example line;
+  `python hoi4_orderspec.py check FILE`. Offline: tests/test_OR1.py, which also checks every example in the docs.
+
 # 0.1.4 (2026-11-09)
 
 - **Focus planner (hoi4_focus.py, FP1):** `python hoi4_focus.py --save <save> [--json]` lists the focuses that can
