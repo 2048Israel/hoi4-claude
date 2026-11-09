@@ -18,7 +18,8 @@ plus `.bare` for values without a key (`{ 5 42 50 }`, or anonymous `{ ... }` blo
 `spec` says which blocks to build: None or True = everything; a dict = only the keys it names (`"*"` for any other
 key), with the spec for that key's block as the value; SPAN = do not parse, just give the block's Span(start, end).
 Blocks it does not name are skipped by matching braces only, which is several times faster than tokenizing them.
-Plain `key=value` pairs are always kept.
+Plain `key=value` pairs are always kept. Wrap a spec dict in Once(...) when its keys appear once (a save's
+sections, the countries by tag): parsing then stops as soon as all of them have been read.
 """
 import argparse
 import json

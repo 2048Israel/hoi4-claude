@@ -100,6 +100,34 @@ Coordinates are always full-resolution game-window pixels. The grid labels show 
 
 It only logs. It changes nothing about the game.
 
+## Save reader
+
+`hoi4_save.py` turns a text save into compact JSON for one country, so the agents of `docs/command.md` get the
+game's state as data instead of screenshots:
+
+```
+python hoi4_save.py "<save>.hoi4" [--tag GER] [--units POL,SOV] [--indent 1] [--timing]
+python hoi4_save.py "<save>.hoi4" --raw countries.GER.focus
+```
+
+- **research:** each slot's tech, points, cost, rate and days left; free slots with their saved points; techs done
+- **production:** each line's equipment and variant, factories, efficiency and output per day (ships: progress)
+- **construction:** building, state, levels, factories, progress and days left
+- **divisions:** name, template, province and state, army, strength, organisation, manpower, where it is moving,
+  in combat; **armies** with their general, **fronts**, **templates**, the **training** queue, **fleets**
+- **focus** (running, progress, completed), political power, stability, war support, ideas, owned **states**
+- `--units` adds other countries' divisions (province, template, strength) for the state slicer (ST1), which
+  applies the fog of war. `--raw` prints any one block of the save, for exploring without reading the file.
+
+Saves must be text (`save_as_binary=no`, `docs/queue/SR0.md`); a binary save is refused with that hint. Research
+costs and years, state names and province-to-state come from the game's files and the mods enabled in
+`dlc_load.json`, read-only (`--no-game` skips them). Saves are only ever read.
+
+**Speed**, measured on the PC on 2026-11-09 with `claude_ger_1939_11_stop.hoi4` (76 MB, 1 Nov 1939): **0.9 s** in
+all, of which 0.55 s is the save and 0.27 s the game's files; 54 KB of JSON. It reads only what it needs: unwanted
+blocks are skipped by counting braces, and it stops once Germany, the first country, is read. Just tokenizing the
+whole file would take 2.8 s, before building anything.
+
 ## Status and how to help
 
 The program and mod run on one Windows PC that has the game; the first campaign there is **Germany, 1936**
