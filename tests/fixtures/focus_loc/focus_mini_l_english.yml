@@ -1,0 +1,8 @@
+﻿l_english:
+ GER_root_a:0 "Root A"
+ GER_root_b: "Root $GER_b_word$"
+ GER_b_word:0 "B"
+ GER_or_child:0 "Either Child" # a comment
+ GER_left:1 "Left Führer"
+ # GER_right:0 "commented out"
+ GER_left_desc:0 "not a name we ask for"
