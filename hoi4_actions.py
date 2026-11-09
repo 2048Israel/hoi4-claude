@@ -1829,8 +1829,10 @@ def main(argv):
     g = s.add_mutually_exclusive_group(required=True)
     g.add_argument("--line", type=int, help="line number 1-5 on the first screen")
     g.add_argument("--name", help="any line, found by its header text, e.g. 'Bf 109' or 'Ju 87'")
+    g.add_argument("--new", help="--dockyards: a new line for this ship design, e.g. 'Typ VIIA' (--add: its dockyards)")
     s.add_argument("--add", type=int, default=0)
     s.add_argument("--remove", type=int, default=0)
+    s.add_argument("--dockyards", action="store_true", help="ship lines (dockyards): --name accepts '#8' or '8 Name'")
     s = sub.add_parser("open")
     s.add_argument("screen")
     s = sub.add_parser("close")
@@ -1875,6 +1877,15 @@ def main(argv):
     s.add_argument("--base", help="an air base by name, as the Air Forces Overview (read air) shows it")
     s.add_argument("--wing", help="assign: one wing by name, picked in the overview (a base panel shows 4 rows)")
     s.add_argument("--region-name", help="assign --wing: the region the wing must end up over, e.g. 'Western Poland'")
+    s = sub.add_parser("navy", help="task forces: mission --fleet NAME --mission M [--region X Y] | port --fleet NAME "
+                                    "--port CITY | deselect")
+    s.add_argument("op", choices=["mission", "port", "deselect"])
+    s.add_argument("--fleet", "--task-force", dest="fleet", help="a task force by name, as read navy shows it")
+    s.add_argument("--mission", help="patrol, strike, convoy-raid, convoy-escort, minelaying, minesweeping, "
+                                     "invasion-support, exercises, hold")
+    s.add_argument("--region", type=int, nargs=2, metavar=("X", "Y"), help="a point on open sea (standard camera)")
+    s.add_argument("--region-name", help="the sea region the fleet must then list, e.g. 'Lower Baltic Sea'")
+    s.add_argument("--port", help="port: a city with a naval base, as the map's Find window knows it")
     s = sub.add_parser("idea", help="take a law/advisor/staff/government choice: --slot S --name NAME [--dry-run]")
     s.add_argument("--slot", required=True, help="e.g. law-economy, advisor-3, staff-6, gov-structure (see read ideas)")
     s.add_argument("--name", required=True)
@@ -1902,8 +1913,11 @@ def main(argv):
     s.add_argument("name", help="the save's name as the Load list shows it, e.g. claude_ger_1936")
     s = sub.add_parser("read")
     s.add_argument("what", choices=["research", "production", "date", "techs", "focus", "event", "decisions", "pp",
-                                    "air", "ideas"])
+                                    "air", "ideas", "navy"])
     s.add_argument("--slot", help="read ideas: the slot whose choices to list (law-economy, advisor-3, staff-6, ...)")
+    s.add_argument("--dockyards", action="store_true", help="read production: the ship lines instead")
+    s.add_argument("--quick", action="store_true", help="read navy: the overview only (no clicks)")
+    s.add_argument("--fleet", help="read navy: one task force with its ships")
     s.add_argument("--tab")
     s.add_argument("--grep")
     args = p.parse_args(argv)
@@ -1921,6 +1935,14 @@ def main(argv):
                 raise ActionError(f"slot {args.slot} is busy with {busy['tech']} ({busy['days']} days left); "
                                   "add --replace to swap it out")
         research(hwnd, args.slot, args.tech, args.mio, dry_run=args.dry_run)
+    elif args.cmd == "production" and (args.dockyards or args.new):
+        import hoi4_navy
+        if args.new:
+            hoi4_navy.new_ship_line(hwnd, args.new, dockyards=args.add)
+        elif args.name:
+            hoi4_navy.change_dockyards(hwnd, args.name, args.add, args.remove)
+        else:
+            raise ActionError("act production --dockyards needs --name LINE or --new DESIGN")
     elif args.cmd == "production":
         if args.name:
             production_by_name(hwnd, args.name, args.add, args.remove)
@@ -1953,6 +1975,20 @@ def main(argv):
             if not args.to:
                 raise ActionError("act air rebase needs --to X Y")
             hoi4_air.rebase(hwnd, args.at, args.to, args.only, base=args.base)
+    elif args.cmd == "navy":
+        import hoi4_navy
+        if args.op == "deselect":
+            hoi4_navy.deselect(hwnd)
+        elif not args.fleet:
+            raise ActionError("act navy needs --fleet NAME (a task force, see: read navy)")
+        elif args.op == "mission":
+            if not args.mission:
+                raise ActionError("act navy mission needs --mission M")
+            hoi4_navy.set_mission(hwnd, args.fleet, args.mission, args.region, args.region_name)
+        elif args.op == "port":
+            if not args.port:
+                raise ActionError("act navy port needs --port CITY")
+            hoi4_navy.set_home_base(hwnd, args.fleet, args.port)
     elif args.cmd == "idea":
         import hoi4_politics
         hoi4_politics.take(hwnd, args.slot, args.name, dry_run=args.dry_run, replace=args.replace)
@@ -2034,6 +2070,15 @@ def main(argv):
     elif args.what == "research":
         for s in read_research(hwnd):
             print(f"  slot {s['slot']}: {s['tech'] or '(empty)'}" + (f" - {s['days']} days" if s["days"] else ""))
+    elif args.what == "production" and args.dockyards:
+        import hoi4_navy
+        hoi4_navy.read_dockyard_lines(hwnd)
+    elif args.what == "navy":
+        import hoi4_navy
+        if args.fleet:
+            hoi4_navy.read_task_force(hwnd, args.fleet)
+        else:
+            hoi4_navy.read_navy(hwnd, quick=args.quick)
     elif args.what == "production":
         header, rows = read_production(hwnd)
         print(header)
