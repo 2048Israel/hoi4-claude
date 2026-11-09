@@ -69,6 +69,18 @@ def check_parser():
     raises(S.parse, b"a=1 }", contains="without a matching")
     raises(S.skip_block, b"{ a", 1, contains="unclosed")
 
+    tail = b'a={ x=1 } countries={ AAA={ d={ n=1 } d={ n=2 } late=3 } BBB={ y=2 } } b={ y=2 } last=9 broken={ '
+    raises(S.parse, tail, contains="not closed")
+    once = S.parse(tail, S.Once({"a": True, "countries": S.Once({"AAA": {"d": True}})}))
+    assert once.one("a").one("x") == 1 and "b" not in once, "Once: stops after the last named key"
+    aaa = once.path("countries", "AAA")
+    assert [d.one("n") for d in aaa.all("d")] == [1, 2] and aaa.one("late") == 3, "a plain spec reads its block whole"
+    assert "BBB" not in once.one("countries")
+    whole = tail.index(b" broken")
+    assert "last" not in once
+    assert S.parse(tail, S.Once({"a": True, "zzz": True}), end=whole).one("last") == 9, "a missing key: reads on"
+    assert S.parse(tail, S.Once({"a": True, "*": {}}), end=whole).one("last") == 9, 'a Once with "*" reads on'
+
     eq = b'equipments={ a={ creator="X" id={ id=5 type=70 } } b={ id={ id=6 type=70 } name="B" } c={ id=7 } }'
     span = S.parse(eq, {"equipments": S.SPAN}).one("equipments")
     found = S._lookup(eq, span, {(5, 70), (6, 70), (9, 70)}, None, {"id": True}, False, {"*": {"id": True}},
@@ -210,6 +222,9 @@ def check_small():
     assert again.pop("save")["file"] is None
     snap.pop("save")
     assert again == snap, "CRLF and LF read the same"
+    cut = S.extract(SMALL.read_bytes() + b"\nbroken={\n", units=["BBB"], game=g)
+    cut.pop("save")
+    assert cut == snap, "reading stops after the last section it needs: what follows is never read"
     bare = S.extract(SMALL)
     assert bare["research"]["running"][1]["days_left"] is None and bare["construction"][0]["state_name"] is None
     assert "state" not in bare["divisions"][0], "without the game's files: no state names, no days left"

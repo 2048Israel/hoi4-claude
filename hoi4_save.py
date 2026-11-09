@@ -29,7 +29,7 @@ import time
 from collections import namedtuple
 from pathlib import Path
 
-__all__ = ["Block", "Cmp", "Span", "SPAN", "SaveFormatError", "GameData", "parse", "parse_file", "read_save",
+__all__ = ["Block", "Cmp", "Span", "SPAN", "Once", "SaveFormatError", "GameData", "parse", "parse_file", "read_save",
            "skip_block", "plain_braces", "extract", "raw", "leader_name", "research_eta", "enabled_mods"]
 
 TEXT_MAGIC = b"HOI4txt"
@@ -162,44 +162,54 @@ def plain_braces(data, start=0, end=None):
     if end is None:
         end = len(data)
     is_bytes = isinstance(data, (bytes, bytearray))
-    if data.find(b"#" if is_bytes else "#", start, end) != -1:
+    hash_, quote, braces = (b"#", b'"', (b"{", b"}")) if is_bytes else ("#", '"', ("{", "}"))
+    if data.find(hash_, start, end) != -1:
         return False
     joined = (b"" if is_bytes else "").join(_re("string", data).findall(data, start, end))
-    return not any(c in joined for c in ((b"{", b"}") if is_bytes else ("{", "}")))
+    if joined.count(quote) != data.count(quote, start, end):
+        return False                            # a string left open in the stretch: its braces may count
+    return not any(c in joined for c in braces)
 
 
-def skip_block(data, pos, plain=False):
+def skip_block(data, pos, plain=None):
     """data[pos] is just after an opening '{': return the index just after its matching '}'.
-    plain=True counts braces only (see plain_braces); otherwise strings and # comments are stepped over."""
-    depth = 1
-    if plain:
+    plain=True: count braces only (the caller knows plain_braces holds). plain=False: step over strings and #
+    comments, brace by brace. None: count braces, then check the skipped stretch with plain_braces and do it the
+    exact way only if a string or comment there could hide a brace (same answer as False, much faster)."""
+    if plain is not False:
+        depth = 1
         for m in _re("braces", data).finditer(data, pos):
             if m.lastindex:
                 depth += 1
             else:
                 depth -= 1
                 if not depth:
-                    return m.end()
-    else:
-        is_bytes = isinstance(data, (bytes, bytearray))
-        o, c, q = (123, 125, 34) if is_bytes else ("{", "}", '"')
-        search, string, comment = _re("special", data).search, _re("string", data).match, _re("comment", data).match
-        while True:
-            m = search(data, pos)
-            if m is None:
-                break
-            ch = data[m.start()]
-            if ch == o:
-                depth += 1
-                pos = m.end()
-            elif ch == c:
-                depth -= 1
-                pos = m.end()
-                if not depth:
-                    return pos
-            else:
-                s = (string if ch == q else comment)(data, m.start())
-                pos = s.end() if s else m.end()
+                    e = m.end()
+                    if plain or plain_braces(data, pos, e):
+                        return e
+                    break
+        if plain:
+            raise SaveFormatError(f"unclosed '{{' opened before offset {pos}")
+    depth = 1
+    is_bytes = isinstance(data, (bytes, bytearray))
+    o, c, q = (123, 125, 34) if is_bytes else ("{", "}", '"')
+    search, string, comment = _re("special", data).search, _re("string", data).match, _re("comment", data).match
+    while True:
+        m = search(data, pos)
+        if m is None:
+            break
+        ch = data[m.start()]
+        if ch == o:
+            depth += 1
+            pos = m.end()
+        elif ch == c:
+            depth -= 1
+            pos = m.end()
+            if not depth:
+                return pos
+        else:
+            s = (string if ch == q else comment)(data, m.start())
+            pos = s.end() if s else m.end()
     raise SaveFormatError(f"unclosed '{{' opened before offset {pos}")
 
 
@@ -217,9 +227,32 @@ def _child_spec(spec, key):
     return sub
 
 
+class Once(dict):
+    """A spec whose named keys each appear once in their block (a save's sections, the countries by tag).
+    When every open block's spec is a Once and all their keys have been read, parsing stops there: the rest of
+    the file is not read. Never wrap a spec for repeated keys (division, military_lines) in Once."""
+
+
+def _todo(spec):
+    """The keys a Once spec still waits for, or None (any other spec never stops early)."""
+    if not isinstance(spec, Once) or "*" in spec:
+        return None
+    return {k for k, v in spec.items() if v is not False and v is not None}
+
+
+def _finished(cur_todo, stack):
+    """Every key named by the open blocks' Once specs has been read (each waits only for its open child)."""
+    if cur_todo is None or cur_todo:
+        return False
+    for _, _, todo, child in stack:
+        if todo is None or len(todo) > 1 or (todo and child not in todo):
+            return False
+    return True
+
+
 def parse(data, spec=None, start=0, end=None, plain=None):
-    """Parse Clausewitz script (bytes or str) into a Block. See the module docstring for spec.
-    plain: whether braces alone show the structure (plain_braces); worked out on first need when None."""
+    """Parse Clausewitz script (bytes or str) into a Block. See the module docstring for spec, and Once.
+    plain: how to skip blocks, as in skip_block (None: fast, and checked)."""
     if spec is True:
         spec = None
     is_bytes = isinstance(data, (bytes, bytearray))
@@ -238,8 +271,9 @@ def parse(data, spec=None, start=0, end=None, plain=None):
             return s
 
     root = Block()
-    stack = []               # (block, spec) of the enclosing blocks
+    stack = []               # (block, spec, keys it still waits for, key of the open child) of enclosing blocks
     cur, cur_spec = root, spec
+    cur_todo = _todo(spec)
     ahead = None             # the next token's match, when it was read to see if a value is a key
     key = None               # a key waiting for its value
     op = None
@@ -271,8 +305,6 @@ def parse(data, spec=None, start=0, end=None, plain=None):
             if kind == _OPEN:
                 sub = _child_spec(cur_spec, key)
                 if sub is _SKIPPED or sub is SPAN:
-                    if plain is None:
-                        plain = plain_braces(data, start, end)
                     e = skip_block(data, pos, plain)
                     if sub is SPAN:
                         item = Span(pos, e - 1)
@@ -282,6 +314,10 @@ def parse(data, spec=None, start=0, end=None, plain=None):
                         else:
                             lst.append(item)
                     pos = e
+                    if cur_todo and key in cur_todo:
+                        cur_todo.discard(key)
+                        if _finished(cur_todo, stack):
+                            return root
                 else:
                     child = Block()
                     item = child if op == "=" else Cmp(op, child)
@@ -290,8 +326,9 @@ def parse(data, spec=None, start=0, end=None, plain=None):
                         cur[key] = [item]
                     else:
                         lst.append(item)
-                    stack.append((cur, cur_spec))
+                    stack.append((cur, cur_spec, cur_todo, key))
                     cur, cur_spec = child, sub
+                    cur_todo = _todo(sub)
             elif kind == _OP:
                 raise SaveFormatError(f"key {key!r} has two operators (offset {pos})")
             else:
@@ -309,18 +346,26 @@ def parse(data, spec=None, start=0, end=None, plain=None):
                     cur[key] = [item]
                 else:
                     lst.append(item)
+                if cur_todo and key in cur_todo:
+                    cur_todo.discard(key)
+                    if _finished(cur_todo, stack):
+                        return root
             key = None
             continue
 
         if kind == _CLOSE:
             if not stack:
                 raise SaveFormatError(f"'}}' without a matching '{{' (offset {pos})")
-            cur, cur_spec = stack.pop()
+            cur, cur_spec, cur_todo, child_key = stack.pop()
+            if cur_todo and child_key in cur_todo:
+                cur_todo.discard(child_key)
+                if _finished(cur_todo, stack):
+                    return root
         elif kind == _OPEN:                     # anonymous block inside a list: same spec as its parent
             child = Block()
             cur.bare.append(child)
-            stack.append((cur, cur_spec))
-            cur = child
+            stack.append((cur, cur_spec, cur_todo, None))
+            cur, cur_todo = child, None
         elif kind == _OP:
             raise SaveFormatError(f"operator {val!r} without a key (offset {pos})")
         else:                                   # a key, or a bare value: the next token tells
@@ -358,12 +403,13 @@ def parse_file(path, spec=None):
 def _spec_for(keys):
     spec = True
     for k in reversed(keys):
-        spec = {k: spec}
+        spec = Once({k: spec})
     return spec
 
 
 def raw(path, dotted):
-    """One block or value of a save by dotted path (countries.GER.focus), parsing only what leads to it."""
+    """One block or value of a save by dotted path (countries.GER.focus), parsing only what leads to it and
+    stopping once it is read. A repeated key gives its first value."""
     keys = [k for k in dotted.split(".") if k]
     root = parse_file(path, _spec_for(keys))
     return root.path(*keys)
@@ -692,8 +738,7 @@ def extract(save, tag=None, units=(), game=None, timing=None):
     else:
         data, name = read_save(save), Path(save).name
     lap("read")
-    plain = plain_braces(data)
-    lap("check")
+    plain = None             # skip blocks by counting braces, each skipped stretch checked (see skip_block)
 
     if tag is None:
         m = re.search(rb'\nplayer\s*=\s*"([^"]+)"', data[:65536])
@@ -701,13 +746,16 @@ def extract(save, tag=None, units=(), game=None, timing=None):
         if not tag:
             raise SaveFormatError("no player= in the save's header: give --tag")
     units = [u for u in units if u and u != tag]
-    spec = {
-        "countries": {tag: COUNTRY_SPEC, **{u: OTHER_COUNTRY_SPEC for u in units}},
+    # Once: each of these appears once, so reading stops when the last is done (in 1.19 saves the countries come
+    # after the other sections, and the player is often the first country).
+    spec = Once({
+        "player": True, "date": True, "version": True,
+        "countries": Once({tag: COUNTRY_SPEC, **{u: OTHER_COUNTRY_SPEC for u in units}}),
         "equipments": SPAN,
         "character_manager": SPAN,
         "division_templates": _TEMPLATES_SPEC,
         "states": _STATES_SPEC,
-    }
+    })
     root = parse(data, spec, start=len(TEXT_MAGIC), plain=plain)
     lap("parse")
 
