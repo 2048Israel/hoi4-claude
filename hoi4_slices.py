@@ -26,7 +26,6 @@ Standard library only, no import of hoi4.py. The save and the game's files are o
 """
 import argparse
 import json
-import math
 import re
 import struct
 import sys
@@ -256,7 +255,7 @@ class MapData:
 
 # --------------------------------------------------------------------------------------------- the game's files
 
-_LOC = re.compile(rb'^[ \t]*([A-Za-z0-9_.\-]+):\d*[ \t]*"(.*)"[ \t]*(?:#.*)?$', re.M)
+_LOC = re.compile(rb'^[ \t]*([A-Za-z0-9_.\-]+):\d*[ \t]*"(.*)"[ \t\r]*(?:#[^\n]*)?$', re.M)   # LF or CRLF
 _LOC_REF = re.compile(r"\$([A-Za-z0-9_.\-]+)\$")
 
 
@@ -265,17 +264,21 @@ def localise(game, keys):
     keys = {k for k in keys if isinstance(k, str)}
     if not game or not keys:
         return {}
-    found = {}
-    for folder in ("localisation/english", "localisation/replace/english", "localisation/replace",
-                   "localisation"):
-        for p in game.files(folder, "*_l_english.yml").values():
+    files = [p for folder in ("localisation", "localisation/english", "localisation/replace",
+                              "localisation/replace/english") for p in game.files(folder, "*_l_english.yml").values()]
+
+    def scan(wanted):
+        got = {}
+        for p in files:                               # later folders (replace/) win
             for m in _LOC.finditer(p.read_bytes()):
                 k = m.group(1).decode("utf-8", "replace")
-                if k in keys:
-                    found[k] = m.group(2).decode("utf-8", "replace").strip()
-    for k, v in found.items():
-        found[k] = _LOC_REF.sub(lambda m: found.get(m.group(1), m.group(0)), v)
-    return found
+                if k in wanted:
+                    got[k] = m.group(2).decode("utf-8", "replace").strip()
+        return got
+    found = scan(keys)
+    refs = {r for v in found.values() for r in _LOC_REF.findall(v)} - set(found)
+    table = dict(found, **(scan(refs) if refs else {}))
+    return {k: _LOC_REF.sub(lambda m: table.get(m.group(1), m.group(0)), v) for k, v in found.items()}
 
 
 def game_tables(game):
