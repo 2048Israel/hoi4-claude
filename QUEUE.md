@@ -18,9 +18,17 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 
 | batch | lane | what | brief |
 |---|---|---|---|
-| OR1 | Offline | The orders format: what thinker agents send and the executor accepts (`hoi4_orderspec.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
+| OR1 | Offline | The orders format, with requests, budgets, results and operation charters (`hoi4_orderspec.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
 | SR1 | Offline | Save-file reader: an HOI4 text save into compact JSON for the player (research, production, construction, divisions) | [SR1](docs/queue/SR1.md) |
-| TH1 | Offline | Thinker agents: economy, research and focus, politics and diplomacy, military; state in, orders out (after OR1) | [TH1](docs/queue/TH1.md) |
+| FP1 | Offline | Focus planner: which focuses can start now, from the game's focus files and a save | [FP1](docs/queue/FP1.md) |
+| ST1 | Offline | State slicer: one input per agent, with fog of war (after SR1) | [ST1](docs/queue/ST1.md) |
+| TH1 | Offline | The ten agent definitions of `docs/command.md`, each with a worked example (after OR1, ST1) | [TH1](docs/queue/TH1.md) |
+| EX4 | PC | Navy and dockyards in the executor | [EX4](docs/queue/EX4.md) |
+| EX5 | PC | Army structure: army groups, field marshals, safe army forming, deploy locations | [EX5](docs/queue/EX5.md) |
+| EX6 | PC | Trade, and building in a named state | [EX6](docs/queue/EX6.md) |
+| TL1 | PC | The turn loop that runs the agents, measured over one game month (after OR1, ST1, TH1) | [TL1](docs/queue/TL1.md) |
+
+The command structure these rows build is designed in [docs/command.md](docs/command.md) (2026-11-09).
 
 ## Pending
 

@@ -15,6 +15,7 @@ introduction and the command list; read it too. `PLAYBOOK.md` is the game's hotk
 | `QUEUE.md` | the batches waiting, in order, one line each, by lane |
 | `docs/queue/<id>.md` | one batch's brief |
 | `docs/changelog.md` | what shipped, newest first |
+| `docs/command.md` | the design for playing with one agent per branch (policy, air, navy, industries, army, field marshals, operations) |
 
 ## Who works here
 

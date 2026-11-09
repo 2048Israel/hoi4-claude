@@ -27,9 +27,30 @@ checkable format between them, so a thinker never describes clicks and the execu
   orders for the same research slot; production asking for more factories than exist; political power spent twice.
   It reports conflicts; it does not guess.
 
+## Added 2026-11-09: the command structure (`docs/command.md`)
+
+Jerus asked for one agent per branch (policy, air, navy, civilian, military and naval industry, army, a field
+marshal per army group, and task agents for single operations). The format now has to carry four more things:
+
+- **Requests:** an order addressed to an agent instead of the executor, with `to` (an agent name) and an
+  `op` of the form `request.<kind>`: `request.equipment {equipment, amount}`, `request.divisions {count, template,
+  theater}`, `request.air_support {region, mission, until}`, `request.construction {building, state}`,
+  `request.ships {type, count}`, `request.research {tech}`.
+- **Budgets:** a per-turn object `{agent: {pp, cp, civ_factories, mil_factories, dockyards, manpower}}`. The merge
+  step refuses spending over an agent's budget.
+- **Results:** for each executed order, `done`, `refused` (with the game's reason as text) or `failed`, keyed by an
+  order id, so the issuing agent sees it next turn.
+- **Operation charters:** `operation.start {name, goal, forces, success, abort, deadline}` and
+  `operation.end {name, outcome}`. `success` and `abort` are plain sentences for now; TL1 decides how to test them.
+- Ops the executor has today: `air.assign {base, mission, region}`, `air.rebase {base, to}`,
+  `army.target {army, city}`, `army.front {army}`, `army.execute {army}`, `diplomacy.act {city, action}`,
+  `construction.queue {building, count}`, `event.choose {title, option}`, besides the first list above.
+- Every agent's reply is one JSON object `{orders, requests, report, notes}`. Validate that shape too.
+
 ## Done when
 
 - `docs/orders.md` lists every op with an example line.
-- `tests/test_OR1.py` covers valid orders, each kind of problem, and each conflict rule.
+- `tests/test_OR1.py` covers valid orders, each kind of problem, each conflict rule, an over-budget spend, a
+  request, a result, and an operation charter.
 - Names of things (techs, focuses, equipment) are free strings for now. EX1 maps them to the screen; SR1 and the mod
   supply the real names.

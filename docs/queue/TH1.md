@@ -1,29 +1,34 @@
-# TH1: the thinker agents
+# TH1: the agent definitions
 
-**Lane:** Offline, after OR1. **Files:** `.claude/agents/hoi4-<role>.md`, `docs/turn.md`.
+**Lane:** Offline, after OR1 and ST1. **Files:** `.claude/agents/hoi4-<role>.md`, one per role.
 
 ## Why
 
-Jerus, 2026-11-07: "wouldnt it be more efficient of multiple agents play at once and take care of specific stuff?"
-Each thinker reads the same paused-game state and returns orders for its own area, in parallel. The orchestrator
-merges them (OR1's merge step) and the executor carries them out (EX1).
+Jerus, 2026-11-07: "wouldnt it be more efficient of multiple agents play at once and take care of specific stuff?",
+and 2026-11-09 the structure itself: one agent each for policy, air, navy, civilian, military and naval industry,
+the army, one per field marshal, and a task agent per operation. `docs/command.md` is the design; this batch writes
+the agents. (This replaces the 2026-11-07 version of TH1, which had four broader thinkers.)
 
 ## What
 
-- Four subagent definitions, each a Claude Code agent file with a short system prompt:
-  - **economy:** production lines, construction, trade.
-  - **research and focus:** research slots, the national focus.
-  - **politics and diplomacy:** laws, advisors, decisions, diplomacy.
-  - **military:** templates, recruiting, and later fronts (fronts need SR1's division locations).
-- Each takes the state as JSON (`hoi4.py state` today, SR1's snapshot later) and returns only OR1 orders, each with a
-  one-line `why`. No clicks, no coordinates, no screenshots.
-- Shared budgets go in the turn's input, so thinkers do not spend the same thing twice: the political power each may
-  spend, free factories, free research slots.
-- `docs/turn.md`: one turn, step by step. Pause; snapshot; run the thinkers in parallel; merge and settle conflicts;
-  execute; advance N days; repeat. Say what N should be in peace and in war.
+- Ten agent files: `hoi4-policy`, `hoi4-research`, `hoi4-civilian-industry`, `hoi4-military-industry`,
+  `hoi4-naval-industry`, `hoi4-air`, `hoi4-navy`, `hoi4-army`, `hoi4-field-marshal`, `hoi4-operation`. Each, in at
+  most 80 lines:
+  - what it owns and what it must leave to others (the ownership table in `docs/command.md`);
+  - its goals and how it is measured (air: superiority over our fronts; military industry: no equipment
+    shortfall; field marshal: no lost states, ground gained; operation: its `success` sentence);
+  - its doctrine: short, concrete rules for Germany 1936-1941, including the lessons in
+    `docs/changelog.md` and `docs/command.md` (Why): every wing has a mission, no idle factories, both fronts
+    covered before a declaration, never re-order an army that is still marching;
+  - the ops it may give and the requests it may make (OR1), within its budget;
+  - its input (its ST1 slice + notes, budget, requests, results) and its reply: one JSON object
+    `{orders, requests, report, notes}`, nothing else;
+  - one worked example: a short input and the reply it should give.
+- `hoi4-field-marshal` and `hoi4-operation` are templates: TL1 starts one per army group and per operation, with the
+  name and charter in the input.
+- Model per agent in the file's frontmatter: the army tree on the strongest model, the others on a cheaper one.
 
 ## Done when
 
-- The four agent files exist and each has one worked example: a short input and the orders it should give.
-- `docs/turn.md` describes the loop and what one turn costs in agent calls.
-- Remember that four thinkers per turn cost several times one player's tokens: keep their prompts and inputs short.
+- The ten files exist, and each example reply passes OR1's validator.
+- A short table in the PR: each agent, its model, and its example's input and output size.
