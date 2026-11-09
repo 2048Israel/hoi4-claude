@@ -1,0 +1,7 @@
+state={
+	id=1
+	name="STATE_1"
+	provinces={
+		10 11 12
+	}
+}

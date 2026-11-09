@@ -1,0 +1,29 @@
+# SR1 test technologies: comments, nested blocks, comparisons and a variable, as in the game's files.
+@cost_two = 2
+
+technologies = {
+	steady_tech = {
+		research_cost = 1.5
+		start_year = 1936
+		path = {
+			leads_to_tech = future_tech
+			research_cost_coeff = 1
+		}
+		categories = { industry }
+		ai_will_do = {
+			factor = 1
+			modifier = { factor = 0 date < 1938.1.1 }
+		}
+	}
+
+	future_tech = {
+		research_cost = @cost_two	# 200 points with BASE_TECH_COST = 100
+		start_year = 1941
+		allow = { has_war_support > 0.5 }
+	}
+
+	basic_tech = {
+		research_cost = 1
+		start_year = 1936
+	}
+}
