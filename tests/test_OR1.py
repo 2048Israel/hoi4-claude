@@ -379,7 +379,13 @@ def check_budgets():
         except S.OrderError:
             pass
     assert S.validate_budgets({"policy": {"pp": 150.5}, "army": {}}) == []
-    has(S.validate_budgets({"policy": {"pp": "lots"}}), "budget 'pp' must be a number >= 0")
+    has(S.validate_budgets({"policy": {"pp": "lots"}}), "budgets[policy]: budget 'pp' must be a number >= 0")
+    has(S.validate_budgets({"policy": 150}), "budgets[policy]: budget must be an object")
+    try:
+        S.merge({}, available={"factories": 10})
+        raise AssertionError("merge must refuse a malformed available")
+    except S.OrderError as e:
+        assert "available has unknown resource 'factories'" in str(e), str(e)
 
 
 def check_merge():

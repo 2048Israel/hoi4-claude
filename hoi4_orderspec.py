@@ -246,15 +246,16 @@ def _matches(name, patterns) -> bool:
     return any(fnmatch.fnmatchcase(name, p) for p in patterns)
 
 
-def _cost_problems(cost) -> list:
+def _cost_problems(cost, what="cost") -> list:
+    """Problems with a {resource: amount} object: an order's cost, a budget, or what the country has."""
     if not isinstance(cost, dict):
-        return [f"field 'cost' must be an object of {', '.join(RESOURCES)}"]
+        return [f"{'field ' + repr(what) if what == 'cost' else what} must be an object of {', '.join(RESOURCES)}"]
     out = []
     for k, v in cost.items():
         if k not in RESOURCES:
-            out.append(f"cost has unknown resource '{k}'{_close(k, RESOURCES)}")
+            out.append(f"{what} has unknown resource '{k}'{_close(k, RESOURCES)}")
         elif not ((_is_int(v) or isinstance(v, float)) and v >= 0):
-            out.append(f"cost '{k}' must be a number >= 0, got {v!r}")
+            out.append(f"{what} '{k}' must be a number >= 0, got {v!r}")
     return out
 
 
@@ -366,7 +367,7 @@ def validate_budgets(budgets) -> list:
     for agent, b in budgets.items():
         if not is_agent(agent):
             problems.append(f"budgets: unknown agent {agent!r}")
-        problems += [f"budgets[{agent}]: {p.replace('cost', 'budget', 1)}" for p in _cost_problems(b)]
+        problems += [f"budgets[{agent}]: {p}" for p in _cost_problems(b, "budget")]
     return problems
 
 
@@ -580,8 +581,8 @@ def merge(replies: dict, budgets: dict | None = None, available: dict | None = N
     A reply may also be a plain list of orders and requests (an orders file)."""
     if budgets is not None and (bp := validate_budgets(budgets)):
         raise OrderError("; ".join(bp))
-    if available is not None and (ap := _cost_problems(available)):
-        raise OrderError("available: " + "; ".join(ap))
+    if available is not None and (ap := _cost_problems(available, "available")):
+        raise OrderError("; ".join(ap))
     if not isinstance(replies, dict):
         raise OrderError("replies must be an object {agent: reply}")
     prefix = f"t{turn}." if turn is not None else ""
