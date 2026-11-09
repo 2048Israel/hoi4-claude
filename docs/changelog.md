@@ -5,6 +5,16 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+# 0.1.6 (2026-11-09)
+
+- **Save reader (hoi4_save.py, SR1):** `python hoi4_save.py <save> [--tag GER] [--units POL]` turns a text save
+  into compact JSON: research slots with days left, production lines, the construction queue, divisions (province,
+  state, army, strength, org), armies with their generals, fronts, templates, training, fleets, owned states, the
+  focus, political power, stability and war support. Days left follow the rule the saves show (a tech ahead of its
+  year speeds up as it nears): it named the game's finish day for 9 of 10 techs, one day off for the 10th. Reads
+  the 76 MB 1939 save in 0.9 s by stopping once the player's country is read. `--raw countries.GER.focus` prints
+  one block. Offline: tests/test_SR1.py with a handmade save and game-folder fixtures.
+
 # 0.1.5 (2026-11-09)
 
 - **Orders format (hoi4_orderspec.py, OR1):** the JSON Lines format between the agents of docs/command.md and the
