@@ -1,0 +1,116 @@
+# Handmade for tests/test_FP1.py, in the syntax of common/national_focus/*.txt (not copied from the game).
+# Eight GER focuses: two roots, an OR child, an AND child, a pair that excludes each other (declared on one side
+# only, as the game's files often do), a focus whose `available` asks for a focus NOT done, and a DLC branch.
+# A second tree for ITA checks that the tree claiming the tag is the one read.
+
+@long_cost = 10
+
+focus_tree = {
+	id = test_german_focus
+
+	country = {
+		factor = 0
+		modifier = {
+			add = 10
+			tag = GER
+		}
+	}
+
+	default = no
+
+	focus = {
+		id = GER_root_a
+		icon = GFX_goal_generic_construct_civ_factory
+		x = 0
+		y = 0
+		cost = 5
+		available = {
+		}
+	}
+
+	focus = {
+		id = GER_root_b # cost from a variable
+		x = 4
+		y = 0
+		cost = @long_cost
+		available = {
+			has_war = no
+		}
+	}
+
+	focus = {
+		id = GER_or_child
+		prerequisite = { focus = GER_root_a focus = GER_root_b }
+		x = 2
+		y = 1
+		cost = 7
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = GER_and_child # no cost: the game's default, 10
+		prerequisite = { focus = GER_root_a }
+		prerequisite = { focus = GER_root_b }
+		x = 2
+		y = 2
+	}
+
+	focus = {
+		id = GER_left
+		prerequisite = { focus = GER_or_child }
+		mutually_exclusive = { focus = GER_right }
+		relative_position_id = GER_or_child
+		x = -1
+		y = 1
+		cost = 5
+		will_lead_to_war_with = POL
+	}
+
+	focus = {
+		id = GER_right
+		prerequisite = { focus = GER_or_child }
+		relative_position_id = GER_or_child
+		x = 1
+		y = 1
+		cost = 5
+		available = {
+			has_government = fascism
+		}
+		bypass = {
+			has_war_with = POL
+		}
+	}
+
+	focus = {
+		id = GER_after_left
+		prerequisite = { focus = GER_left }
+		x = -1
+		y = 2
+		relative_position_id = GER_or_child
+		cost = 2
+		available = {
+			NOT = { has_completed_focus = GER_root_b }
+		}
+	}
+
+	focus = {
+		id = GER_dlc_branch
+		prerequisite = { focus = GER_root_a }
+		allow_branch = {
+			has_dlc = "Test DLC"
+		}
+		x = 0
+		y = 1
+		cost = 4
+		completion_reward = {
+			add_political_power = 50 # "a # inside a comment"
+			custom_effect_tooltip = "text with # and { braces }"
+		}
+	}
+}
+
+focus_tree = {
+	id = test_italian_focus
+	country = { factor = 0 modifier = { add = 10 tag = ITA } }
+	focus = { id = ITA_only cost = 5 }
+}

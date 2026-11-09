@@ -18,9 +18,7 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 
 | batch | lane | what | brief |
 |---|---|---|---|
-| OR1 | Offline | The orders format, with requests, budgets, results and operation charters (`hoi4_orderspec.py`, validator, tests) | [OR1](docs/queue/OR1.md) |
 | SR1 | Offline | Save-file reader: an HOI4 text save into compact JSON for the player (research, production, construction, divisions) | [SR1](docs/queue/SR1.md) |
-| FP1 | Offline | Focus planner: which focuses can start now, from the game's focus files and a save | [FP1](docs/queue/FP1.md) |
 | ST1 | Offline | State slicer: one input per agent, with fog of war (after SR1) | [ST1](docs/queue/ST1.md) |
 | TH1 | Offline | The ten agent definitions of `docs/command.md`, each with a worked example (after OR1, ST1) | [TH1](docs/queue/TH1.md) |
 | EX4 | PC | Navy and dockyards in the executor | [EX4](docs/queue/EX4.md) |
