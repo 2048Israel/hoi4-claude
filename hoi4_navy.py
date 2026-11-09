@@ -340,7 +340,7 @@ def select_task_force(hwnd, name):
         A.close_screen(hwnd, "navy")
         raise ActionError(f"no task force like {name!r}; the overview has: {[r['name'] for r in rows]}")
     hoi4.click(hwnd, NV["overview_click_x"], row["y"])
-    got = A.wait_for(lambda: (lambda p: p if p[1] else None)(panel(hwnd)), timeout=2.5)
+    got = A.wait_for(lambda: (lambda p: p if p[0] and p[1] else None)(panel(hwnd)), timeout=2.5)
     if not got:
         raise ActionError(f"clicking {row['name']!r} in the overview opened no task force card")
     head, card = got
@@ -363,7 +363,7 @@ def read_navy(hwnd, quick=False, log=print):
         for r in rows:
             A.open_screen(hwnd, "navy")
             hoi4.click(hwnd, NV["overview_click_x"], r["y"])
-            got = A.wait_for(lambda: (lambda p: p if p[1] else None)(panel(hwnd)), timeout=2.5)
+            got = A.wait_for(lambda: (lambda p: p if p[0] and p[1] else None)(panel(hwnd)), timeout=2.5)
             if not got:
                 log(f"  {r['name']}: no card opened")
                 continue
@@ -424,6 +424,15 @@ def letters(text):
     return re.sub(r"[^a-z]", "", (text or "").lower())
 
 
+def bar_selection(bar):
+    """'Missions - Ostseeflotte' -> 'Ostseeflotte'; 'Missions - All Taskforces' (read 'Att') -> 'All Taskforces'."""
+    return re.sub(r"^.*?missions?\s*[-–—:]?\s*", "", bar.strip(), flags=re.I)
+
+
+def whole_fleet(bar):
+    return "taskforces" in letters(bar)
+
+
 def set_mission(hwnd, task_force, mission, region_pt=None, region_name=None, log=print):
     """Give a task force a mission; with region_pt, also add the sea region there to its fleet's regions.
     Confirmed by the mission icon's tooltip (mission name and regions)."""
@@ -434,12 +443,16 @@ def set_mission(hwnd, task_force, mission, region_pt=None, region_name=None, log
         bar = mission_bar(hwnd)
         if "mission" not in bar.lower():
             raise ActionError(f"no mission bar under the map (read {bar!r}); nothing clicked")
+        # the card already names the task force; the bar must be for it alone, not the whole fleet
+        if whole_fleet(bar) or name_score(card["name"], bar_selection(bar)) < 0.5:
+            raise ActionError(f"the mission bar is for {bar_selection(bar)!r}, not {card['name']!r}; nothing clicked")
         before, _ = read_mission(hwnd)
         needs_region = mission not in NV["no_region"]
-        if not (needs_region and mission_set(hwnd, mission)):
+        has_light = mission != "hold"  # Hold is a plain button: it sends the task force to port
+        if not (has_light and mission_set(hwnd, mission)):
             hoi4.click(hwnd, NV["missions"][mission], NV["mission_y"])
             time.sleep(0.6)
-        if needs_region and not mission_set(hwnd, mission):
+        if has_light and not mission_set(hwnd, mission):
             raise ActionError(f"the {mission} button did not light up for {card['name']} (not possible for these "
                               "ships, or not at war?)")
         if region_pt and needs_region:
@@ -512,7 +525,7 @@ def set_home_base(hwnd, task_force, port, log=print):
     try:
         hoi4.click(hwnd, *NV["tf_back"])
         time.sleep(0.8)
-        if "all" not in mission_bar(hwnd).lower():
+        if not whole_fleet(mission_bar(hwnd)):
             raise ActionError("Back did not select the whole fleet (the mission bar does not say All Taskforces)")
         city = A.find_city(hwnd, port)
         base, tip = naval_base_near(hwnd, city)

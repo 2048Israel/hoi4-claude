@@ -136,6 +136,10 @@ def check_mission_tip():
     assert N.parse_mission_tip([L("Convoy Raidmg", (84, 492, 190, 505))])[0] == "Convoy Raiding", "OCR'd name fixed"
     assert N.parse_mission_tip([]) == (None, [])
     assert N.letters("Convoy Raiding") in N.letters("Convoy 1 Raiding"), "letters only, as act air compares"
+    # the mission bar's title as read live: one task force, then the whole fleet after Back
+    assert N.bar_selection("Missions - OstseeFtotte") == "OstseeFtotte"
+    assert N.name_score("Ostseeflotte", N.bar_selection("Missions - OstseeFtotte")) >= 0.85
+    assert N.whole_fleet("Missions - Att Taskforces") and not N.whole_fleet("Missions - OstseeFtotte")
 
 
 def check_ships():

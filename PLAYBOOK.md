@@ -97,6 +97,9 @@ Speeds: `GAME_SPEED_SECONDS = {2.0, 0.5, 0.2, 0.1, 0.0}` for levels 1-5, where 5
 | `d` / `s` / `g` | Split task force in half / select half / merge (kb:10, kb:7, :529). loc says Shift+G merges every task force in the theater (core:554); that is **not** in the gui |
 | `shift+s` | Automate home base (:1025) |
 
+Seen live (EX4): the mission buttons are clicked rather than keyed (`hoi4_navy.py`); the hotkeys above were not
+tried. See **Navy** in section 2 for the panel and the read-back.
+
 ### Air (air base or wings selected; airselectionview.gui)
 | Key | Action |
 |---|---|
@@ -134,6 +137,19 @@ Operative selected (operativeleader.gui:342-503): `z x c v b n m` = mission slot
 - Four "new line" buttons (`infantry_button`, `tank_button`, `aircraft_button`, `naval_button`), then pick the equipment, which creates the line (loc tutorial:148). Click = add at the end; Shift+Click = add at the top (loc production:264).
 - Factories: the ± buttons on the line. Priority: drag and drop, or the arrows (Shift = top/bottom) (production:37-38, 249).
 - Click the equipment icon to change what the line builds (loses progress, production:208). Click X = cancel the line. **Shift+Click X cancels ALL lines** (production:79); never shift-click X.
+- **Dockyards (seen live 1939-11-01, EX4).** Ship lines are mixed with the land and air lines. "Dockyards 4/12"
+  (used/total) sits right of "Military Factories 95/95". The first filter row (y 437) is Infantry & Artillery
+  Equipment, Armor, Air, Capital Ships, Screen Ships, Other Ships; a yellow check means shown, Click toggles one,
+  Shift+Click = "hide everything else" (and again "show everything again"), Right-click collapses the category.
+  Toggling each one by its check is more predictable than Shift+Click; put the filters back afterwards.
+- A ship line's header: "N Name", "Auto" (the deploy base: "Deploy target base in Weser-Ems"), − dockyards + (Click
+  ±1, Ctrl ±5, Shift ±10), delete. Under it the ship type and the date the next ship is done, and a second +/−
+  (x 380) for how many ships to build (Ctrl ±10, Shift ±100). Lines are 139 px apart.
+- Build Ships (the anchor + button; the anchor-and-wrench next to it is the Naval Repair Queue) opens a list of
+  designs 100 px apart: "Convoy", "Scharnhorst Klasse / Early Heavy Ship", "Admiral Hipper Klasse", "Admiral Graf
+  Spee A Klasse", "Leipzig A Klasse", "Zerstörer 1934A A Klasse", "Typ VIIA Klasse / Early Submarine", "Typ IIB A
+  Klasse", ... A click adds a line at the end (Shift+Click at the top); its X closes the list. The line's header
+  then shows the design's short name ("Zerstörer 1934A").
 
 **Construction** (`t`)
 - Click a building button, then click a state or province on the map (loc constructions:15/18).
@@ -171,6 +187,32 @@ Operative selected (operativeleader.gui:342-503): `z x c v b n m` = mission slot
 **Politics** (`q`)
 - Laws and political advisors: click a slot in the idea categories, then pick ("Click to add $GROUP$", loc politics:21; change/remove: politics:114-115).
 - Military advisors, high command and theorists are in Officer Corps (`shift+e`).
+
+**Navy** (`p`; seen live 1939-11-01, EX4; `hoi4_navy.py`)
+- The Navy Overview lists **task forces**, not fleets (its header says "6 Fleets" for six task forces in three
+  fleets): Type, Name, Area, Size. Names and areas are cut short. Germany 1939: Kriegsmarine (Hochseeflotte,
+  Ostseeflotte, Marineschule Kiel), Unterseeboots-Flotte (two U-boat flotillas), German Reich Flotta 1 (the
+  reserve fleet, mission "Reserve").
+- Click a row = select that task force: the fleet panel opens at the top left. The fleet header has the commander
+  slot, "Active in Regions: N", the home base (gear = "Automate Home Base Selection: Enabled/Disabled"), Select All
+  and an X ("Deselect"). The task force card below has its ship count, name, Back, and a status line ("Docked in
+  Weser-Ems", "Holding position in Lower Baltic Sea", "Operating in Lower Baltic Sea", "No assigned regions"), then
+  its ships (name, class). **Back** shows all task forces of the fleet and selects them all.
+- `p` with a task force selected reopens the overview. Never Esc to deselect; use the header's X.
+- **Missions:** the mission bar (bottom centre, "Missions - <task force>" or "Missions - All Taskforces") has
+  Patrol, Strike Force, Convoy Raiding, Naval Exercises, Convoy Escort, Minelaying, Minesweeping, Naval Invasion
+  Support, the target filter, Hold and Remove Regions. A button's small top-left light turns yellow when its mission
+  is set for the selection. Click Patrol with no region: the status becomes "No assigned regions".
+- **Regions are the fleet's.** With a mission set, Right-click a sea region on the map to add it ("Right-Click to
+  add the Area to the current mission"); Right-click on a region already added changes nothing. A sea region's
+  tooltip: "Shallow Sea | This seazone requires at least 233 Naval Dominance ...". The Find window (ctrl+f) knows
+  land places only, not sea regions.
+- **Read-back:** hover the task force's round mission icon (left of its status line): "Patrol | Active in: | -
+  Lower Baltic Sea" (Hold and Reserve likewise).
+- **Home base:** Ctrl+Right-click a naval base on the map: the fleet moves there and the header names the new base.
+  A naval base's anchor icon (with "0/4", docks in use) has the tooltip "Hinterpommern | Naval base: 4". Left-click
+  on the home base name does nothing; Right-click pans the camera there. With automation on, the game picks bases
+  itself: a Baltic patrol for Ostseeflotte moved the Kriegsmarine's base from Wilhelmshaven to Kiel.
 
 ## 3. Army control
 1. **Select.** Left-drag a box, or left-click a counter (loc tutorial:23, 38). Shift+Click adds (army:26).

@@ -82,6 +82,11 @@ See `PLAYBOOK.md` for hotkeys and screen-by-screen notes for this game version. 
 | `act air assign --base Holstein --mission cas --region X Y [--only Kampf,KG]` | Give a base's wings a mission over the region at a screen point; each wing's order is checked |
 | `act air assign --wing Jagdgeschwader --base Niederschlesien --mission superiority --region X Y` | One wing by name through the overview (a base panel shows only four rows) |
 | `act air rebase --base Oberbayern --to X Y [--only Jagd]` / `act air base --base NAME` / `act air off` | Move wings to the base icon at X Y; list a base's wings and orders; back to the Default map |
+| `read navy [--quick]` / `read navy --fleet Ostseeflotte` | Every task force (Navy Overview, `p`): fleet, ships, mission, status, home base, regions; `--quick` the overview only; `--fleet` one task force with its ships |
+| `act navy mission --fleet Ostseeflotte --mission patrol --region X Y [--region-name "Lower Baltic Sea"]` | A task force's mission (patrol, strike, convoy-raid, convoy-escort, minelaying, minesweeping, invasion-support, exercises, hold); the sea region at X Y (standard camera) is added to its fleet. Checked by the mission icon's tooltip |
+| `act navy port --fleet Ostseeflotte --port Kiel` / `act navy deselect` | Home base of the task force's fleet (Ctrl+Right-click on the port's naval base), checked by the fleet header |
+| `read production --dockyards` | Ship lines only: dockyards per line, ships to build, next ship's date, and dockyards used/total |
+| `act production --dockyards --name "Scharnhorst" --add 2` / `--name "#8" --remove 1` / `--new "Typ VIIA" --add 3` | Dockyards on a ship line (a number picks one of several lines of one design), or a new line for a design. Filters are put back afterwards |
 | `act open production` / `act close production` | Open or close a screen by its hotkey, confirmed by its title |
 | `act save ger_1936_06` / `act load-save claude_ger_1936` | Save through the console (always as `claude_...`), or load a save from the main menu |
 | `act calibrate-research [--tabs artillery]` | Build the tech map (`state/tech_map.json`): clicks each icon once and reads its name. About a minute per tab |
