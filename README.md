@@ -128,6 +128,30 @@ all, of which 0.55 s is the save and 0.27 s the game's files; 54 KB of JSON. It 
 blocks are skipped by counting braces, and it stops once Germany, the first country, is read. Just tokenizing the
 whole file would take 2.8 s, before building anything.
 
+## State slicer
+
+`hoi4_slices.py` cuts the save reader's snapshot and the bridge's report into one small input per agent of
+`docs/command.md`, with the fog of war applied:
+
+```
+python hoi4_slices.py "<save>.hoi4" [--bridge report.log] [--agent air] [--indent 1]
+python hoi4_slices.py "<save>.hoi4" --sizes [--operations ops.json] [--field-marshals fm.json] [--no-focus]
+```
+
+- **Slices:** `policy`, `research`, `civilian_industry`, `military_industry`, `naval_industry`, `air`, `navy`, `army`,
+  one `field_marshal_<army group>` per army group and one `operation_<name>` per running operation. The keys are
+  the agent names of `docs/orders.md`. Repeated rows are tables (`columns` + `rows`).
+- **Fog of war:** our country in full. Enemy divisions only in provinces we control or stand in, or next to one;
+  per-country division and factory counts only from the bridge (what diplomacy shows); hidden ideas left out.
+  Adjacency comes from the game's `map/` (`provinces.bmp`, `definition.csv`, `adjacencies.csv`), read at run time
+  and cached in `state/map_cache.json`; nothing from the game is committed.
+- **Beyond SR1** it reads province control, wars, air wings and bases, air superiority and the faction from the
+  save, laws, advisors and building slots from the game's files, and FP1's startable focuses for `policy`.
+
+**Speed and size**, on `claude_ger_1939_11_stop.hoi4`: 5.3 s in all, of which 2.1 s is FP1's focus list (skip it with
+`--no-focus` when the policy agent is not due) and 1.8 s the save with 16 enemies' divisions; every slice is under
+7,000 characters (the aim is 8,000).
+
 ## Status and how to help
 
 The program and mod run on one Windows PC that has the game; the first campaign there is **Germany, 1936**
