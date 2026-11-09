@@ -1,0 +1,21 @@
+{
+ "agent": "research",
+ "turn": 12,
+ "due": ["slot 4 freed: Advanced Machine Tools finished"],
+ "budget": {},
+ "state": {
+  "agent": "research",
+  "date": "1939.11.1.1",
+  "tag": "GER",
+  "year": 1939,
+  "slots": 5,
+  "free": 1,
+  "running": [{"tech": "concentrated_industry4", "days_left": 213, "per_day": 0.381, "years_ahead": 1.17}, {"tech": "computing_machine", "days_left": 130, "per_day": 1.12, "years_ahead": 0.0}, {"tech": "construction4", "days_left": 174, "per_day": 0.381, "years_ahead": 1.17}, {"tech": "excavation2", "days_left": 90, "per_day": 2.27, "years_ahead": 0.0}],
+  "researched": ["aa_cannon_1", "aa_lmg", "advanced_cruiser_armor_scheme", "advanced_dp_light_battery", "advanced_heavy_armor_scheme", "advanced_heavy_battery", "advanced_light_battery", "advanced_machine_tools", "advanced_ship_torpedo_launcher", "advanced_super_dreadnought_ship_hull", "air_torpedoe_1", "aircraft_construction", "antiair1", "antitank1", "armor_tech_1", "armored_car1", "armored_cruiser_hull", "armored_cruiser_hull_2", "auto_cannon_tech", "auxiliary_hull_1", "basic_battery", "basic_battlecruiser_hull", "basic_cruiser_armor_scheme", "basic_depth_charges", "basic_dreadnought_ship_hull", "basic_fire_control_system", "basic_heavy_armor_scheme", "basic_heavy_battery", "basic_heavy_tank_chassis", "basic_light_battery", "basic_light_tank_chassis", "basic_machine_tools", "basic_medium_airframe", "basic_medium_tank_chassis", "basic_naval_mines", "basic_small_airframe", "basic_super_dreadnought_ship_hull", "basic_torpedo", "basic_train", "bba_airship", "bba_early_transport_plane", "close_support_gun_tech", "concentrated_industry", "concentrated_industry2", "concentrated_industry3", "construction1", "construction2", "construction3", "damage_control_1", "destroyer_leader_hull_1", "early_battlecruiser_hull", "early_bombs", "early_destroyer_hull_1", "early_destroyer_hull_2", "early_destroyer_hull_3", "early_destroyer_hull_4", "early_heavy_cruiser_hull", "early_heavy_cruiser_hull_2", "early_heavy_cruiser_hull_3", "early_light_cruiser_hull", "early_ship_hull_heavy", "early_ship_hull_heavy_cruiser", "early_ship_hull_light", "early_ship_hull_submarine", "early_submarine_hull_1", "early_submarine_hull_2", "early_submarine_hull_3", "early_submarine_hull_4", "early_submarine_hull_5", "electric_torpedo", "electronic_mechanical_engineering", "engine_tech_1", "engines_1", "engines_2", "excavation1", "fuel_refining", "fuel_silos", "gw_artillery", "gwtank_chassis", "improved_battlecruiser_hull", "improved_cruiser_armor_scheme", "improved_dreadnought_ship_hull", "improved_heavy_armor_scheme", "improved_heavy_battery", "improved_light_battery", "improved_light_tank_chassis", "improved_machine_tools", "improved_medium_tank_chassis", "improved_naval_mines", "improved_radio", "improved_ship_torpedo_launcher", "improved_sonar", "improved_super_dreadnought_ship_hull", "infantry_weapons", "infantry_weapons1", "infantry_weapons2", "interwar_antiair", "interwar_antitank", "interwar_artillery", "iw_large_airframe", "iw_medium_airframe", "iw_small_airframe", "magnetic_detonator", "mechanical_computing", "motorised_infantry", "mtg_transport", "oil_processing", "photo_reconnaisance", "predreadnought_ship_hull", "radio", "rubber_processing", "scout_cruiser_hull_1", "scout_cruiser_hull_2", "scout_cruiser_hull_3", "scout_cruiser_hull_4", "small_cannon_tech", "sonar", "submarine_mine_laying", "support_weapons", "support_weapons2", "support_weapons3", "synth_oil_experiments", "tech_engineers", "tech_mountaineers", "tech_recon", "tech_support", "tech_trucks", "torpedoboat_destroyer_hull"]
+ },
+ "notes": "Next after the industry line: Fuel Refining II, Improved Oil Processing (fuel for a long war).",
+ "requests": [
+  {"op": "request.research", "to": "research", "tech": "Improved Small Airframe", "by": "air", "why": "the next fighter airframe, for superiority over France in 1940"}
+ ],
+ "results": {}
+}

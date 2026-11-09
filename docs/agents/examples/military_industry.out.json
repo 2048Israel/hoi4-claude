@@ -1,0 +1,8 @@
+{
+  "orders": [
+    {"op": "production.set", "line": 1, "factories": 16, "priority": 2, "by": "military_industry", "why": "the 6 idle factories to infantry equipment: the army needs 20,000 for 32 divisions in training"}
+  ],
+  "requests": [],
+  "report": "6 idle factories to infantry equipment (line 1: 10 -> 16, about 170 a day: 20,000 in about 4 months).\nJu 87: 12 factories at 38% and rising: 100 planes by about March 1940.\nAll 100 military factories on lines.",
+  "notes": "Infantry equipment: back to 12 factories once the 32 divisions are out of training.\nHe 111 stays at 0 until the air agent asks for bombers.\nNext new factories: Panzer III line once research gives it."
+}

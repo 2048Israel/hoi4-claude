@@ -1,0 +1,19 @@
+{
+ "agent": "military_industry",
+ "turn": 12,
+ "due": ["cadence: every 3rd turn at war", "6 military factories idle", "requests from army, air"],
+ "budget": {"mil_factories": 100},
+ "state": {
+  "agent": "military_industry",
+  "date": "1939.11.1.1",
+  "tag": "GER",
+  "lines": {"columns": ["line", "equipment", "variant", "factories", "efficiency", "per_day", "priority", "amount"], "rows": [[1, "infantry_equipment_1", null, 10, 83.0, 113.55, 0, null], [2, "support_equipment_1", null, 10, 78.0, 13.33, 1, null], [3, "artillery_equipment_1", null, 17, 69.2, 18.86, 2, null], [4, "light_tank_chassis_2", "Panzer II", 12, 75.4, 14.72, 3, null], [5, "motorized_equipment_1", null, 4, 79.8, 8.73, 4, null], [6, "small_plane_airframe_1", "Bf 109", 29, 45.5, 2.19, 9, null], [7, "small_plane_cas_airframe_1", "Ju 87", 12, 38.2, 0.0, 10, null], [8, "medium_plane_airframe_1", "He 111", 0, null, 0.0, 11, null]]},
+  "factories": {"military": 100, "military_free": 6}
+ },
+ "notes": "He 111 line kept at 0 until the air agent asks for level bombers.",
+ "requests": [
+  {"op": "request.equipment", "to": "military_industry", "equipment": "infantry_equipment", "amount": 20000, "by": "army", "why": "32 Infanterie-Division lines in training and the losses in Poland"},
+  {"op": "request.equipment", "to": "military_industry", "equipment": "Ju 87", "amount": 100, "by": "air", "why": "a second Stuka wing for the West in spring"}
+ ],
+ "results": {}
+}

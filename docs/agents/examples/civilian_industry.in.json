@@ -1,0 +1,20 @@
+{
+ "agent": "civilian_industry",
+ "turn": 12,
+ "due": ["cadence: every 3rd turn at war", "a request from army"],
+ "directive": "At war with Poland, Britain and France since 1939-08-25. Finish Poland in November; hold the West, no offensive against France before spring 1940. No new wars.",
+ "budget": {"civ_factories": 40},
+ "state": {
+  "agent": "civilian_industry",
+  "date": "1939.11.1.1",
+  "tag": "GER",
+  "construction": {"columns": ["building", "state", "levels", "factories", "progress", "days_left"], "rows": [["synthetic_refinery", "Lower Austria", 1, 14, 0.688, 23], ["synthetic_refinery", "Thüringen", 1, 0, 0.039, null], ["arms_factory", "Niederbayern", 2, 0, 0.0, null], ["arms_factory", "Ostmark", 2, 0, 0.0, null]]},
+  "repairs": {"air_base": {"queued": 1, "with_factories": 0}, "infrastructure": {"queued": 5, "with_factories": 0}, "landmark_berlin_reichstag": {"queued": 1, "with_factories": 0}, "rail_way": {"queued": 35, "with_factories": 0}, "synthetic_refinery": {"queued": 1, "with_factories": 0}},
+  "states": {"columns": ["state", "category", "slots", "used", "queued", "free", "infrastructure", "air_base"], "note": "slots from the state category, before modifiers; trimmed to 12 of 36 states", "rows": [["Lower Austria", "large_city", 26, 10, 1, 15, 5, 6], ["Moselland", "metropolis", 34, 3, 0, 31, 4, null], ["Rhineland", "megalopolis", 40, 9, 0, 31, 4, 3], ["Niederbayern", "city", 20, 1, 2, 17, 4, null], ["Hessen", "large_city", 26, 4, 0, 22, 4, null], ["Westfalen", "large_city", 26, 7, 0, 19, 4, 3], ["Hannover", "large_city", 26, 12, 0, 14, 5, null], ["Thüringen", "large_city", 26, 3, 1, 22, 5, null], ["Brandenburg", "megalopolis", 40, 13, 0, 27, 5, 6], ["Sachsen", "metropolis", 34, 33, 0, 1, 4, null], ["Ostmark", "city", 20, 1, 2, 17, 3, null], ["Baden", "large_city", 26, 3, 0, 23, 3, 1]]}
+ },
+ "notes": "War: military factories and refineries east of the Rhine. Two arms factories queued (Niederbayern, Ostmark).",
+ "requests": [
+  {"op": "request.construction", "to": "civilian_industry", "building": "land_fort", "state": "Baden", "count": 2, "by": "army", "why": "the Rhine border with France has one fort line and no army behind it"}
+ ],
+ "results": {}
+}

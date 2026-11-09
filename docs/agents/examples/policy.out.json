@@ -1,0 +1,10 @@
+{
+  "orders": [
+    {"op": "focus.start", "focus": "Create the Rüstungsstab", "priority": 2, "by": "policy", "why": "no focus is running; the industry branch first, and it gives no war goal"},
+    {"op": "politics.law", "category": "conscription", "law": "Service by Requirement", "cost": {"pp": 150}, "by": "policy", "why": "at war with Britain and France: manpower for two fronts"},
+    {"op": "politics.hire", "advisor": "Walther Funk", "slot": "advisor-1", "cost": {"pp": 150}, "by": "policy", "why": "the political advisor slots are empty with 722 PP banked"}
+  ],
+  "requests": [],
+  "report": "Focus: Create the Rüstungsstab (70 days). Service by Requirement and Walther Funk: 300 of 450 PP.\nLeft for the directive: Around Maginot and Operation Weserübung (war goals).",
+  "notes": "Next focus: Armament Rationalization, then Expand Kummersdorf's Capacity.\nPP after this turn: 422. Next: a second advisor, then Total Mobilization when war support allows.\nWar support 68.5%: War Propaganda if a law is refused for it."
+}
