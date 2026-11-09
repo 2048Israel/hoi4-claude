@@ -5,6 +5,15 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+# 0.1.4 (2026-11-09)
+
+- **Focus planner (hoi4_focus.py, FP1):** `python hoi4_focus.py --save <save> [--json]` lists the focuses that can
+  start now from the game's own focus files: prerequisites (OR in a block, AND across), exclusions both ways, cost
+  in days, the `available` text only the game can check, and what each focus opens. It finds the tree the game
+  gives the tag across the enabled mods, reads names from localisation, and decides has_completed_focus, has_dlc,
+  game rules and the ruling ideology from the save. On `claude_ger_1939_11_stop` it lists 32 focuses (the game's
+  germany.txt won; no enabled mod has focus files). `tests/test_FP1.py`, handmade fixtures.
+
 - **Diplomacy (hoi4_diplomacy.py):** `act diplomacy --city Warsaw --action "Declare war" [--dry-run]` right-clicks
   the country owning the city, picks the action from its list by name (tooltip printed), and sends it. Used
   live: war on Poland declared 1939-08-25 in the replay.
