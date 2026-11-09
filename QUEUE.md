@@ -20,10 +20,6 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 |---|---|---|---|
 | ST1 | Offline | State slicer: one input per agent, with fog of war (after SR1) | [ST1](docs/queue/ST1.md) |
 | TH1 | Offline | The ten agent definitions of `docs/command.md`, each with a worked example (after OR1, ST1) | [TH1](docs/queue/TH1.md) |
-| EX4 | PC | Navy and dockyards in the executor | [EX4](docs/queue/EX4.md) |
-| EX5 | PC | Army structure: army groups, field marshals, safe army forming, deploy locations | [EX5](docs/queue/EX5.md) |
-| EX6 | PC | Trade, and building in a named state | [EX6](docs/queue/EX6.md) |
-| TL1 | PC | The turn loop that runs the agents, measured over one game month (after OR1, ST1, TH1) | [TL1](docs/queue/TL1.md) |
 
 The command structure these rows build is designed in [docs/command.md](docs/command.md) (2026-11-09).
 
@@ -31,6 +27,13 @@ The command structure these rows build is designed in [docs/command.md](docs/com
 
 | batch | lane | waits on | brief |
 |---|---|---|---|
+| EX4 | PC | a live check of PR #4 (written offline; not run in the game) | [EX4](docs/queue/EX4.md) |
+| EX5 | PC | game access | [EX5](docs/queue/EX5.md) |
+| EX6 | PC | game access | [EX6](docs/queue/EX6.md) |
+| TL1 | PC | game access, and TH1 | [TL1](docs/queue/TL1.md) |
+
+Jerus, 2026-11-09: "dont open hoiv". The PC-lane batches need the game, so they wait here until Jerus says the
+game may be used again. EX4's code is in PR #4, written and tested offline.
 
 Removed 2026-11-07 (PC session), shipped in 0.1.2-0.1.3: **LV1** (general, front, enemy and ally lines are read
 live by `report` and `act army push`; news hooks feed `news`), **PU1** (`read event`, `act event`, auto-dismissed
