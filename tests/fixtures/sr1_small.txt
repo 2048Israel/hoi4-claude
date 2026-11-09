@@ -1,0 +1,413 @@
+HOI4txt
+player="AAA"
+ideology=fascism
+date="1940.3.13.6"
+difficulty="normal"
+version="SR1 handmade fixture"
+player_countries={
+	AAA={
+		user="REDACTED"
+		country_leader=yes
+	}
+}
+mods={
+	"Test Mod"
+}
+equipments={
+	infantry_equipment_1={
+		id={ id=10 type=70 }
+		max_version=0
+		is_frame=no
+		creator="AAA"
+	}
+	ship_hull_light_2={
+		id={ id=11 type=70 }
+		name="Klasse {A}"
+		version=1
+		creator="AAA"
+		upgrades={
+			upgrades={
+				{ ship_upgrade 0}
+ 			}
+		}
+		modules={
+			fixed_ship_battery_slot=ship_light_battery_1
+		}
+	}
+	infantry_equipment_1={
+		id={ id=12 type=70 }
+		creator="BBB"
+	}
+}
+character_manager={
+	historical={
+		character={
+			id={ id=1 type=73 }
+			token="AAA_hans_von_test"
+			name="AAA_hans_von_test"
+			country="AAA"
+			portraits={
+				army={
+					large="GFX_portrait_test"
+				}
+			}
+			corps_commander={
+				id={ id=500 type=4713 }
+				name="AAA_hans_von_test"
+				skill=3
+				traits={ old_guard trait_cautious }
+				attack_skill=3
+				defense_skill=2
+				planning_skill=4
+				logistics_skill=1
+			}
+		}
+		character={
+			id={ id=2 type=73 }
+			name="Erika Muster"
+			country="AAA"
+			field_marshal={
+				id={ id=501 type=4713 }
+				name="Erika Muster"
+				skill=2
+			}
+		}
+	}
+	next_character_id=3
+}
+division_templates={
+	division_template={
+		id={ id=1 type=52 }
+		name="Infanterie-Division"
+		division_names_group="AAA_Inf_01"
+		country="AAA"
+		support={
+			engineer={ x=0 y=0 }
+		}
+		regiments={
+			infantry={ x=0 y=0 }
+			infantry={ x=0 y=1 }
+			infantry={ x=1 y=0 }
+		}
+	}
+	division_template={
+		id={ id=2 type=52 }
+		name="Gebirgsjaeger"
+		country="AAA"
+		regiments={
+			mountaineers={ x=0 y=0 }
+		}
+	}
+	division_template={
+		id={ id=3 type=52 }
+		name="Piechota"
+		country="BBB"
+		regiments={
+			infantry={ x=0 y=0 }
+		}
+	}
+}
+countries={
+	BBB={
+		technology={
+			slots={
+				basic_tech={
+					points_factor=1
+				}
+			}
+		}
+		units={
+			division={
+				id={ id=2 type=51 }
+				location=20
+				division_template_id={ id=3 type=52 }
+				division_name={
+					type=0
+					name_order=1
+				}
+				organisation=30.5
+				strength=100
+			}
+			division={
+				id={ id=3 type=51 }
+				location=21
+				division_template_id={ id=3 type=52 }
+				organisation=10
+				strength=50.25
+			}
+		}
+		stability=0.4
+	}
+	AAA={
+		technology={
+			technologies={
+				basic_tech={
+					level=1
+					research_points=100
+					date="1936.1.1.12"
+				}
+				future_tech={
+					research_points=20
+					date="1.1.1.1"
+				}
+				steady_tech={
+					research_points=50
+					date="1.1.1.1"
+					design_team={ id=24 type=79 }
+				}
+			}
+			slots={
+				future_tech={
+					used_saved_points=0
+					points_factor=0.5
+				}
+				steady_tech={
+					used_saved_points=10
+					points_factor=2
+				}
+				empty={
+					points=25
+				}
+			}
+		}
+		research_slot=3
+		production={
+			military_lines={
+				id={ id=1 type=56 }
+				produced=0.25
+				active_factories=2
+				priority=0
+				amount=-1
+				speed=9
+				cost=0.5
+				requested_factories=3
+				equipment_variant_index={ id=10 type=70 }
+				factory_efficiencies={
+					50.00000 70.00000 10.00000
+				}
+			}
+			naval_lines={
+				id={ id=2 type=57 }
+				produced=100
+				active_factories=1
+				priority=1
+				amount=2
+				speed=30
+				cost=400
+				requested_factories=1
+				equipment_variant_index={ id=11 type=70 }
+			}
+			general_lines={
+				building={
+					id={ id=7 type=59 }
+					produced=1000
+					active_factories=15
+					priority=0
+					amount=2
+					speed=150
+					cost=10800
+					building={
+						template=industrial_complex
+						location=1
+					}
+				}
+				building={
+					id={ id=8 type=59 }
+					priority=1
+					amount=1
+					cost=7200
+					building={
+						template=arms_factory
+						location=2
+					}
+				}
+			}
+		}
+		intel={
+			BBB={
+				civilian_intel=12.5
+				"a string with } a brace"
+			}
+		}
+		units={
+			division={
+				id={ id=1 type=51 }
+				last_combat_date="1940.3.13.2"
+				path={ 11 12 }
+				location=10
+				id={ id=1 type=51 }
+				division_template_id={ id=1 type=52 }
+				division_name={
+					type=0
+					name_order=7
+				}
+				organisation=25.25
+				strength=180.5
+				army_manpower={
+					army_manpower_value={
+						value={ tag="AAA" value=9000 }
+					}
+					army_manpower_need={
+						value={ tag="AAA" value=10000 }
+					}
+				}
+			}
+			division={
+				id={ id=900 type=4713 }
+				last_combat_date="1.1.1.1"
+				location=11
+				division_template_id={ id=2 type=52 }
+				division_name={
+					type=0
+					override="Gebirgs-Brigade"
+				}
+				organisation=40
+				strength=90
+			}
+			division={
+				id={ id=901 type=4713 }
+				location=20
+				division_template_id={ id=1 type=52 }
+				division_name={
+					type=0
+					name_order=8
+				}
+				organisation=40
+				strength=200
+			}
+			fleet={
+				id={ id=1 type=61 }
+				name="Flotte"
+				home_base=30
+				task_force={
+					id={ id=40 type=51 }
+					name="TF 1"
+					location=30
+					ship={
+						id={ id=41 type=51 }
+						definition="destroyer"
+						organisation=40
+						strength=50
+					}
+					ship={
+						id={ id=42 type=51 }
+						definition="destroyer"
+						organisation=30
+						strength=45.5
+					}
+					mission={
+						mission=2
+						is_in_regions=yes
+					}
+				}
+			}
+		}
+		theatres={
+			theatre={
+				id={ id=1 type=67 }
+				orders_group={
+					id={ id=100 type=53 }
+					name="Army 1"
+					member={
+						unit={ id=1 type=51 }
+					}
+					member={
+						unit={ id=900 type=4713 }
+					}
+					leader={ id=500 type=4713 }
+					field_marshal_group=no
+				}
+				orders_group={
+					id={ id=101 type=53 }
+					name="Army 2"
+					leader={ id=501 type=4713 }
+				}
+				theater_group={
+					id={ id=200 type=68 }
+					name="Heeresgruppe Test"
+					orders_group={ id=100 type=53 }
+				}
+				front={
+					id={ id=300 type=66 }
+					provinces={ 10 11 }
+					enemies={ BBB }
+				}
+			}
+		}
+		deployment={
+			military_deployment_conveyor={
+				id={ id=5 type=64 }
+				division_template_id={ id=1 type=52 }
+				name="Infanterie-Division"
+				amount=1
+				location=10
+				priority=1
+				role=
+				closed=no
+				military_deployment_line={
+					amount=2
+					military_deployment={
+						training=0.5
+						max_training=1
+					}
+				}
+			}
+		}
+		capital=1
+		stability=0.65
+		war_support=0.5
+		command_power=10
+		politics={
+			parties={
+				fascism={
+					popularity=55.55
+				}
+				democratic={
+					popularity=44.45
+				}
+			}
+			ideas={
+				war_economy extensive_conscription
+			}
+			ruling_party=fascism
+			political_power=150.555
+		}
+		focus_tree="aaa_focus"
+		focus={
+			completed="AAA_first"
+			completed="AAA_second"
+			progress=12.5
+			current="AAA_third"
+			paused=no
+		}
+	}
+}
+states={
+	1={
+		buildings={
+			industrial_complex={
+				level=3
+				partial_health=0
+			}
+			infrastructure={
+				level=5
+			}
+		}
+		owner="AAA"
+		manpower_pool={
+			available=1000
+			total=50000
+		}
+		state_category=city
+		variables={
+			random={ 1 2 }
+		}
+	}
+	2={
+		owner="BBB"
+		state_category=town
+	}
+}
+weather={
+	{ 1 2 3 }
+}

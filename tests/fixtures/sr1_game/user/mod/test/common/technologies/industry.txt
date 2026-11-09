@@ -1,0 +1,15 @@
+# The mod's copy replaces the game's industry.txt: steady_tech costs 2 here (200 points), not 1.5.
+technologies = {
+	steady_tech = {
+		research_cost = 2
+		start_year = 1936
+	}
+	future_tech = {
+		research_cost = 2
+		start_year = 1941
+	}
+	basic_tech = {
+		research_cost = 1
+		start_year = 1936
+	}
+}
