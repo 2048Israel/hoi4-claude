@@ -5,6 +5,16 @@ saying what changed and how it was checked.
 
 # Next (on main, not released yet)
 
+# 0.1.8 (2026-11-09)
+
+- **Agent definitions (.claude/agents, TH1):** the ten subagents of docs/command.md: policy, research, civilian,
+  military and naval industry, air, navy, army, and the templates field-marshal (one per army group) and operation
+  (one per operation). Each file (63-77 lines) says what the agent owns and leaves, its goals, its doctrine for
+  Germany 1936-1941 with the 1939-1940 lessons, its OR1 ops and requests, its input and its one-object reply. The
+  army tree runs on fable, the rest on sonnet, with the Read tool only. One worked example each, cut from real ST1
+  slices of claude_ger_1939_11_stop (docs/agents/examples: inputs 1,000-7,100 characters, replies 640-1,730).
+  Offline: tests/test_TH1.py (every reply passes OR1 within its budget; the ten merge as one turn with no conflict).
+
 # 0.1.7 (2026-11-09)
 
 - **State slicer (hoi4_slices.py, ST1):** `slices(snapshot, bridge_state, world)` gives each agent of

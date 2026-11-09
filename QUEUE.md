@@ -18,7 +18,6 @@ The batches waiting, in order, one line each with a link to its brief, and nothi
 
 | batch | lane | what | brief |
 |---|---|---|---|
-| TH1 | Offline | The ten agent definitions of `docs/command.md`, each with a worked example (after OR1, ST1) | [TH1](docs/queue/TH1.md) |
 
 The command structure these rows build is designed in [docs/command.md](docs/command.md) (2026-11-09).
 
